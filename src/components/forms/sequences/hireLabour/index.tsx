@@ -186,8 +186,12 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     <SelectContent>
                       <SelectItem value="Condo">Condo</SelectItem>
                       <SelectItem value="Apartment">Apartment</SelectItem>
-                      <SelectItem value="Penthouse">Penthouse</SelectItem>
-                    </SelectContent>
+                      <SelectItem value="House">House</SelectItem>
+                      <SelectItem value="Office">Office</SelectItem>
+                      <SelectItem value="TownHouse">TownHouse</SelectItem>
+                      <SelectItem value="Storage">Storage</SelectItem>
+                      <SelectItem value="Store">Store</SelectItem>
+                     </SelectContent>
                   </Select>
                   <FormMessage className="text-destructive" />
                 </FormItem>

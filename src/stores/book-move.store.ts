@@ -36,12 +36,14 @@ const initialState: BookMove = {
   PUDFinalDestination: {
     elevatorAccess: "Yes",
     flightOfStairs: "0",
-    buildingType: "Condo",
+    // buildingType: "Condo",
+    buildingType: "",
   },
   PUDPickUpLocation: {
     elevatorAccess: "Yes",
     flightOfStairs: "0",
-    buildingType: "Condo",
+    // buildingType: "Condo",
+    buildingType: "",
   },
   PUDStops: [],
   majorAppliances: "",

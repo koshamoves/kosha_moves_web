@@ -17,7 +17,9 @@ import { useValidRoute } from "@/hooks/useValidRoute";
 export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
   const { isValidRoute } = useValidRoute([
     Routes.bookMoveQuoteDetails,
+    Routes.bookMoveQuotes,
     Routes.hireLabourQuoteDetails,
+    Routes.hireLabourQuotes,
   ]);
   const router = useRouter();
   const { user } = useUserStore((state) => state);
@@ -48,17 +50,21 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
       <Row className="flex-1 items-center gap-4">
         <Column className="hidden lg:block">
           <P className="text-blue-300 text-sm">{headerContent.title}</P>
-          <H className="text-blue-200 text-4xl">{headerContent.description}</H>
-        </Column>
-        {isValidRoute && (
-          <Row
-            onClick={() => router.back()}
-            className="items-center border p-2 rounded-md hover:cursor-pointer"
-          >
-            <ArrowLeft className="text-primary text-sm" />
-            <P className="text-primary text-sm">Go back</P>
+          <Row>
+            {isValidRoute && (
+              <Row
+                onClick={() => router.back()}
+                className="items-center border p-2 rounded-md hover:cursor-pointer"
+              >
+                <ArrowLeft className="text-primary text-sm" />
+                <P className="text-primary text-sm">Go back</P>
+              </Row>
+            )}
+            <H className="text-blue-200 text-4xl">
+              {headerContent.description}
+            </H>
           </Row>
-        )}
+        </Column>
       </Row>
       {nonAuth ? (
         <Column>

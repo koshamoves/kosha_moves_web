@@ -193,28 +193,30 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
         Rates
       </H>
       <Column>
-        {rates.map((item, index) => {
-          if (!item.rate) return null;
+        {rates
+          .filter((item) => (item.count || 0) > 0)
+          .map((item, index) => {
+            if (!item.rate) return null;
 
-          return (
-            <Row
-              key={item.label + index}
-              className="items-center justify-between p-3 bg-white-100 shadow-custom rounded-lg"
-            >
-              <Row className="items-center">
-                <span className="w-[40px] h-[40px] bg-white-300 flex items-center justify-center rounded-lg">
-                  {item.icon}
-                </span>
-                <P className="text-primary">
-                  {item.label} {item.count ? `(${item.count})` : null}
+            return (
+              <Row
+                key={item.label + index}
+                className="items-center justify-between p-3 bg-white-100 shadow-custom rounded-lg"
+              >
+                <Row className="items-center">
+                  <span className="w-[40px] h-[40px] bg-white-300 flex items-center justify-center rounded-lg">
+                    {item.icon}
+                  </span>
+                  <P className="text-primary">
+                    {item.label} {item.count ? `(${item.count})` : null}
+                  </P>
+                </Row>
+                <P className="text-primary font-bold">
+                  {formatCurrency(item.rate)}
                 </P>
               </Row>
-              <P className="text-primary font-bold">
-                {formatCurrency(item.rate)}
-              </P>
-            </Row>
-          );
-        })}
+            );
+          })}
       </Column>
     </Column>
   );

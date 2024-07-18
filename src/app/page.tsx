@@ -99,7 +99,7 @@ export default function Home() {
             {SEQUENCES.map((item, index) => (
               <Link
                 key={item.label + index}
-                href={item.type === "Delivery" ? "#" : item.route}
+                href={item.route}
                 className="flex-1 group max-h-[120px] min-w-[200px] custom-496:max-w-[120px] sm:max-w-[250px]"
               >
                 <div
@@ -127,11 +127,6 @@ export default function Home() {
                     className="absolute top-[50%] translate-y-[-50%] left-6 text-white-100 text-lg"
                   >
                     {item.label}
-                    {item.type === "Delivery" && (
-                      <>
-                        <p className="text-xs block">(Coming soon)</p>
-                      </>
-                    )}
                   </H>
                 </div>
               </Link>

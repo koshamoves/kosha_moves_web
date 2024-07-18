@@ -296,7 +296,14 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     defaultValues: {
       PUDPickUpLocation,
       PUDFinalDestination,
-      PUDStops,
+      PUDStops:
+        (PUDStops?.length || 0) > 0
+          ? PUDStops
+          : formData.stops.map(() => ({
+              buildingType: "",
+              flightOfStairs: "0",
+              elevatorAccess: "Yes",
+            })),
     },
   });
 

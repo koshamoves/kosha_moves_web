@@ -80,7 +80,9 @@ export const bookMoveSequenceStep3Schema = z.object({
   poolTables: z.string().optional(),
   numberOfBoxes: z.string().optional(),
   instructions: z.string().optional(),
-  images: z.array(z.string())
+  images: z.array(z.string()),
+  pictures: z.array(z.string()).optional(),
+  receipts: z.array(z.string()).optional()
 });
 
 
@@ -113,7 +115,9 @@ export const bookDeliverySequenceStep2Schema = bookMoveSequenceStep2Schema.omit(
 
 export const bookDeliverySequenceStep3Schema = bookMoveSequenceStep3Schema.pick({
   images: true,
-  instructions: true
+  instructions: true,
+  pictures: true,
+  receipts: true,
 }) 
 
 export const sendMessageSchema = z.object({
