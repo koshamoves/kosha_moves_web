@@ -29,6 +29,12 @@ const Page = () => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    document
+      .querySelector("#layoutMainWrapper")
+      ?.scrollTo({ left: 0, top: 0, behavior: "smooth" });
+  }, [activeTab]);
+
   if (!isMounted) return null;
   if (!selectedBooking && updating) {
     return (

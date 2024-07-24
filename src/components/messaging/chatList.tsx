@@ -14,13 +14,32 @@ export const ChatList: FC<{ closeList: () => void }> = ({ closeList }) => {
   const type = "Book a move";
   const params = useParams();
   return (
-    <Column className="gap-0">
+    <Column className="gap-0 h-full w-full">
       {isLoading && (
         <div className="space-y-2 px-4">
           <Skeleton className="h-16" />
           <Skeleton className="h-16" />
           <Skeleton className="h-16" />
         </div>
+      )}
+      {!isLoading && data && data.length === 0 && (
+        <Column className="justify-center items-center gap-4 h-full w-full">
+          <Picture
+            container={{
+              className: "w-[200px] h-[150px]",
+            }}
+            image={{
+              alt: "",
+              src: "/images/chat-bg.png",
+            }}
+          />
+          <Column className="items-center gap-1">
+            <P className="text-grey-300 font-bold text-xl">
+              No conversation yet
+            </P>
+            <P className="text-grey-200">Book to have conversations</P>
+          </Column>
+        </Column>
       )}
       {!isLoading &&
         data &&

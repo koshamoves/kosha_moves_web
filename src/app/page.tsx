@@ -158,7 +158,7 @@ export default function Home() {
             )}
             <Row className="flex-wrap gap-4">
               {bookings &&
-                bookings.slice(0, 3).map((booking) => (
+                bookings.slice(0, 3).map((booking, idx) => (
                   <Quotes
                     key={booking.bookingId}
                     onClick={() => {
@@ -199,9 +199,16 @@ export default function Home() {
                             12:00pm - 4:00pm
                           </QuotesTime>
                         )}
-                        <span className="border rounded-full text-xs px-2 py-1 text-grey-300">
-                          {booking.status ?? "Pending"}
-                        </span>
+                        <div>
+                          <span className="border rounded-full text-xs px-2 py-1 text-grey-300 block w-min ml-auto">
+                            {booking.status ?? "Pending"}
+                          </span>
+                          {isToday && idx === 0 && (
+                            <span className="border rounded-full text-xs px-2 py-0.5 text-grey-300 block w-min mt-0.5 ml-auto bg-gray-200">
+                              Recent
+                            </span>
+                          )}
+                        </div>
                       </Row>
                       <Row className="justify-between items-center">
                         <Column className="gap-1">

@@ -464,7 +464,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-6"
       >
-        <Row className="gap-4">
+        <Row className="gap-4 max-[580px]:flex-col">
           <FormField
             name="pictures"
             control={form.control}

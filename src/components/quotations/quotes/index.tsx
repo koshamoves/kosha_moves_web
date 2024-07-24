@@ -19,7 +19,7 @@ const Quotes: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
     {...props}
     className={cn(
       "flex flex-col gap-2 justify-between p-4 bg-white-100 shadow-sm rounded-xl flex-1 w-full max-w-[400px] sm:max-w-[270px] sm:min-w-[270px] lg:max-w-[270px] max-h-[350px] hover:cursor-pointer",
-      props.className
+      props.className,
     )}
   />
 );
@@ -172,4 +172,3 @@ export {
   QuotesLabourActivity,
   QuotesDistance,
 };
-

@@ -94,14 +94,16 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
             </P>
             <P className="text-sm font-dm-sans text-grey-300">reviews</P>
           </Column>
-          <Column className="gap-0 flex-1">
-            <P className="text-primary font-bold font-dm-sans text-lg">
-              {+movesCompleted || 0}
-            </P>
-            <P className="text-sm font-dm-sans text-grey-300">
-              moves completed
-            </P>
-          </Column>
+          {movesCompleted !== "nil" && (
+            <Column className="gap-0 flex-1">
+              <P className="text-primary font-bold font-dm-sans text-lg">
+                {+movesCompleted || 0}
+              </P>
+              <P className="text-sm font-dm-sans text-grey-300">
+                moves completed
+              </P>
+            </Column>
+          )}
         </Row>
       </Column>
     </Column>
@@ -110,11 +112,15 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
 
 interface QuotesDetailsWorkersProps extends HTMLAttributes<HTMLDivElement> {
   movers: number;
+  finishing: boolean;
   disabled?: boolean;
+  workerTag?: string;
 }
 const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
   movers,
   disabled,
+  workerTag = "Movers",
+  finishing,
   ...props
 }) => {
   const { updateQuoteField } = useQuoteDetailsData();
@@ -132,17 +138,24 @@ const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
         props.className
       )}
     >
-      <Row className="justify-between items-center w-full">
-        <Button
-          disabled={disabled}
-          onClick={() =>
-            !disabled &&
-            setCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1))
-          }
-          className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
-        >
-          -
-        </Button>
+      <Row
+        className={cn(
+          "items-center w-full",
+          !finishing ? "justify-between" : "justify-center"
+        )}
+      >
+        {!finishing && (
+          <Button
+            disabled={disabled}
+            onClick={() =>
+              !disabled &&
+              setCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1))
+            }
+            className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
+          >
+            -
+          </Button>
+        )}
         <Column className="flex-1 max-w-max">
           <Row className="relative min-w-[210px]">
             {doodles.map((item, index) => (
@@ -167,19 +180,25 @@ const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
               </div>
             ))}
           </Row>
-          <H className="text-primary font-bold text-2xl">{count} Movers</H>
+          <H className="text-primary font-bold text-2xl">
+            {count} {workerTag ?? "Movers"}
+          </H>
         </Column>
-        <Button
-          disabled={disabled}
-          onClick={() => !disabled && setCount((prevCount) => prevCount + 1)}
-          className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
-        >
-          +
-        </Button>
+        {!finishing && (
+          <Button
+            disabled={disabled}
+            onClick={() => !disabled && setCount((prevCount) => prevCount + 1)}
+            className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
+          >
+            +
+          </Button>
+        )}
       </Row>
-      <P className="px-12 font-dm-sans text-grey-300 text-base">
-        Click on the -\+ sign to increase or reduce the number of movers
-      </P>
+      {!finishing && (
+        <P className="px-12 font-dm-sans text-grey-300 text-base">
+          Click on the -\+ sign to increase or reduce the number of movers
+        </P>
+      )}
     </Column>
   );
 };
@@ -225,10 +244,12 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
 interface QuoteDetailsVehicleProps {
   truckType: string;
   disabled?: boolean;
+  finishing: boolean;
 }
 const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
   truckType,
   disabled,
+  finishing,
 }) => {
   const { updateQuoteField } = useQuoteDetailsData();
   //TODO: confirm the types of vehicles available
@@ -320,25 +341,27 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
                 }}
               />
             </Row>
-            <Row className="items-center gap-4">
-              <Button
-                disabled={disabled}
-                size="icon"
-                className="max-w-[20px] max-h-[20px]"
-                onClick={() => handleDecrease(index)}
-              >
-                -
-              </Button>
-              <span>{item.quantity}</span>
-              <Button
-                disabled={disabled}
-                size="icon"
-                className="max-w-[20px] max-h-[20px]"
-                onClick={() => handleIncrease(index)}
-              >
-                +
-              </Button>
-            </Row>
+            {!finishing && (
+              <Row className="items-center gap-4">
+                <Button
+                  disabled={disabled}
+                  size="icon"
+                  className="max-w-[20px] max-h-[20px]"
+                  onClick={() => handleDecrease(index)}
+                >
+                  -
+                </Button>
+                <span>{item.quantity}</span>
+                <Button
+                  disabled={disabled}
+                  size="icon"
+                  className="max-w-[20px] max-h-[20px]"
+                  onClick={() => handleIncrease(index)}
+                >
+                  +
+                </Button>
+              </Row>
+            )}
           </Row>
         ))}
       </Column>
@@ -533,7 +556,11 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
         )}
         {finishing && currentUser && (
           <>
-            <Button className="bg-[#19B000]">Make Payment</Button>
+            {user?.hasCreditCard ? (
+              <Button className="bg-[#19B000]">Make Payment</Button>
+            ) : (
+              <Button className="bg-[#19B000]">Pay on site</Button>
+            )}
             <Button
               disabled={isDeletePending}
               loading={isDeletePending}
@@ -692,7 +719,8 @@ const QuoteDetailsServiceRequirement: FC<
   ];
   const form = useForm({
     defaultValues: {
-      services,
+      services: (JSON.parse(localStorage.getItem(StorageKeys.FORM_DATA) || "{}")
+        ?.services ?? []) as typeof services,
     },
   });
 
@@ -735,7 +763,7 @@ const QuoteDetailsServiceRequirement: FC<
                         className="data-[state=checked]:bg-orange-100 data-[state=checked]:border-orange-100"
                         id={checkboxId}
                         disabled={disabled}
-                        // checked={isChecked}
+                        checked={isChecked}
                         onCheckedChange={(checked) => {
                           if (disabled) return;
                           const updatedServices = checked

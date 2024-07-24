@@ -6,13 +6,13 @@ import { Button } from "@/components/atoms";
 import { cn } from "@/lib/utils";
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
-  const [listOpen, setListOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(true);
   const closeList = useCallback(() => setListOpen(false), []);
   return (
     <div className="flex h-full">
       <div
         className={cn(
-          "flex-1 max-w-[320px] max-[800px]:fixed left-0 z-10 max-[800px]:bg-white-100 max-[800px]:max-w-full max-[800px]:w-full max-[800px]:h-[calc(100dvh-7.2rem)] max-[800px]:overflow-y-auto max-[800px]:top-[7.2rem] min-[800px]:flex",
+          "flex-1 max-w-[320px] max-[800px]:fixed left-0 z-10 max-[800px]:bg-white-100 max-[800px]:max-w-full max-[800px]:w-full max-[800px]:h-[calc(100dvh-7.2rem)] max-[800px]:overflow-y-auto max-[800px]:top-[6.5rem] min-[800px]:flex",
           !listOpen && "hidden"
         )}
       >

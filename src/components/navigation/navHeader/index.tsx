@@ -40,10 +40,10 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
         trigger={
           <Button
             variant="ghost"
-            className="font-medium text-grey-300 text-lg lg:hidden"
+            className="font-medium text-grey-300 text-lg lg:hidden text-left justify-start"
           >
             <MenuIcon className="w-[22px] h-[22px] text-primary block mr-2" />
-            <P>{headerContent.title}</P>
+            <P className="max-w-[calc(100vw-16em)] whitespace-nowrap overflow-hidden text-ellipsis">{headerContent.title}</P>
           </Button>
         }
       />

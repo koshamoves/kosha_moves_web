@@ -191,7 +191,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       <SelectItem value="TownHouse">TownHouse</SelectItem>
                       <SelectItem value="Storage">Storage</SelectItem>
                       <SelectItem value="Store">Store</SelectItem>
-                     </SelectContent>
+                    </SelectContent>
                   </Select>
                   <FormMessage className="text-destructive" />
                 </FormItem>
