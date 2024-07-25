@@ -247,6 +247,24 @@ export const cancelBooking = async (bookingId: string) => {
   }
 };
 
+export const updateUserDetails = async (name?: string, phoneNumber?: string) => {
+  try {
+    const userId = getAuth().currentUser?.uid;
+    const userDocRef = doc(db, FIREBASE_COLLECTIONS.USERS, userId ?? "");
+    await updateDoc(userDocRef, {
+      fullName: name,
+      phoneNumber: phoneNumber,
+    });
+  } catch (err) {
+    toast({
+      title: "Oops!",
+      description: getFirebaseErrorMessage(err as FirebaseError),
+      variant: "destructive",
+    });
+    throw err;
+  }
+};
+
 // For conversations
 // - Fetch conversations from chat collections
 // - Filter by currentUserLoggedIn user id

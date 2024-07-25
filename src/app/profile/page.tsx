@@ -38,16 +38,7 @@ const Page = () => {
                                     </span>
                               </Column>
                               <Column className="pl-6 py-4 gap-0">
-                                    <UserProfileItem>
-                                          <div className="flex-1 text-center">
-                                                <P className="font-dm-sans text-xl font-bold text-blue-200">{user?.fullName || user?.displayName}</P>
-                                          </div>
-                                    </UserProfileItem>
-                                    <UserProfileItem>
-                                          <div className="flex-1 text-center">
-                                                <P className="text-grey-100 text-lg">{user?.phoneNumber}</P>
-                                          </div>
-                                    </UserProfileItem>
+                                    <UserProfileItem />
                               </Column>
                         </Column>
                         <div className="flex-1">
