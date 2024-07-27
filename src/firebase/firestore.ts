@@ -6,11 +6,9 @@ import {
   getDocs,
   where,
   query,
-  orderBy,
   updateDoc,
   deleteDoc,
   doc,
-  queryEqual,
 } from "firebase/firestore";
 import firebaseApp from "./config";
 import { FIREBASE_COLLECTIONS } from "@/constants/enums";
@@ -19,7 +17,9 @@ import { toast } from "@/components/toast/use-toast";
 import { getFirebaseErrorMessage } from "@/lib/helpers/getErrorMessage";
 import type { FirebaseError } from "firebase/app";
 import { safeParseDate } from "@/lib/utils";
-import { current } from "immer";
+import { DefaultDateFormat } from "@/constants/constants";
+import moment from "moment";
+import { isSameDay } from "date-fns";
 
 export const db = getFirestore(firebaseApp);
 
@@ -38,7 +38,7 @@ export const addToBookings = async (payload: Booking) => {
 
     const res = await addDoc(collection(db, FIREBASE_COLLECTIONS.BOOKINGS), {
       ...payload,
-      bookingDate: new Date().getTime(),
+      bookingDate: moment(new Date()).format(DefaultDateFormat),
     });
     return res;
   } catch (err) {
@@ -51,16 +51,11 @@ export const getBookings = async (inputDate: Date) => {
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
     const date = new Date(inputDate);
-    const startOfDay = new Date(date.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
     const q = query(
       collection(db, FIREBASE_COLLECTIONS.BOOKINGS),
-      where("bookingDate", ">=", startOfDay.getTime()),
-      where("bookingDate", "<=", endOfDay.getTime()),
       where("clientId", "==", userId),
-      where("requestType", "in", ["RegularMove", "LabourOnly"]), // Get only move and labour booking for now
-      orderBy("bookingDate", "desc")
+      where("requestType", "in", ["RegularMove", "LabourOnly"]) // Get only move and labour booking for now
     );
 
     const querySnapshot = await getDocs(q);
@@ -73,7 +68,7 @@ export const getBookings = async (inputDate: Date) => {
             ...doc.data(),
           } as Partial<Booking>)
       )
-      .filter((booking) => booking.quote);
+      .filter((booking) => booking.quote && booking.movingDate && isSameDay(booking.movingDate, date));
     return bookings;
   } catch (err) {
     throw err;
