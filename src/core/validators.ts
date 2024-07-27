@@ -106,12 +106,11 @@ export const bookDeliverySequenceStep1Schema = z.object({
   deliveryDate: z.date({message: "Move date is required"}),
   time: z.string().min(1, {message: "Time is required"}),
   pickUpLocation: locationSchema,
+  stops: z.array(locationSchema),
   deliveryLocation: locationSchema
 })
 
-export const bookDeliverySequenceStep2Schema = bookMoveSequenceStep2Schema.omit({
-  PUDStops: true
-})
+export const bookDeliverySequenceStep2Schema = bookMoveSequenceStep2Schema;
 
 export const bookDeliverySequenceStep3Schema = bookMoveSequenceStep3Schema.pick({
   images: true,
@@ -119,6 +118,8 @@ export const bookDeliverySequenceStep3Schema = bookMoveSequenceStep3Schema.pick(
   pictures: true,
   receipts: true,
 }) 
+
+export const bookDeliverySequenceStep4Schema = bookMoveSequenceStep4Schema;
 
 export const sendMessageSchema = z.object({
   message: z.string().optional(),

@@ -55,7 +55,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Routes } from "@/core/routing";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { update, formData, removeStop } = useBookMoveStore((state) => state);
+  const router = useRouter();
+  const { update, formData, removeStop, reset } = useBookMoveStore((state) => state);
   const { moveDate, time, stops, pickUpLocation, finalDestination } = formData;
   const form = useForm<z.infer<typeof bookMoveSequenceStep1Schema>>({
     resolver: zodResolver(bookMoveSequenceStep1Schema),
@@ -273,6 +274,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           <Button
             type="button"
             className="order-1 sm:order-0 flex-1 min-w-[200px] sm:max-w-[180px] rounded-3xl"
+            onClick={()=>{
+              reset()
+              router.push(Routes.root)
+            }}
           >
             Cancel
           </Button>
@@ -1099,7 +1104,7 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             type="submit"
             className="order-0 sm:order-1 flex-1 min-w-[200px] sm:max-w-[180px] bg-orange-100 rounded-3xl"
           >
-            Search
+            Get Quotes
           </Button>
         </Row>
       </form>

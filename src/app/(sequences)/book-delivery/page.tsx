@@ -58,6 +58,13 @@ const Page = () => {
                 <TabsCount count="3" isActive={activeTab === "itu"} />
                 <P className="hidden md:block">Items to Pick up</P>
               </TabsTrigger>
+              <TabsTrigger className="flex gap-2" value="serviceRequirement">
+                <TabsCount
+                  count="4"
+                  isActive={activeTab === "serviceRequirement"}
+                />
+                <P className="hidden md:block">Add-on Services</P>
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="dlt">
               <BookDeliverySequence.Step1
@@ -71,6 +78,11 @@ const Page = () => {
             </TabsContent>
             <TabsContent value="itu">
               <BookDeliverySequence.Step3
+                onChangeStep={(next) => setActiveTab(next ?? "")}
+              />
+            </TabsContent>
+            <TabsContent value="serviceRequirement">
+              <BookDeliverySequence.Step4
                 onChangeStep={(next) => setActiveTab(next ?? "")}
               />
             </TabsContent>
@@ -113,6 +125,9 @@ const getMobileTitle = (active: string): string => {
     case "itu":
       return "Items to Pick up";
       break;
+    case "serviceRequirement":
+        return "Add-on Services";
+        break;
     default:
       return "";
       break;

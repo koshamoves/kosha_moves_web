@@ -53,7 +53,8 @@ import { hireLabourFactory } from "@/core/models/hireLabourFactory";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { update, formData } = useHireLabourStore((state) => state);
+  const router = useRouter();
+  const { update, formData, reset } = useHireLabourStore((state) => state);
   const {
     date,
     time,
@@ -247,7 +248,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           </Row>
         </Column>
         <Row className="items-center justify-center my-8">
-          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl">
+          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl" onClick={()=>{
+            reset()
+            router.push(Routes.root)
+          }}>
             Cancel
           </Button>
           <Button
@@ -713,7 +717,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             type="submit"
             className="flex-1 max-w-[180px] bg-orange-100 rounded-3xl"
           >
-            Send Request
+            Get Qoutes
           </Button>
         </Row>
       </form>

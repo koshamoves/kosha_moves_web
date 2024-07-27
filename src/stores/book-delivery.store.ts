@@ -8,10 +8,12 @@ interface Store {
     fieldName: K,
     newValue: BookDelivery[K]
   ) => void;
+  removeStop: (index: number) => void;
   removeImage: (
     index: number,
     type?: "images" | "pictures" | "receipts"
   ) => void;
+  reset: () => void;
 }
 
 const initialState: BookDelivery = {
@@ -25,6 +27,7 @@ const initialState: BookDelivery = {
     location: "",
     apartmentNumber: "",
   },
+  stops: [],
   PUDFinalDestination: {
     buildingType: "",
     elevatorAccess: "",
@@ -35,10 +38,12 @@ const initialState: BookDelivery = {
     elevatorAccess: "",
     flightOfStairs: "",
   },
+  PUDStops: [],
   images: [],
   pictures: [],
   receipts: [],
   instructions: "",
+  services: []
 };
 
 const useBookDeliveryStore = create<Store>((set) => ({
@@ -47,9 +52,31 @@ const useBookDeliveryStore = create<Store>((set) => ({
     set((state) => ({
       formData: { ...state.formData, ...newData },
     })),
-  updateField: (fieldName, newValue) =>
+    updateField: (fieldName, newValue) =>
+    set((state) => {
+      if (fieldName.startsWith("stops")) {
+        const stopIndex = parseInt(fieldName.split(".")[1]);
+        const updatedStops = [...state.formData.stops];
+        const updatedStop = {
+          ...updatedStops[stopIndex],
+          ...(newValue as {}),
+        };
+        updatedStops[stopIndex] = updatedStop;
+        return {
+          formData: { ...state.formData, stops: updatedStops },
+        };
+      }
+      return {
+        formData: { ...state.formData, [fieldName]: newValue },
+      };
+    }),
+    removeStop: (index) =>
     set((state) => ({
-      formData: { ...state.formData, [fieldName]: newValue },
+      formData: {
+        ...state.formData,
+        stops: state.formData.stops.filter((_, i) => i !== index),
+        PUDStops: state.formData.PUDStops?.filter((_, i) => i !== index),
+      },
     })),
   removeImage: (index, type: "images" | "pictures" | "receipts" = "images") =>
     set((state) => {
@@ -58,6 +85,7 @@ const useBookDeliveryStore = create<Store>((set) => ({
         formData: { ...state.formData, [type]: newImages },
       };
     }),
+    reset: () => set({ formData: initialState }),
 }));
 
 export default useBookDeliveryStore;
