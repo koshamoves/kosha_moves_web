@@ -134,10 +134,11 @@ const Page = () => {
   }
 
   return (
-    <QuoteDetails className="flex-col sm:flex-row">
-      <Column className="gap-4">
+    <QuoteDetails className="flex-col sm:flex-row w-full">
+      <Column className="gap-4 flex-1">
         <Row className="gap-4 flex-col lg:flex-row">
           <QuoteDetailsMap
+          className="flex-1"
             data={{
               location: {
                 lat: "",
@@ -154,6 +155,7 @@ const Page = () => {
             disabled={finishing}
             workerTag="Laborers"
             finishing={finishing}
+            className="flex-1"
           />
         </Row>
         <QuoteDetailsRates
@@ -222,7 +224,7 @@ const Page = () => {
           ]}
         />
       </Column>
-      <Column className="gap-4 max-w-[400px]">
+      <Column className="gap-4 max-w-[400px] flex-1">
         <QuoteDetailsServiceRequirement
           services={formData.services}
           disabled={finishing || selectedBooking?.status === "Cancelled"}

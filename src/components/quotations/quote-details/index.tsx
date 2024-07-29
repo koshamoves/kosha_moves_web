@@ -1,4 +1,4 @@
-import { InfoCircle, TruckFront } from "@/components/Icons";
+import { BookingLocation, BookingTime, InfoCircle, TruckFront } from "@/components/Icons";
 import { Button, H, P, Picture } from "@/components/atoms";
 import { Checkbox } from "@/components/checkbox";
 import {
@@ -46,7 +46,46 @@ import useHireLabourStore from "@/stores/hire-labour.store";
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
 );
-const QuoteDetailsLocation = () => {};
+interface QuotesDetailsLocationProps {
+  locations: Array<{
+    address: string;
+    location?: string;
+    apartmentNumber: string;
+    buildingType: string;
+    flightOfStairs: number;
+    googlePlaceId: string;
+    hasElevator: string;
+    id: string;
+  }>
+}
+const QuoteDetailsLocation:FC<QuotesDetailsLocationProps> = ({ locations}) => {
+  return (
+    <Row className="flex-1 bg-white-100 p-2 px-6 shadow-custom rounded-lg gap-1 order-2 lg:order-1">
+      <BookingLocation className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]"/>
+      <Row className={cn("gap-0 flex-wrap", {
+        // "flex-col" : locations.length > 2
+      })}>
+          {
+            locations.map((item, index) => {
+              return (
+                <Row key={index} className="items-center flex-1 min-w-[200px] max-w-[350px]">
+                  {
+                    index !== 0 && (
+                      <div className="h-[50px] w-[6px] sm:w-[50px] sm:h-[6px] bg-primary rounded-md"/>
+                    )
+                  }
+                  <Column className="gap-0 flex-1">
+                    <P className="text-primary text-base font-semibold">{item.address || item.location}</P>
+                    <P className="text-grey-100 text-sm font-semibold">{item.buildingType}, {item.hasElevator === "Yes" ? "Elevator Available" : "No Elevator"}</P>
+                  </Column>
+                </Row>
+              )
+            })
+          }
+      </Row>
+    </Row>
+  )
+};
 
 interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
   data: {
@@ -861,16 +900,17 @@ const QuoteDetailsEDT = () => {
   );
 };
 interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
-  status: "Pending" | "Accepted";
+  status: "New" | "Pending" | "Confirmed" | "Rejected" | "InProgress" | "Completed" | "DepositHeld" | "Cancelled" | "Edited" | "Paused" | "PendingPayment";
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (
-    <Column className="bg-white-100 p-4 shadow-custom rounded-lg">
+    <Column className="bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
       <P className="text-sm text-primary-foreground">Status</P>
       <P
-        className={cn("font-bold text-lg", {
-          "text-grey-300": status === "Pending",
-          "text-green-200": status === "Accepted",
+        className={cn("font-bold text-lg text-grey-600", {
+          "text-orange-500": status === "Pending",
+          "text-green-200": status === "Confirmed",
+          "text-red-500": status == "Cancelled"
         })}
       >
         {status}
@@ -878,6 +918,22 @@ const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
     </Column>
   );
 };
+
+interface QuoteDetailsDateProps{
+  date: string,
+  time: string
+}
+const QuoteDetailsDate:FC<QuoteDetailsDateProps> = ({ date, time }) => {
+  return (
+    <Row className="items-center bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
+      <BookingTime className="w-[30px] h-[30px]" />
+      <Column className="gap-0">
+          <P className="text-grey-100 text-sm font-semibold">{date}</P>
+          <P className="text-sm font-semibold">{time}</P>
+      </Column>
+    </Row>
+  )
+}
 
 const QuoteDetailsEdit = () => {
   return (
@@ -906,4 +962,5 @@ export {
   QuoteDetailsStatus,
   QuoteDetailsEdit,
   QuoteDetailsEditRequest,
+  QuoteDetailsDate
 };
