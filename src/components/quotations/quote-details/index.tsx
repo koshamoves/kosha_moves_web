@@ -844,37 +844,33 @@ const QuoteDetailsNotesImages: FC<QuoteDetailsNotesImagesProps> = ({
   notes,
 }) => {
   return (
-    <Column className="gap-12 h-full w-full p-6 bg-white-100 shadow-custom rounded-lg">
+    <Column className="gap-12 w-full p-6 bg-white-100 shadow-custom rounded-lg">
       <H level={2} className="text-grey-300 font-dm-sans text-lg">
         Notes & Images
       </H>
-      <Row className="flex-wrap gap-4">
-        {images.map((image, index) => (
-          <div
-            key={image + index}
-            className="relative flex-1 min-w-[250px] max-w-[300px] h-[180px] group"
-          >
-            <Picture
-              container={{
-                className: "w-full h-full rounded-lg",
-              }}
-              image={{
-                alt: "",
-                src: image,
-                className: "object-cover rounded-lg",
-              }}
-            />
-            {/* <Button 
-                                                            type="button" 
-                                                            variant="ghost" 
-                                                            className="bg-transparent hover:bg-transparent p-0 max-w-max absolute -top-4 -right-2 hidden group-hover:inline"
-                                                            onClick={() => handleRemoveImage(index)}
-                                                      >
-                                                            <Cancel className="w-[24px] h-[24px]"/>
-                                                      </Button> */}
-          </div>
-        ))}
-      </Row>
+      {
+        images.length > 0 && (
+          <Row className="flex-wrap gap-4">
+          {images.map((image, index) => (
+            <div
+              key={image + index}
+              className="relative flex-1 min-w-[250px] max-w-[300px] h-[180px] group"
+            >
+              <Picture
+                container={{
+                  className: "w-full h-full rounded-lg",
+                }}
+                image={{
+                  alt: "",
+                  src: image,
+                  className: "object-cover rounded-lg",
+                }}
+              />
+            </div>
+          ))}
+        </Row>
+        )
+      }
       <P className="text-grey-400">
         <i>{notes}</i>
       </P>
@@ -904,7 +900,7 @@ interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (
-    <Column className="bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
+    <Column className="flex-1 bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
       <P className="text-sm text-primary-foreground">Status</P>
       <P
         className={cn("font-bold text-lg text-grey-600", {
@@ -925,7 +921,7 @@ interface QuoteDetailsDateProps{
 }
 const QuoteDetailsDate:FC<QuoteDetailsDateProps> = ({ date, time }) => {
   return (
-    <Row className="items-center bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
+    <Row className="flex-1 items-center bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
       <BookingTime className="w-[30px] h-[30px]" />
       <Column className="gap-0">
           <P className="text-grey-100 text-sm font-semibold">{date}</P>

@@ -20,6 +20,7 @@ import {
   QuoteDetailsStatus,
   QuoteDetailsDate,
   QuoteDetailsLocation,
+  QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
@@ -66,13 +67,18 @@ const Page = () => {
     ? (selectedBooking?.quote as Quote ) ?? {}
     : quoteDetailsData || {};
 
-    const bookingDate = format(new Date(selectedBooking?.movingDate ?? ""), "d MMMM yyyy")
-    const bookingTime = format(new Date(selectedBooking?.movingDate ?? ""), "hh:mm a")
-    const locations = [
-  selectedBooking?.fromAddress, 
-  ...(selectedBooking?.additionalStops ?? []), 
-  selectedBooking?.toAddress
-].filter(Boolean);
+    let bookingDate, bookingTime, locations;
+
+    if (finishing) {
+      bookingDate = format(new Date(selectedBooking?.movingDate ?? ""), "d MMMM yyyy");
+      bookingTime = format(new Date(selectedBooking?.movingDate ?? ""), "hh:mm a");
+      locations = [
+        selectedBooking?.fromAddress, 
+        ...(selectedBooking?.additionalStops ?? []), 
+        selectedBooking?.toAddress
+      ].filter(Boolean)
+    }
+console.log(selectedBooking)
   // const amount = useMemo(() => {
   //   const majorAppliancesAmount =
   //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
@@ -144,18 +150,18 @@ const Page = () => {
 
   return (
     <Column className="w-full">
-              {
-          finishing && (
-                  <Row className="lg:items-center justify-between flex-col lg:flex-row">
-                    {/* @ts-ignore */}
-                        <QuoteDetailsLocation locations={locations} />
-                        <Row className="order-1 lg:order-2">
-                          <QuoteDetailsDate date={bookingDate} time={bookingTime} />
-                            <QuoteDetailsStatus status={selectedBooking?.status ?? "New"} />
-                        </Row>
-                    </Row>
-                )
-              }
+    {
+finishing && (
+        <Row className="lg:items-end justify-between flex-col lg:flex-row">
+          {/* @ts-ignore */}
+              <QuoteDetailsLocation locations={locations} />
+              <Row className="flex-1 max-w-[400px] order-1 lg:order-2">
+                <QuoteDetailsDate date={bookingDate ?? ""} time={bookingTime ?? ""} />
+                  <QuoteDetailsStatus status={selectedBooking?.status ?? "New"} />
+              </Row>
+          </Row>
+      )
+    }  
         <QuoteDetails className="flex-col sm:flex-row w-full">
       <Column className="gap-4 flex-1">
         <Row className="gap-4 flex-col lg:flex-row">
@@ -242,6 +248,11 @@ const Page = () => {
             },
           ]}
         />
+              {
+        finishing && (
+          <QuoteDetailsNotesImages images={[]} notes={selectedBooking?.additionalNotes ?? ""} />
+        )
+      }
       </Column>
       <Column className="gap-4 flex-1 max-w-[400px]">
         <QuoteDetailsVehicle
