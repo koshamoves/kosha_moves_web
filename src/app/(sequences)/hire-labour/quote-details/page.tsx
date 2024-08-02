@@ -17,6 +17,10 @@ import {
   QuoteDetailsServiceRequirement,
   QuoteDetailsWorkers,
   QuoteDetailsEditRequest,
+  QuoteDetailsDate,
+  QuoteDetailsStatus,
+  QuoteDetailsLocation,
+  QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { StorageKeys } from "@/constants/enums";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
@@ -28,6 +32,7 @@ import useBookingStore from "@/stores/booking.store";
 import type { Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { format } from "date-fns";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -60,6 +65,14 @@ const Page = () => {
   const formData = JSON.parse(
     localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
   );
+
+  let bookingDate, bookingTime, locations;
+
+  if (finishing) {
+    bookingDate = format(new Date(selectedBooking?.movingDate ?? ""), "d MMMM yyyy");
+    bookingTime = format(new Date(selectedBooking?.movingDate ?? ""), "hh:mm a");
+    locations = [selectedBooking?.fromAddress];
+  }
 
   // const amount = useMemo(() => {
   //   const majorAppliancesAmount =
@@ -134,113 +147,133 @@ const Page = () => {
   }
 
   return (
-    <QuoteDetails className="flex-col sm:flex-row">
-      <Column className="gap-4">
-        <Row className="gap-4 flex-col lg:flex-row">
-          <QuoteDetailsMap
-            data={{
-              location: {
-                lat: "",
-                long: "",
-              },
-              name: companyName,
-              charge: hourlyRate,
-              reviews: numberOfReviews,
-              movesCompleted: "nil",
-            }}
-          />
-          <QuoteDetailsWorkers
-            movers={movers}
-            disabled={finishing}
-            workerTag="Laborers"
+    <Column className="w-full">
+    {
+finishing && (
+        <Row className="lg:items-end justify-between flex-col lg:flex-row">
+          {/* @ts-ignore */}
+              <QuoteDetailsLocation locations={locations} />
+              <Row className="flex-1 max-w-[400px] order-1 lg:order-2">
+                <QuoteDetailsDate date={bookingDate ?? ""} time={bookingTime ?? ""} />
+                  <QuoteDetailsStatus status={selectedBooking?.status ?? "New"} />
+              </Row>
+          </Row>
+      )
+    }    <QuoteDetails className="flex-col sm:flex-row w-full">
+    <Column className="gap-4 flex-1">
+      <Row className="gap-4 flex-col lg:flex-row">
+        <QuoteDetailsMap
+        className="flex-1"
+          data={{
+            location: {
+              lat: "",
+              long: "",
+            },
+            name: companyName,
+            charge: hourlyRate,
+            reviews: numberOfReviews,
+            movesCompleted: "nil",
+          }}
+        />
+        <QuoteDetailsWorkers
+          movers={movers}
+          disabled={finishing}
+          workerTag="Laborers"
+          finishing={finishing}
+          className="flex-1"
+        />
+      </Row>
+      <QuoteDetailsRates
+        rates={[
+          {
+            icon: <TruckFrontGrey {...iconSizes} />,
+            label: "Truck Fee",
+            rate: truckFee,
+          },
+          {
+            icon: <Appliances {...iconSizes} />,
+            label: "Appliances",
+            rate: majorAppliancesFee,
+            ...(+(formData.majorAppliances ?? 0)
+              ? { count: +(formData.majorAppliances ?? 0) }
+              : {}),
+          },
+          {
+            icon: <FlightOfStairs {...iconSizes} />,
+            label: "Flight of Stairs",
+            rate: flightOfStairsFee,
+          },
+          {
+            icon: <Piano {...iconSizes} />,
+            label: "Piano",
+            rate: pianosFee,
+            ...(+(formData.pianos ?? 0)
+              ? { count: +(formData.pianos ?? 0) }
+              : {}),
+          },
+          {
+            icon: <AdditionalStops {...iconSizes} />,
+            label: "Additional Stops",
+            rate: stopOverFee,
+          },
+          {
+            icon: <Appliances {...iconSizes} />,
+            label: "Hot Tub",
+            rate: hotTubsFee,
+            ...(+(formData.hotTubs ?? 0)
+              ? { count: +(formData.hotTubs ?? 0) }
+              : {}),
+          },
+          {
+            icon: <Appliances {...iconSizes} />,
+            label: "Pool Table",
+            rate: poolTablesFee,
+            ...(+(formData.poolTables ?? 0)
+              ? { count: +(formData.poolTables ?? 0) }
+              : {}),
+          },
+          {
+            icon: <Appliances {...iconSizes} />,
+            label: "Workout Equipments",
+            rate: workoutEquipmentsFee,
+            ...(+(formData.workOutEquipment ?? 0)
+              ? { count: +(formData.workOutEquipment ?? 0) }
+              : {}),
+          },
+          {
+            icon: <Alarm {...iconSizes} />,
+            label: "Minimum Hours",
+            count: minimumHours,
+            rate: hourlyRate * minimumHours,
+          },
+        ]}
+      />
+      {
+        finishing && (
+          <QuoteDetailsNotesImages images={[]} notes={selectedBooking?.additionalNotes ?? ""} />
+        )
+      }
+    </Column>
+    <Column className="gap-4 max-w-[400px] flex-1">
+      <QuoteDetailsServiceRequirement
+        services={formData.services}
+        disabled={finishing || selectedBooking?.status === "Cancelled"}
+      />
+      {((!updating && !finishing) ||
+        selectedBooking?.status !== "Cancelled") && (
+        <>
+          <QuoteDetailsCharge
+            amount={minimumAmount}
+            hourlyRate={formatCurrency(hourlyRate)}
             finishing={finishing}
+            updating={updating}
           />
-        </Row>
-        <QuoteDetailsRates
-          rates={[
-            {
-              icon: <TruckFrontGrey {...iconSizes} />,
-              label: "Truck Fee",
-              rate: truckFee,
-            },
-            {
-              icon: <Appliances {...iconSizes} />,
-              label: "Appliances",
-              rate: majorAppliancesFee,
-              ...(+(formData.majorAppliances ?? 0)
-                ? { count: +(formData.majorAppliances ?? 0) }
-                : {}),
-            },
-            {
-              icon: <FlightOfStairs {...iconSizes} />,
-              label: "Flight of Stairs",
-              rate: flightOfStairsFee,
-            },
-            {
-              icon: <Piano {...iconSizes} />,
-              label: "Piano",
-              rate: pianosFee,
-              ...(+(formData.pianos ?? 0)
-                ? { count: +(formData.pianos ?? 0) }
-                : {}),
-            },
-            {
-              icon: <AdditionalStops {...iconSizes} />,
-              label: "Additional Stops",
-              rate: stopOverFee,
-            },
-            {
-              icon: <Appliances {...iconSizes} />,
-              label: "Hot Tub",
-              rate: hotTubsFee,
-              ...(+(formData.hotTubs ?? 0)
-                ? { count: +(formData.hotTubs ?? 0) }
-                : {}),
-            },
-            {
-              icon: <Appliances {...iconSizes} />,
-              label: "Pool Table",
-              rate: poolTablesFee,
-              ...(+(formData.poolTables ?? 0)
-                ? { count: +(formData.poolTables ?? 0) }
-                : {}),
-            },
-            {
-              icon: <Appliances {...iconSizes} />,
-              label: "Workout Equipments",
-              rate: workoutEquipmentsFee,
-              ...(+(formData.workOutEquipment ?? 0)
-                ? { count: +(formData.workOutEquipment ?? 0) }
-                : {}),
-            },
-            {
-              icon: <Alarm {...iconSizes} />,
-              label: "Minimum Hours",
-              count: minimumHours,
-              rate: hourlyRate * minimumHours,
-            },
-          ]}
-        />
-      </Column>
-      <Column className="gap-4 max-w-[400px]">
-        <QuoteDetailsServiceRequirement
-          services={formData.services}
-          disabled={finishing || selectedBooking?.status === "Cancelled"}
-        />
-        {((!updating && !finishing) ||
-          selectedBooking?.status !== "Cancelled") && (
-          <>
-            <QuoteDetailsCharge
-              amount={minimumAmount}
-              hourlyRate={formatCurrency(hourlyRate)}
-              finishing={finishing}
-              updating={updating}
-            />
-            {finishing && <QuoteDetailsEditRequest type="LabourOnly" />}
-          </>
-        )}
-      </Column>
-    </QuoteDetails>
+          {finishing && <QuoteDetailsEditRequest type="LabourOnly" />}
+        </>
+      )}
+    </Column>
+  </QuoteDetails>
+    </Column>
   );
 };
 

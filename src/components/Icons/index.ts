@@ -3,6 +3,8 @@ export { default as Calendar } from "./Calendar";
 export { default as Add } from "./Add";
 export { default as AdditionalStops } from "./AdditionalStops";
 export { default as Appliances } from "./Appliances";
+export { default as BookingLocation } from "./BookingLocation";
+export { default as BookingTime } from "./BookingTime";
 export { default as Camera } from "./Camera";
 export { default as Cancel } from "./Cancel";
 export { default as Caret } from "./Caret";

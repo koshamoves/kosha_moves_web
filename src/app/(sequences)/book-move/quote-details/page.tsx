@@ -17,6 +17,10 @@ import {
   QuoteDetailsVehicle,
   QuoteDetailsWorkers,
   QuoteDetailsEditRequest,
+  QuoteDetailsStatus,
+  QuoteDetailsDate,
+  QuoteDetailsLocation,
+  QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
@@ -28,6 +32,7 @@ import useBookMoveStore from "@/stores/book-move.store";
 import type { Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { format } from "date-fns";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -57,11 +62,23 @@ const Page = () => {
     poolTablesFee,
     workoutEquipmentsFee,
     minimumAmount,
-    movingTruck,
+    movingTruck
   } = finishing
-    ? (selectedBooking?.quote as Quote) ?? {}
+    ? (selectedBooking?.quote as Quote ) ?? {}
     : quoteDetailsData || {};
 
+    let bookingDate, bookingTime, locations;
+
+    if (finishing) {
+      bookingDate = format(new Date(selectedBooking?.movingDate ?? ""), "d MMMM yyyy");
+      bookingTime = format(new Date(selectedBooking?.movingDate ?? ""), "hh:mm a");
+      locations = [
+        selectedBooking?.fromAddress, 
+        ...(selectedBooking?.additionalStops ?? []), 
+        selectedBooking?.toAddress
+      ].filter(Boolean)
+    }
+console.log(selectedBooking)
   // const amount = useMemo(() => {
   //   const majorAppliancesAmount =
   //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
@@ -132,10 +149,24 @@ const Page = () => {
   }
 
   return (
-    <QuoteDetails className="flex-col sm:flex-row">
-      <Column className="gap-4">
+    <Column className="w-full">
+    {
+finishing && (
+        <Row className="lg:items-end justify-between flex-col lg:flex-row">
+          {/* @ts-ignore */}
+              <QuoteDetailsLocation locations={locations} />
+              <Row className="flex-1 max-w-[400px] order-1 lg:order-2">
+                <QuoteDetailsDate date={bookingDate ?? ""} time={bookingTime ?? ""} />
+                  <QuoteDetailsStatus status={selectedBooking?.status ?? "New"} />
+              </Row>
+          </Row>
+      )
+    }  
+        <QuoteDetails className="flex-col sm:flex-row w-full">
+      <Column className="gap-4 flex-1">
         <Row className="gap-4 flex-col lg:flex-row">
           <QuoteDetailsMap
+          className="flex-1"
             data={{
               location: {
                 lat: "",
@@ -147,7 +178,7 @@ const Page = () => {
               movesCompleted: "nil",
             }}
           />
-          <QuoteDetailsWorkers movers={movers} disabled={finishing} finishing={finishing} />
+          <QuoteDetailsWorkers className="flex-1" movers={movers} disabled={finishing} finishing={finishing} />
         </Row>
         <QuoteDetailsRates
           rates={[
@@ -217,8 +248,13 @@ const Page = () => {
             },
           ]}
         />
+              {
+        finishing && (
+          <QuoteDetailsNotesImages images={[]} notes={selectedBooking?.additionalNotes ?? ""} />
+        )
+      }
       </Column>
-      <Column className="gap-4 max-w-[400px]">
+      <Column className="gap-4 flex-1 max-w-[400px]">
         <QuoteDetailsVehicle
           truckType={movingTruck}
           disabled={finishing || selectedBooking?.status === "Cancelled"}
@@ -237,7 +273,8 @@ const Page = () => {
           </>
         )}
       </Column>
-    </QuoteDetails>
+        </QuoteDetails>
+    </Column>
   );
 };
 
