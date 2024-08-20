@@ -91,7 +91,7 @@ export const bookMoveSequenceStep4Schema = z.object({
 })
 
 export const hireLabourSequenceStep1Schema = z.object({
-  date: z.date({message: "Move date is required"}),
+  date: z.date({message: "Date is required"}),
   time: z.string().min(1, {message: "Time is required"}),
   serviceLocation: z.string().min(1, {message: "Location is required"}),
   apartmentNumber: z.string().optional(),

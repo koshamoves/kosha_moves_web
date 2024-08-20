@@ -17,7 +17,7 @@ interface Store {
 }
 
 const initialState: BookDelivery = {
-  deliveryDate: new Date(),
+  deliveryDate: undefined as unknown as Date,
   time: "",
   pickUpLocation: {
     location: "",
@@ -43,7 +43,7 @@ const initialState: BookDelivery = {
   pictures: [],
   receipts: [],
   instructions: "",
-  services: []
+  services: [],
 };
 
 const useBookDeliveryStore = create<Store>((set) => ({
@@ -52,7 +52,7 @@ const useBookDeliveryStore = create<Store>((set) => ({
     set((state) => ({
       formData: { ...state.formData, ...newData },
     })),
-    updateField: (fieldName, newValue) =>
+  updateField: (fieldName, newValue) =>
     set((state) => {
       if (fieldName.startsWith("stops")) {
         const stopIndex = parseInt(fieldName.split(".")[1]);
@@ -70,7 +70,7 @@ const useBookDeliveryStore = create<Store>((set) => ({
         formData: { ...state.formData, [fieldName]: newValue },
       };
     }),
-    removeStop: (index) =>
+  removeStop: (index) =>
     set((state) => ({
       formData: {
         ...state.formData,
@@ -80,12 +80,13 @@ const useBookDeliveryStore = create<Store>((set) => ({
     })),
   removeImage: (index, type: "images" | "pictures" | "receipts" = "images") =>
     set((state) => {
-      const newImages = state.formData[type]?.filter((_, i) => i !== index) ?? [];
+      const newImages =
+        state.formData[type]?.filter((_, i) => i !== index) ?? [];
       return {
         formData: { ...state.formData, [type]: newImages },
       };
     }),
-    reset: () => set({ formData: initialState }),
+  reset: () => set({ formData: initialState }),
 }));
 
 export default useBookDeliveryStore;
