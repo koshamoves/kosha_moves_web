@@ -1,4 +1,9 @@
-import { BookingLocation, BookingTime, InfoCircle, TruckFront } from "@/components/Icons";
+import {
+  BookingLocation,
+  BookingTime,
+  InfoCircle,
+  TruckFront,
+} from "@/components/Icons";
 import { Button, H, P, Picture } from "@/components/atoms";
 import { Checkbox } from "@/components/checkbox";
 import {
@@ -56,35 +61,45 @@ interface QuotesDetailsLocationProps {
     googlePlaceId: string;
     hasElevator: string;
     id: string;
-  }>
+  }>;
 }
-const QuoteDetailsLocation:FC<QuotesDetailsLocationProps> = ({ locations}) => {
+const QuoteDetailsLocation: FC<QuotesDetailsLocationProps> = ({
+  locations,
+}) => {
   return (
     <Row className="flex-1 bg-white-100 p-2 px-6 shadow-custom rounded-lg gap-1 order-2 lg:order-1">
-      <BookingLocation className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]"/>
-      <Row className={cn("gap-0 flex-wrap", {
-        // "flex-col" : locations.length > 2
-      })}>
-          {
-            locations.map((item, index) => {
-              return (
-                <Row key={index} className="items-center flex-1 min-w-[200px] max-w-[350px]">
-                  {
-                    index !== 0 && (
-                      <div className="h-[50px] w-[6px] sm:w-[50px] sm:h-[6px] bg-primary rounded-md"/>
-                    )
-                  }
-                  <Column className="gap-0 flex-1">
-                    <P className="text-primary text-base font-semibold">{item.address || item.location}</P>
-                    <P className="text-grey-100 text-sm font-semibold">{item.buildingType}, {item.hasElevator === "Yes" ? "Elevator Available" : "No Elevator"}</P>
-                  </Column>
-                </Row>
-              )
-            })
-          }
+      <BookingLocation className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
+      <Row
+        className={cn("gap-0 flex-wrap", {
+          // "flex-col" : locations.length > 2
+        })}
+      >
+        {locations.map((item, index) => {
+          return (
+            <Row
+              key={index}
+              className="items-center flex-1 min-w-[200px] max-w-[350px]"
+            >
+              {index !== 0 && (
+                <div className="h-[50px] w-[6px] sm:w-[50px] sm:h-[6px] bg-primary rounded-md" />
+              )}
+              <Column className="gap-0 flex-1">
+                <P className="text-primary text-base font-semibold">
+                  {item.address || item.location}
+                </P>
+                <P className="text-grey-100 text-sm font-semibold">
+                  {item.buildingType},{" "}
+                  {item.hasElevator === "Yes"
+                    ? "Elevator Available"
+                    : "No Elevator"}
+                </P>
+              </Column>
+            </Row>
+          );
+        })}
       </Row>
     </Row>
-  )
+  );
 };
 
 interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
@@ -354,23 +369,29 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
 
   return (
     <Column className="gap-6 w-full p-4 bg-white-100 shadow-custom rounded-lg">
-      <H level={2} className="text-primary font-dm-sans text-lg">
-        Choose Truck
-      </H>
+      {!!NaN && (
+        <H level={2} className="text-primary font-dm-sans text-lg">
+          Choose Truck
+        </H>
+      )}
       <Column className="gap-4">
         {trucks.map((item, index) => (
           <Row key={index} className="justify-between items-center">
             <Row
-              onClick={() => handleSelectTruck(item.type)}
-              className={twMerge(`items-center`, !disabled && "cursor-pointer")}
-            >
-              {selectedTruck.type === item.type ? (
-                <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
-                  <span className="bg-primary w-[10px] h-[10px] rounded-full" />
-                </span>
-              ) : (
-                <span className="border border-primary w-[20px] h-[20px] rounded-full" />
+              onClick={() => !!NaN && handleSelectTruck(item.type)}
+              className={twMerge(
+                `items-center`,
+                !disabled && !!NaN && "cursor-pointer"
               )}
+            >
+              {!!NaN &&
+                (selectedTruck.type === item.type ? (
+                  <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
+                    <span className="bg-primary w-[10px] h-[10px] rounded-full" />
+                  </span>
+                ) : (
+                  <span className="border border-primary w-[20px] h-[20px] rounded-full" />
+                ))}
               <Picture
                 container={{ className: "w-[60px] h-[60px] rounded-full ml-4" }}
                 image={{
@@ -848,9 +869,8 @@ const QuoteDetailsNotesImages: FC<QuoteDetailsNotesImagesProps> = ({
       <H level={2} className="text-grey-300 font-dm-sans text-lg">
         Notes & Images
       </H>
-      {
-        images.length > 0 && (
-          <Row className="flex-wrap gap-4">
+      {images.length > 0 && (
+        <Row className="flex-wrap gap-4">
           {images.map((image, index) => (
             <div
               key={image + index}
@@ -869,8 +889,7 @@ const QuoteDetailsNotesImages: FC<QuoteDetailsNotesImagesProps> = ({
             </div>
           ))}
         </Row>
-        )
-      }
+      )}
       <P className="text-grey-400">
         <i>{notes}</i>
       </P>
@@ -896,7 +915,18 @@ const QuoteDetailsEDT = () => {
   );
 };
 interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
-  status: "New" | "Pending" | "Confirmed" | "Rejected" | "InProgress" | "Completed" | "DepositHeld" | "Cancelled" | "Edited" | "Paused" | "PendingPayment";
+  status:
+    | "New"
+    | "Pending"
+    | "Confirmed"
+    | "Rejected"
+    | "InProgress"
+    | "Completed"
+    | "DepositHeld"
+    | "Cancelled"
+    | "Edited"
+    | "Paused"
+    | "PendingPayment";
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (
@@ -906,7 +936,7 @@ const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
         className={cn("font-bold text-lg text-grey-600", {
           "text-orange-500": status === "Pending",
           "text-green-200": status === "Confirmed",
-          "text-red-500": status == "Cancelled"
+          "text-red-500": status == "Cancelled",
         })}
       >
         {status}
@@ -915,21 +945,21 @@ const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   );
 };
 
-interface QuoteDetailsDateProps{
-  date: string,
-  time: string
+interface QuoteDetailsDateProps {
+  date: string;
+  time: string;
 }
-const QuoteDetailsDate:FC<QuoteDetailsDateProps> = ({ date, time }) => {
+const QuoteDetailsDate: FC<QuoteDetailsDateProps> = ({ date, time }) => {
   return (
     <Row className="flex-1 items-center bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
       <BookingTime className="w-[30px] h-[30px]" />
       <Column className="gap-0">
-          <P className="text-grey-100 text-sm font-semibold">{date}</P>
-          <P className="text-sm font-semibold">{time}</P>
+        <P className="text-grey-100 text-sm font-semibold">{date}</P>
+        <P className="text-sm font-semibold">{time}</P>
       </Column>
     </Row>
-  )
-}
+  );
+};
 
 const QuoteDetailsEdit = () => {
   return (
@@ -958,5 +988,5 @@ export {
   QuoteDetailsStatus,
   QuoteDetailsEdit,
   QuoteDetailsEditRequest,
-  QuoteDetailsDate
+  QuoteDetailsDate,
 };
