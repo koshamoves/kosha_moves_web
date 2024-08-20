@@ -48,6 +48,7 @@ export interface BookMoveDto {
         id: string;
       }>;
       requestType: "RegularMove" | "LabourOnly" | "Delivery";
+      bookingId: string;
 }
 export interface GoogleAutoCompleteDto {
   input: string,

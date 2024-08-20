@@ -53,6 +53,11 @@ import {
 } from "@/components/locationAutoCompleteInput";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Routes } from "@/core/routing";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "@/firebase/firestore";
+import { generateBookingId } from "@/lib/helpers/generateBookingId";
+import { ErrorMessage } from "@/constants/enums";
+import { toast } from "@/components/toast/use-toast";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -74,6 +79,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     name: "stops",
     control: form.control,
   });
+
+  useEffect(() => {
+    localStorage.removeItem("bookingId")
+  }, [])
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep1Schema>) => {
     onChangeStep("propertyDetail");
     update(data);
@@ -701,6 +710,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     numberOfBoxes,
     instructions,
     images,
+    tempImages
   } = formData;
   const form = useForm<z.infer<typeof bookMoveSequenceStep3Schema>>({
     resolver: zodResolver(bookMoveSequenceStep3Schema),
@@ -716,14 +726,69 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const handleRemoveImage = (index: number) => {
-    removeImage(index);
-    form.setValue(
-      "images",
-      formData.images.filter((_, i) => i !== index)
-    ); // Update the form state
+  const [bookingId, setBookingId] = useState<string>('');
+
+  // Generate a new unique ID when the component mounts
+  useEffect(() => {
+    const storedBookingId = localStorage.getItem("bookingId");
+    if(storedBookingId){
+       setBookingId(storedBookingId)
+      }else{
+        const newBookingId = generateBookingId();
+        setBookingId(newBookingId);
+        localStorage.setItem("bookingId", newBookingId)
+      }
+  }, []);
+
+  const handleRemoveImage = async (index: number) => {
+    try {
+      const imageUrl = formData.images[index];
+      const urlParts = imageUrl.split('%2F');
+      const folder = urlParts[0].split('/').pop();
+      const fileName = urlParts[1].split('?')[0];
+  
+      const imageRef = ref(storage, `${folder}/${fileName}`);
+      await deleteObject(imageRef);
+  
+      removeImage(index);
+      form.setValue(
+        "images",
+        formData.images.filter((_, i) => i !== index)
+      );
+      updateField(
+        "tempImages",
+        tempImages!.filter((_, i) => i !== index)
+      );
+    } catch (error) {
+      toast({
+        title: "Oops!",
+        description: ErrorMessage.FAILED_ACTION,
+        variant: "destructive",
+      });
+    }
   };
+  const handleUpload = async (file: File): Promise<string> => {
+    const storageRef = ref(storage, `${bookingId}/${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  };
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    if (e.target.files) {
+      const fileArray = Array.from(e.target.files);
+      const tempUrls = fileArray.map((file) => URL.createObjectURL(file));
+      updateField("tempImages", [...tempImages!, ...tempUrls]);
+
+      const uploadPromises = fileArray.map((file) => handleUpload(file));
+      const uploadUrls = await Promise.all(uploadPromises);
+      updateField("images", [...images!, ...uploadUrls]);
+      form.setValue("images", [...images!, ...uploadUrls]);
+    }
+  };
+
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep3Schema>) => {
+    updateField("bookingId", bookingId);
     onChangeStep("serviceRequirement");
     update(data);
   };
@@ -864,7 +929,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         />
         <div>
           <Row className="items-center flex-wrap gap-4">
-            {images.map((image, index) => (
+            {tempImages!.map((image, index) => (
               <div
                 key={image + index}
                 className="relative flex-1 min-w-[120px] max-w-[150px] h-[99px] group"
@@ -889,7 +954,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </Button>
               </div>
             ))}
-            {images.length > 0 && (
+            {tempImages!.length > 0 && (
               <FormField
                 name="images"
                 control={form.control}
@@ -908,18 +973,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                         id="images"
                         className="hidden"
                         multiple
-                        onChange={(e) => {
-                          if (e.target.files) {
-                            updateField("images", [
-                              ...images,
-                              URL.createObjectURL(e.target.files[0]),
-                            ]);
-                            field.onChange([
-                              ...images,
-                              URL.createObjectURL(e.target.files[0]),
-                            ]);
-                          }
-                        }}
+                        onChange={handleChange}
                       />
                     </FormControl>
                   </FormItem>
@@ -927,7 +981,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               />
             )}
           </Row>
-          {images?.length <= 0 && (
+          {tempImages!?.length <= 0 && (
             <FormField
               name="images"
               control={form.control}
@@ -947,18 +1001,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       id="images"
                       className="hidden"
                       multiple
-                      onChange={(e) => {
-                        if (e.target.files) {
-                          updateField("images", [
-                            ...images,
-                            URL.createObjectURL(e.target.files[0]),
-                          ]);
-                          field.onChange([
-                            ...images,
-                            URL.createObjectURL(e.target.files[0]),
-                          ]);
-                        }
-                      }}
+                      onChange={handleChange}
                     />
                   </FormControl>
                 </FormItem>

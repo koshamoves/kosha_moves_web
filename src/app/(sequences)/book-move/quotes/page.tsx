@@ -49,7 +49,8 @@ const Page = () => {
     <>
       <Quotations<Quote>
         list={quotesResult}
-        renderItem={({ index, item }) => (
+        renderItem={({ index, item }) => {
+          return (
           <Quotes
             onClick={() => {
               setQuoteDetailsData(item);
@@ -79,7 +80,7 @@ const Page = () => {
               </Row>
             </QuotesContent>
           </Quotes>
-        )}
+        )}}
       />
     </>
   );

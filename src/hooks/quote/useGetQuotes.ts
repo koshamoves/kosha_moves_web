@@ -19,7 +19,6 @@ export const useGetQuotes = (
   const { isValidRoute: isHireLabourRoute } = useValidRoute(
     Routes.sequence.hireLabour
   );
-  // const { formData, reset } = useBookMoveStore((state) => state);
   const setQuotesResult = useShowQuotes((state) => state.setQuotesResult);
   const methods = useMutation<any, any, Partial<BookMoveDto>>({
     mutationFn: (props) => getQuotesData(props),

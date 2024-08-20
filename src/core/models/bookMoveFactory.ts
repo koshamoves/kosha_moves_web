@@ -57,6 +57,7 @@ export const bookMoveFactory = (a:BookMove): BookMoveDto => {
             date: `${formattedDate} ${formattedTime}`,
             additionalStops: mergeArrays(a.stops, a.PUDStops).map(parseFlightOfStairs),
             addOns: filteredAddOns,
-            requestType: "RegularMove"
+            requestType: "RegularMove",
+            bookingId: a.bookingId ?? ""
       }
 }
