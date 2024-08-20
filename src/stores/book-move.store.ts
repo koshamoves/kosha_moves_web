@@ -34,13 +34,13 @@ const initialState: BookMove = {
     googlePlaceId: "",
   },
   PUDFinalDestination: {
-    elevatorAccess: "Yes",
+    elevatorAccess: "",
     flightOfStairs: "0",
     // buildingType: "Condo",
     buildingType: "",
   },
   PUDPickUpLocation: {
-    elevatorAccess: "Yes",
+    elevatorAccess: "",
     flightOfStairs: "0",
     // buildingType: "Condo",
     buildingType: "",
