@@ -21,6 +21,7 @@ import {
   QuoteDetailsDate,
   QuoteDetailsLocation,
   QuoteDetailsNotesImages,
+  QuoteDetailsServiceRequirement,
 } from "@/components/quotations/quote-details";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
@@ -66,6 +67,16 @@ const Page = () => {
   } = finishing
     ? (selectedBooking?.quote as Quote) ?? {}
     : quoteDetailsData || {};
+
+  const totalAmount =
+    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    +(formData.pianos ?? 0) * pianosFee +
+    +(formData.PUDStops?.length ?? 0) * stopOverFee +
+    +(formData.hotTubs ?? 0) * hotTubsFee +
+    +(formData.poolTables ?? 0) * poolTablesFee +
+    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
+    hourlyRate * minimumHours * minimumHours * movers +
+    minimumAmount;
 
   let bookingDate, bookingTime, locations;
 
@@ -267,6 +278,10 @@ const Page = () => {
           )}
         </Column>
         <Column className="gap-4 flex-1 max-w-[400px]">
+          <QuoteDetailsServiceRequirement
+            services={formData.services}
+            disabled={finishing || selectedBooking?.status === "Cancelled"}
+          />
           <QuoteDetailsVehicle
             truckType={movingTruck}
             disabled={finishing || selectedBooking?.status === "Cancelled"}
@@ -276,7 +291,7 @@ const Page = () => {
             selectedBooking?.status !== "Cancelled") && (
             <>
               <QuoteDetailsCharge
-                amount={minimumAmount}
+                amount={totalAmount}
                 hourlyRate={formatCurrency(hourlyRate)}
                 finishing={finishing}
                 updating={updating}

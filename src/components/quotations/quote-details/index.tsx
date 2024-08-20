@@ -260,6 +260,7 @@ interface QuoteDetailsRatesProps extends HTMLAttributes<HTMLDivElement> {
   rates: Array<QuoteDetailsRate>;
 }
 const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
+  const { quoteDetailsData } = useQuoteDetailsData();
   return (
     <Column className="p-4 bg-white-100 shadow-custom rounded-lg">
       <H level={2} className="text-primary font-dm-sans text-lg">
@@ -275,7 +276,8 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
           // })
           .map((item, index) => {
             if (!item.rate) return null;
-
+            const newCount = +(item.count || 0) || 0;
+            const newRate = (newCount > 0 ? newCount : 1) * item.rate;
             return (
               <Row
                 key={item.label + index}
@@ -290,7 +292,11 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
                   </P>
                 </Row>
                 <P className="text-primary font-bold">
-                  {formatCurrency(item.rate)}
+                  {formatCurrency(
+                    item.label === "Minimum Hours"
+                      ? newRate * quoteDetailsData.movers
+                      : newRate
+                  )}
                 </P>
               </Row>
             );
@@ -488,7 +494,9 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       ? hireLabourFactory(formData)
       : bookMoveFactory(formData);
     const data = {
-      bookingId: formattedFormData.bookingId? formattedFormData.bookingId : generateBookingId(),
+      bookingId: formattedFormData.bookingId
+        ? formattedFormData.bookingId
+        : generateBookingId(),
       clientId: user?.uid ?? "",
       driverId: "", //TODO: where is driverId from?
       ...formattedFormData,
@@ -779,6 +787,7 @@ const QuoteDetailsServiceRequirement: FC<
     "straps",
     "floor runners",
     "tape",
+
     "move garage items",
     "move patio items",
   ];
