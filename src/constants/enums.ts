@@ -10,7 +10,8 @@ export enum QueryKeys {
 export enum StorageKeys {
 	QUOTES_RESULT = "quotes-result",
 	QUOTE_DETAIL = "quote-detail",
-	FORM_DATA = "form-data"
+	FORM_DATA = "form-data",
+	IMAGES = "images"
 }
 
 export enum FIREBASE_COLLECTIONS {
@@ -32,7 +33,8 @@ export enum SUCCESS_MESSAGE {
 
 export enum ErrorMessage {
 	UNEXPECTED_ERROR = "An unexpected error occurred. Please try again.",
-	SERVICE_REQUEST_MADE = "You have completed that service request!"
+	SERVICE_REQUEST_MADE = "You have completed that service request!",
+	FAILED_ACTION = "Sorry, we couldn't make that happen. Try again."
 }
 
 export enum CacheKey {

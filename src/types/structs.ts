@@ -15,7 +15,7 @@ export interface Services {
       label: string,
       description: string
 }
-export type BookMove = z.infer<typeof bookMoveSequenceStep1Schema> & z.infer<typeof bookMoveSequenceStep2Schema> & z.infer<typeof bookMoveSequenceStep3Schema> & z.infer<typeof bookMoveSequenceStep4Schema>  & {requestType?: string;};
+export type BookMove = z.infer<typeof bookMoveSequenceStep1Schema> & z.infer<typeof bookMoveSequenceStep2Schema> & z.infer<typeof bookMoveSequenceStep3Schema> & z.infer<typeof bookMoveSequenceStep4Schema>  & {requestType?: string; tempImages?: string[]; bookingId?:string};
 export type HireLabour = z.infer<typeof hireLabourSequenceStep1Schema> & z.infer<typeof hireLabourSequenceStep2Schema> & z.infer<typeof hireLabourSequenceStep3Schema>
 export type BookDelivery = z.infer<typeof bookDeliverySequenceStep1Schema> & z.infer<typeof bookDeliverySequenceStep2Schema> & z.infer<typeof bookDeliverySequenceStep3Schema> & z.infer<typeof bookDeliverySequenceStep4Schema>
 

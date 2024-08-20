@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import appConfig from "../../env.config";
+import { fileToString } from "@/lib/helpers/file.helpers";
 
 interface Store {
   formData: BookMove;
@@ -55,6 +56,8 @@ const initialState: BookMove = {
   instructions: "",
   images: [],
   services: [],
+  tempImages: [],
+  bookingId: ""
 };
 
 const useBookMoveStore = create<Store>()(
@@ -93,9 +96,9 @@ const useBookMoveStore = create<Store>()(
         })),
       removeImage: (index) =>
         set((state) => {
-          const newImages = state.formData.images.filter((_, i) => i !== index);
+          const newImages = state?.formData?.tempImages!.filter((_, i) => i !== index);
           return {
-            formData: { ...state.formData, images: newImages },
+            formData: { ...state.formData, tempImages: newImages },
           };
         }),
       reset: () => set({ formData: initialState }),

@@ -1,13 +1,8 @@
 import { toast } from "@/components/toast/use-toast";
-import { CacheKey, SUCCESS_MESSAGE } from "@/constants/enums";
-import { Routes } from "@/core/routing";
+import { SUCCESS_MESSAGE } from "@/constants/enums";
 import { updateUserDetails } from "@/firebase/firestore";
 import { getFirebaseErrorMessage } from "@/lib/helpers/getErrorMessage";
-import { queryClient } from "@/lib/query";
-import { wait } from "@/lib/utils";
 import useUserStore from "@/stores/user.store";
-import { Booking } from "@/types/structs";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export const useUpdateUserDetails = () => {

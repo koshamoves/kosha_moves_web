@@ -488,7 +488,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       ? hireLabourFactory(formData)
       : bookMoveFactory(formData);
     const data = {
-      bookingId: generateBookingId(),
+      bookingId: formattedFormData.bookingId? formattedFormData.bookingId : generateBookingId(),
       clientId: user?.uid ?? "",
       driverId: "", //TODO: where is driverId from?
       ...formattedFormData,
