@@ -56,7 +56,9 @@ import { Routes } from "@/core/routing";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
-  const { update, formData, removeStop, reset } = useBookMoveStore((state) => state);
+  const { update, formData, removeStop, reset } = useBookMoveStore(
+    (state) => state
+  );
   const { moveDate, time, stops, pickUpLocation, finalDestination } = formData;
   const form = useForm<z.infer<typeof bookMoveSequenceStep1Schema>>({
     resolver: zodResolver(bookMoveSequenceStep1Schema),
@@ -274,9 +276,9 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           <Button
             type="button"
             className="order-1 sm:order-0 flex-1 min-w-[200px] sm:max-w-[180px] rounded-3xl"
-            onClick={()=>{
-              reset()
-              router.push(Routes.root)
+            onClick={() => {
+              reset();
+              router.push(Routes.root);
             }}
           >
             Cancel
@@ -307,20 +309,33 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           : formData.stops.map(() => ({
               buildingType: "",
               flightOfStairs: "0",
-              elevatorAccess: "Yes",
+              elevatorAccess: "",
             })),
     },
   });
 
+  const finalDestinationBuildingType = useWatch({
+    control: form.control,
+    name: "PUDFinalDestination.buildingType",
+  });
   const finalDestinationElevatorAccess = useWatch({
     control: form.control,
     name: "PUDFinalDestination.elevatorAccess",
+  });
+  const pickUpLocationBuildingType = useWatch({
+    control: form.control,
+    name: "PUDPickUpLocation.buildingType",
   });
   const pickUpLocationElevatorAccess = useWatch({
     control: form.control,
     name: "PUDPickUpLocation.elevatorAccess",
   });
-
+  const stopsBuildingType = useWatch({
+    control: form.control,
+    name: formData.stops.map(
+      (_, index) => `PUDStops.${index}.buildingType`
+    ) as "PUDStops"[],
+  });
   const stopsElevatorAccess = useWatch({
     control: form.control,
     name: formData.stops.map(
@@ -353,17 +368,20 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   control={form.control}
                   name="PUDPickUpLocation.buildingType"
                   render={({ field }) => (
-                    <FormItem className="flex-1">
+                    <FormItem className="flex-1 relative">
                       <FormLabel className="text-grey-300">
                         Building Type
                       </FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(...arg) => {
+                          field.onChange(...arg);
+                          form.trigger("PUDPickUpLocation.elevatorAccess");
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Condo" />
+                            <SelectValue placeholder="" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -376,42 +394,45 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           <SelectItem value="Store">Store</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage className="text-destructive" />
+                      <FormMessage className="text-destructive sm:absolute" />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="PUDPickUpLocation.elevatorAccess"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-grey-300">
-                        Elevator Access
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Yes" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-destructive" />
-                    </FormItem>
-                  )}
-                />
-                {pickUpLocationElevatorAccess === "Yes" ? null : (
+                {pickUpLocationBuildingType !== "House" && (
+                  <FormField
+                    control={form.control}
+                    name="PUDPickUpLocation.elevatorAccess"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 relative">
+                        <FormLabel className="text-grey-300">
+                          Elevator Access
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-destructive sm:absolute" />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {(pickUpLocationElevatorAccess === "No" ||
+                  pickUpLocationBuildingType === "House") && (
                   <FormField
                     control={form.control}
                     name="PUDPickUpLocation.flightOfStairs"
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="flex-1 relative">
                         <FormLabel className="text-grey-300">
                           Flight of Stairs
                         </FormLabel>
@@ -423,7 +444,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             {...InputDirectives.numbersOnly}
                           />
                         </FormControl>
-                        <FormMessage className="text-destructive" />
+                        <FormMessage className="text-destructive sm:absolute" />
                       </FormItem>
                     )}
                   />
@@ -453,17 +474,20 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     control={form.control}
                     name={`PUDStops.${index}.buildingType`}
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="flex-1 relative">
                         <FormLabel className="text-grey-300">
                           Building Type
                         </FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(...arg) => {
+                            field.onChange(...arg);
+                            form.trigger(`PUDStops.${index}.elevatorAccess`);
+                          }}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Condo" />
+                              <SelectValue placeholder="" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -476,44 +500,49 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             <SelectItem value="Store">Store</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-destructive" />
+                        <FormMessage className="text-destructive sm:absolute" />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name={`PUDStops.${index}.elevatorAccess`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel className="text-grey-300">
-                          Elevator Access
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Yes" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-destructive" />
-                      </FormItem>
-                    )}
-                  />
-                  {(stopsElevatorAccess as unknown as ("Yes" | "No")[])[
+                  {(stopsBuildingType as unknown as string[])[index] !==
+                    "House" && (
+                    <FormField
+                      control={form.control}
+                      name={`PUDStops.${index}.elevatorAccess`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 relative">
+                          <FormLabel className="text-grey-300">
+                            Elevator Access
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-destructive sm:absolute" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {((stopsElevatorAccess as unknown as ("Yes" | "No")[])[
                     index
-                  ] === "No" && (
+                  ] === "No" ||
+                    (stopsBuildingType as unknown as string[])[index] ===
+                      "House") && (
                     <FormField
                       control={form.control}
                       name={`PUDStops.${index}.flightOfStairs`}
                       render={({ field }) => (
-                        <FormItem className="flex-1">
+                        <FormItem className="flex-1 relative">
                           <FormLabel className="text-grey-300">
                             Flight of Stairs
                           </FormLabel>
@@ -525,7 +554,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                               defaultValue={0}
                             />
                           </FormControl>
-                          <FormMessage className="text-destructive" />
+                          <FormMessage className="text-destructive sm:absolute" />
                         </FormItem>
                       )}
                     />
@@ -555,17 +584,20 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   control={form.control}
                   name="PUDFinalDestination.buildingType"
                   render={({ field }) => (
-                    <FormItem className="flex-1 w-full">
+                    <FormItem className="flex-1 w-full relative">
                       <FormLabel className="text-grey-300">
                         Building Type
                       </FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(...arg) => {
+                          field.onChange(...arg);
+                          form.trigger("PUDFinalDestination.elevatorAccess");
+                        }}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Condo" />
+                            <SelectValue placeholder="" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -578,42 +610,45 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           <SelectItem value="Store">Store</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage className="text-destructive" />
+                      <FormMessage className="text-destructive sm:absolute" />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="PUDFinalDestination.elevatorAccess"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-grey-300">
-                        Elevator Access
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Yes" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-destructive" />
-                    </FormItem>
-                  )}
-                />
-                {finalDestinationElevatorAccess === "No" && (
+                {finalDestinationBuildingType !== "House" && (
+                  <FormField
+                    control={form.control}
+                    name="PUDFinalDestination.elevatorAccess"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 relative">
+                        <FormLabel className="text-grey-300">
+                          Elevator Access
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-destructive sm:absolute" />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {(finalDestinationElevatorAccess === "No" ||
+                  finalDestinationBuildingType === "House") && (
                   <FormField
                     control={form.control}
                     name="PUDFinalDestination.flightOfStairs"
                     render={({ field }) => (
-                      <FormItem className="flex-1">
+                      <FormItem className="flex-1 relative">
                         <FormLabel className="text-grey-300">
                           Flight of Stairs
                         </FormLabel>
@@ -624,7 +659,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             {...InputDirectives.numbersOnly}
                           />
                         </FormControl>
-                        <FormMessage className="text-destructive" />
+                        <FormMessage className="text-destructive sm:absolute" />
                       </FormItem>
                     )}
                   />
