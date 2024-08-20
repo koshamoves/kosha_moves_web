@@ -267,7 +267,12 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
       </H>
       <Column>
         {rates
-          .filter((item) => (item.count || 0) > 0)
+          // .filter((item) => {
+          //   return (
+          //     ["Truck Fee", "Flight of Stairs"].includes(item.label) ||
+          //     (item.count || 0) > 0
+          //   );
+          // })
           .map((item, index) => {
             if (!item.rate) return null;
 
