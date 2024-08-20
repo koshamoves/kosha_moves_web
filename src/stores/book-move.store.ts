@@ -20,7 +20,7 @@ interface Store {
 const whiteList: (keyof Store)[] = [];
 
 const initialState: BookMove = {
-  moveDate: new Date(),
+  moveDate: undefined as unknown as Date,
   time: "",
   pickUpLocation: {
     location: "",
