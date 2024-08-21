@@ -53,6 +53,7 @@ import { getAuth } from "firebase/auth";
 import { useCancelBooking } from "@/hooks/fireStore/useCancelBooking";
 import { useGetVoucher } from "@/hooks/misc/useGetVoucher";
 import useHireLabourStore from "@/stores/hire-labour.store";
+import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -484,6 +485,23 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       setGottenVoucher(null);
     },
   });
+  const { isPending: isGettingQuotes, getQuotes } = useGetQuotes({
+    onSuccess: () => {
+      if (
+        selectedBooking &&
+        (selectedBooking.requestType === "RegularMove" ||
+          selectedBooking.requestType === "LabourOnly")
+      ) {
+        router.push(
+          `${
+            selectedBooking.requestType === "RegularMove"
+              ? Routes.bookMoveQuotes
+              : Routes.hireLabourQuotes
+          }?action=update`
+        );
+      }
+    },
+  });
 
   if (!formData || !quoteDetailsData) {
     toast({
@@ -638,21 +656,45 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
             {user?.hasCreditCard ? (
               <Button className="bg-[#19B000]">Make Payment</Button>
             ) : (
-              <Button className="bg-[#19B000]">Pay on site</Button>
+              !!NaN && <Button className="bg-[#19B000]">Pay on site</Button>
             )}
-            <Button
-              disabled={isDeletePending}
-              loading={isDeletePending}
-              className="bg-[#CD1A1A33] text-[#DB3434]"
-              onClick={() => {
-                if (!selectedBooking?.bookingId) return;
-                deleteBooking({
-                  bookingId: selectedBooking.bookingId,
-                });
-              }}
-            >
-              Cancel Request
-            </Button>
+            {selectedBooking?.status === "Pending" && (
+              <Button
+                disabled={isDeletePending}
+                loading={isDeletePending}
+                className="bg-[#CD1A1A33] text-[#DB3434]"
+                onClick={() => {
+                  if (!selectedBooking?.bookingId) return;
+                  deleteBooking({
+                    bookingId: selectedBooking.bookingId,
+                  });
+                }}
+              >
+                Cancel Request
+              </Button>
+            )}
+            {selectedBooking?.status === "Rejected" && (
+              <Button
+                disabled={isGettingQuotes}
+                loading={isGettingQuotes}
+                onClick={() => {
+                  if (!selectedBooking?.bookingId) return;
+                  if (selectedBooking.requestType === "RegularMove") {
+                    getQuotes(
+                      bookMoveFactory(bookMoveReverseFactory(selectedBooking))
+                    );
+                  } else if (selectedBooking.requestType === "LabourOnly") {
+                    getQuotes(
+                      hireLabourFactory(
+                        hireLabourReverseFactory(selectedBooking)
+                      )
+                    );
+                  }
+                }}
+              >
+                Search for new vendor
+              </Button>
+            )}
           </>
         )}
       </Column>

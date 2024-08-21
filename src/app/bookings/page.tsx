@@ -27,11 +27,8 @@ const Page = () => {
   const [date, setDate] = useState<Date>(new Date());
   const { isLoading, data: bookings, error } = useGetBookingsByDate(date);
   const setSelectedBooking = useBookingStore.use.setSelectedBooking();
-
-  console.log({bookings})
   const isToday =
     format(date, "MM-dd-yyyy") === format(new Date(), "MM-dd-yyyy");
-
   return (
     <Row className="gap-8 flex-col md:flex-row">
       <Column className="flex-1 gap-8">
