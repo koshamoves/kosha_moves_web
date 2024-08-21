@@ -1,7 +1,7 @@
 import { FC, ComponentProps, useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
-import { StarIcon } from "lucide-react";
+import { StarIcon, StarHalfIcon } from "lucide-react";
 
 const ratingStyles = (className?: string) =>
   cva(twMerge("flex flex-wrap items-center justify-center", className ?? ""), {
@@ -59,7 +59,15 @@ export const Rating: FC<RatingProps> = ({
                 btnClassName
               )}
             >
-              {(value ?? rating) > idx ? (
+              {(value ?? rating) > idx && (value ?? rating) < idx + 1 ? (
+                <StarHalfIcon
+                  className={twMerge(
+                    "max-[440px]:scale-75 stroke-[#E7B66B] stroke-1 fill-[#E7B66B]",
+                    iconClassName,
+                    solidIconClassName
+                  )}
+                />
+              ) : (value ?? rating) > idx ? (
                 <StarIcon
                   className={twMerge(
                     "max-[440px]:scale-75 stroke-[#E7B66B] stroke-1 fill-[#E7B66B]",

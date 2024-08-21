@@ -191,3 +191,8 @@ export interface Review {
   userId: string;
   userName: string;
 }
+
+export interface Company {
+  id: string;
+  operatingName: string;
+}
