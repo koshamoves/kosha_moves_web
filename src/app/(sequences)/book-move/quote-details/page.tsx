@@ -304,7 +304,7 @@ const Page = () => {
           )}
           {companyId && (
             <Button className=" text-white-100" asChild>
-              <Link href={`/reviews/${quoteDetailsData.companyId}`}>
+              <Link href={`/reviews/${companyId}`}>
                 <StarIcon className="scale-75 mr-2" /> See company reviews
               </Link>
             </Button>
