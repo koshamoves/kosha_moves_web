@@ -28,6 +28,7 @@ const Page = () => {
   const { isLoading, data: bookings, error } = useGetBookingsByDate(date);
   const setSelectedBooking = useBookingStore.use.setSelectedBooking();
 
+  console.log({bookings})
   const isToday =
     format(date, "MM-dd-yyyy") === format(new Date(), "MM-dd-yyyy");
 

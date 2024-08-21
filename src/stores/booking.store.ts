@@ -4,6 +4,10 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import appConfig from "../../env.config";
 import { createSelectorFunctions } from "auto-zustand-selectors-hook";
+import useBookMoveStore from "./book-move.store";
+import useHireLabourStore from "./hire-labour.store";
+import { bookMoveReverseFactory } from "@/core/models/bookMoveFactory";
+import { hireLabourReverseFactory } from "@/core/models/hireLabourFactory";
 
 interface State {
   selectedBooking: Partial<Booking> | null;
@@ -17,10 +21,18 @@ const useBookingStore = createSelectorFunctions(
     persist(
       immer<State>((set) => ({
         selectedBooking: null,
-        setSelectedBooking: (booking) =>
+        setSelectedBooking: (booking) => {
+          const updateBookMove = useBookMoveStore.getState().update;
+          const updateHireLabour = useHireLabourStore.getState().update;
           set((state) => {
             state.selectedBooking = booking;
-          }),
+            if (booking?.requestType === "RegularMove") {
+              updateBookMove(bookMoveReverseFactory(booking));
+            } else if (booking?.requestType === "LabourOnly") {
+              updateHireLabour(hireLabourReverseFactory(booking));
+            }
+          });
+        },
       })),
       {
         name: "96yo_41vhxp840s9bxqv6",

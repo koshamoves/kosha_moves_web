@@ -30,8 +30,7 @@ export const useGetQuotes = (
       .mutateAsync(payload)
       .then((res) => {
         const { formData } = bookMoveStore.getState();
-        const { formData: hireLabourFormData } =
-          hireLabourStore.getState();
+        const { formData: hireLabourFormData } = hireLabourStore.getState();
         if (isHireLabourRoute) {
           localStorage.setItem(
             StorageKeys.FORM_DATA,

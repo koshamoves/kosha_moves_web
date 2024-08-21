@@ -1,3 +1,4 @@
+import { StorageKeys } from "@/constants/enums";
 import { HireLabour } from "@/types/structs";
 import { create } from "zustand";
 
@@ -34,11 +35,19 @@ const initialState: HireLabour = {
 
 const useHireLabourStore = create<Store>((set) => ({
   formData: initialState,
-  update: (newData) =>
+  update: (newData) => {
     set((state) => {
       const updatedFormData = { ...state.formData, ...newData };
       return { formData: updatedFormData };
-    }),
+    });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
   updateField: (fieldName, newValue) =>
     set((state) => ({
       formData: { ...state.formData, [fieldName]: newValue },
