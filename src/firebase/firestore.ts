@@ -190,7 +190,7 @@ export const getVoucher = async (code: string) => {
     );
     if (querySnapshot.empty)
       throw new Error("Voucher not found", { cause: 404 });
-    const vouchers = querySnapshot.docs.filter((item, idx) => {
+    const vouchers = querySnapshot.docs.filter((item) => {
       const voucher = item.data() as Voucher,
         startDate = safeParseDate(voucher.startDate)?.getTime(),
         endDate = safeParseDate(voucher.endDate)?.getTime(),
@@ -247,7 +247,10 @@ export const cancelBooking = async (bookingId: string) => {
   }
 };
 
-export const updateUserDetails = async (name?: string, phoneNumber?: string) => {
+export const updateUserDetails = async (
+  name?: string,
+  phoneNumber?: string
+) => {
   try {
     const userId = getAuth().currentUser?.uid;
     const userDocRef = doc(db, FIREBASE_COLLECTIONS.USERS, userId ?? "");
@@ -264,7 +267,6 @@ export const updateUserDetails = async (name?: string, phoneNumber?: string) => 
     throw err;
   }
 };
-
 
 // export const uploadFileToFirebase = async (file: File, path: string): Promise<string> => {
 //   const storageRef = ref(storage, path);
