@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FC } from "react";
+import { useCallback, useEffect, useState, type FC } from "react";
 import { Button, Picture } from "../atoms";
 import {
   Dialog,
@@ -17,12 +17,13 @@ import {
   SelectValue,
 } from "../select";
 import { Rating } from "./Rating";
-import { useGetCompanyReviews } from "@/hooks/review";
+import { useAddCustomerReview, useGetCompanyReviews } from "@/hooks/review";
 import { Loader } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useGetCompany } from "@/hooks/company";
 import { safeParseDate } from "@/lib/utils";
 import { format } from "date-fns";
+import { canWriteCompanyReview } from "@/firebase/db/reviews";
 
 const calculateAverageRating = (ratings: number[]) => {
   const total = ratings.reduce((acc, rating) => acc + rating, 0);
@@ -32,8 +33,18 @@ const calculateAverageRating = (ratings: number[]) => {
 const ReviewModal: FC<{
   open: boolean;
   onClose: () => void;
-}> = ({ open, onClose }) => {
+  companyName: string;
+  companyId: string;
+}> = ({ open, onClose, companyName, companyId }) => {
   const [review, setReview] = useState("");
+  const [rating, setRating] = useState(0);
+  const { isPending, mutate: addReview } = useAddCustomerReview({
+    onSuccess: () => {
+      onClose();
+      setRating(0);
+      setReview("");
+    },
+  });
   return (
     <Dialog open={open}>
       <DialogContent
@@ -43,7 +54,7 @@ const ReviewModal: FC<{
       >
         <DialogHeader>
           <DialogTitle className="text-center font-medium tracking-wide">
-            Leave a Review for Tiyende movers
+            Leave a Review for {companyName}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4 text-center">
@@ -52,6 +63,8 @@ const ReviewModal: FC<{
             editable
             iconClassName="scale-[1.4]"
             outlineIconClassName="stroke-[#0D0C22]"
+            value={rating}
+            onRatingChange={(val) => setRating(val)}
           />
           <textarea
             value={review}
@@ -62,8 +75,18 @@ const ReviewModal: FC<{
         </div>
         <DialogFooter>
           <Button
+            disabled={isPending || rating === 0 || !review}
+            loading={isPending}
             type="button"
             className="w-full h-8 font-normal tracking-wide rounded-full"
+            onClick={() => {
+              if (rating === 0 || !review) return;
+              addReview({
+                companyId,
+                comment: review,
+                rating,
+              });
+            }}
           >
             Submit Review
           </Button>
@@ -73,14 +96,24 @@ const ReviewModal: FC<{
   );
 };
 
-const AllReviews: FC<{ companyId: string }> = ({ companyId }) => {
+const AllReviews: FC<{ companyId: string; companyName: string }> = ({
+  companyId,
+  companyName,
+}) => {
   const [modalOpen, setModalOpen] = useState(false);
   const onClose = useCallback(() => setModalOpen(false), []);
+  const [canWriteReview, setCanWriteReview] = useState(false);
   const {
     isLoading: isLoadingReviews,
     data: reviews,
     error: reviewsError,
   } = useGetCompanyReviews(companyId);
+  useEffect(() => {
+    void (async () => {
+      if (!companyId) return;
+      setCanWriteReview(await canWriteCompanyReview(companyId));
+    })();
+  }, [companyId]);
   if (isLoadingReviews)
     return (
       <div className="flex justify-center pt-10 scale-125">
@@ -143,12 +176,14 @@ const AllReviews: FC<{ companyId: string }> = ({ companyId }) => {
             </Select>
           </div>
           <div>
-            <Button
-              onClick={() => setModalOpen(true)}
-              className="rounded-full w-[306px] max-w-[calc(100vw-2rem)] h-[2.25rem]"
-            >
-              Write a Review
-            </Button>
+            {canWriteReview && (
+              <Button
+                onClick={() => setModalOpen(true)}
+                className="rounded-full w-[306px] max-w-[calc(100vw-2rem)] h-[2.25rem]"
+              >
+                Write a Review
+              </Button>
+            )}
           </div>
         </div>
         <div className="bg-white-100 rounded-md mt-6 px-[clamp(2rem,10vw,6rem)] py-6 flex justify-between items-center flex-wrap gap-6 max-w-full overflow-hidden">
@@ -218,7 +253,12 @@ const AllReviews: FC<{ companyId: string }> = ({ companyId }) => {
           })}
         </div>
       </div>
-      <ReviewModal open={modalOpen} onClose={onClose} />
+      <ReviewModal
+        open={modalOpen}
+        onClose={onClose}
+        companyName={companyName}
+        companyId={companyId}
+      />
     </>
   );
 };
@@ -245,5 +285,10 @@ export const CustomerReviews: FC<{ companyId: string }> = ({ companyId }) => {
       </p>
     );
   }
-  return <AllReviews companyId={companyId} />;
+  return (
+    <AllReviews
+      companyId={companyId}
+      companyName={company?.operatingName ?? ""}
+    />
+  );
 };
