@@ -393,55 +393,59 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
         </H>
       )}
       <Column className="gap-4">
-        {trucks.map((item, index) => (
-          <Row key={index} className="justify-between items-center">
-            <Row
-              onClick={() => !!NaN && handleSelectTruck(item.type)}
-              className={twMerge(
-                `items-center`,
-                !disabled && !!NaN && "cursor-pointer"
-              )}
-            >
-              {!!NaN &&
-                (selectedTruck.type === item.type ? (
-                  <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
-                    <span className="bg-primary w-[10px] h-[10px] rounded-full" />
-                  </span>
-                ) : (
-                  <span className="border border-primary w-[20px] h-[20px] rounded-full" />
-                ))}
-              <Picture
-                container={{ className: "w-[60px] h-[60px] rounded-full ml-4" }}
-                image={{
-                  alt: item.type,
-                  src: item.image,
-                  className: "rounded-full",
-                }}
-              />
-            </Row>
-            {!finishing && (
-              <Row className="items-center gap-4">
-                <Button
-                  disabled={disabled}
-                  size="icon"
-                  className="max-w-[20px] max-h-[20px]"
-                  onClick={() => handleDecrease(index)}
-                >
-                  -
-                </Button>
-                <span>{item.quantity}</span>
-                <Button
-                  disabled={disabled}
-                  size="icon"
-                  className="max-w-[20px] max-h-[20px]"
-                  onClick={() => handleIncrease(index)}
-                >
-                  +
-                </Button>
+        {trucks
+          .filter((truck) => truck.type === truckType)
+          .map((item, index) => (
+            <Row key={index} className="justify-between items-center">
+              <Row
+                onClick={() => !!NaN && handleSelectTruck(item.type)}
+                className={twMerge(
+                  `items-center`,
+                  !disabled && !!NaN && "cursor-pointer"
+                )}
+              >
+                {!!NaN &&
+                  (selectedTruck.type === item.type ? (
+                    <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
+                      <span className="bg-primary w-[10px] h-[10px] rounded-full" />
+                    </span>
+                  ) : (
+                    <span className="border border-primary w-[20px] h-[20px] rounded-full" />
+                  ))}
+                <Picture
+                  container={{
+                    className: "w-[60px] h-[60px] rounded-full ml-4",
+                  }}
+                  image={{
+                    alt: item.type,
+                    src: item.image,
+                    className: "rounded-full",
+                  }}
+                />
               </Row>
-            )}
-          </Row>
-        ))}
+              {!finishing && !!NaN && (
+                <Row className="items-center gap-4">
+                  <Button
+                    disabled={disabled}
+                    size="icon"
+                    className="max-w-[20px] max-h-[20px]"
+                    onClick={() => handleDecrease(index)}
+                  >
+                    -
+                  </Button>
+                  <span>{item.quantity}</span>
+                  <Button
+                    disabled={disabled}
+                    size="icon"
+                    className="max-w-[20px] max-h-[20px]"
+                    onClick={() => handleIncrease(index)}
+                  >
+                    +
+                  </Button>
+                </Row>
+              )}
+            </Row>
+          ))}
       </Column>
     </Column>
   );
