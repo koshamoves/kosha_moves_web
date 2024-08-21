@@ -62,15 +62,10 @@ const Page = () => {
   } = finishing
     ? (selectedBooking?.quote as Quote) ?? {}
     : quoteDetailsData || {};
-
-  console.log("quotes: ", selectedBooking?.quote, quoteDetailsData);
   const formData = JSON.parse(
     localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
   );
-  console.log("formData: ", formData);
-
   let bookingDate, bookingTime, locations;
-
   if (finishing) {
     bookingDate = format(
       new Date(selectedBooking?.movingDate ?? ""),
@@ -82,7 +77,6 @@ const Page = () => {
     );
     locations = [selectedBooking?.fromAddress];
   }
-
   // const amount = useMemo(() => {
   //   const majorAppliancesAmount =
   //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
