@@ -114,6 +114,18 @@ const AllReviews: FC<{ companyId: string; companyName: string }> = ({
       setCanWriteReview(await canWriteCompanyReview(companyId));
     })();
   }, [companyId]);
+  useEffect(() => {
+    const customEvent = new CustomEvent<{
+      title: string;
+      description: string;
+    }>("kosha:review_nav_info", {
+      detail: {
+        title: "Review",
+        description: companyName,
+      },
+    });
+    document.dispatchEvent(customEvent);
+  });
   if (isLoadingReviews)
     return (
       <div className="flex justify-center pt-10 scale-125">
