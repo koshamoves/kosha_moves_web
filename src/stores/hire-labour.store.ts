@@ -48,18 +48,43 @@ const useHireLabourStore = create<Store>((set) => ({
       return { ...state };
     });
   },
-  updateField: (fieldName, newValue) =>
+  updateField: (fieldName, newValue) => {
     set((state) => ({
       formData: { ...state.formData, [fieldName]: newValue },
-    })),
-  removeImage: (index) =>
+    }));
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  removeImage: (index) => {
     set((state) => {
       const newImages = state.formData.images.filter((_, i) => i !== index);
       return {
         formData: { ...state.formData, images: newImages },
       };
-    }),
-  reset: () => set({ formData: initialState }),
+    });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  reset: () => {
+    set({ formData: initialState });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
 }));
 
 export default useHireLabourStore;
