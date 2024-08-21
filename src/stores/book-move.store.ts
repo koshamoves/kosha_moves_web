@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import appConfig from "../../env.config";
 import { fileToString } from "@/lib/helpers/file.helpers";
+import { StorageKeys } from "@/constants/enums";
 
 interface Store {
   formData: BookMove;
@@ -57,17 +58,25 @@ const initialState: BookMove = {
   images: [],
   services: [],
   tempImages: [],
-  bookingId: ""
+  bookingId: "",
 };
 
 const useBookMoveStore = create<Store>()(
   persist(
     immer<Store>((set) => ({
       formData: initialState,
-      update: (newData) =>
+      update: (newData) => {
         set((state) => ({
           formData: { ...state.formData, ...newData },
-        })),
+        }));
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
       updateField: (fieldName, newValue) =>
         set((state) => {
           if (fieldName.startsWith("stops")) {
@@ -96,7 +105,9 @@ const useBookMoveStore = create<Store>()(
         })),
       removeImage: (index) =>
         set((state) => {
-          const newImages = state?.formData?.tempImages!.filter((_, i) => i !== index);
+          const newImages = state?.formData?.tempImages!.filter(
+            (_, i) => i !== index
+          );
           return {
             formData: { ...state.formData, tempImages: newImages },
           };
