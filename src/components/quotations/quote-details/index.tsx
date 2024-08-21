@@ -393,6 +393,9 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
         </H>
       )}
       <Column className="gap-4">
+        {trucks.filter((truck) => truck.type === truckType).length === 0 && (
+          <p className="text-gray-600">No truck available.</p>
+        )}
         {trucks
           .filter((truck) => truck.type === truckType)
           .map((item, index) => (
