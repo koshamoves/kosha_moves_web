@@ -5,9 +5,10 @@ import { Review } from "@/types/structs";
 
 export const useGetCompanyReviews = (companyId: string) => {
   return useQuery({
-    queryKey: [CacheKey.REVIEW_STATE],
+    queryKey: [CacheKey.REVIEW_STATE, companyId],
     queryFn: () => getCompanyReview(companyId),
     retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 

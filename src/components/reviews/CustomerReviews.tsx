@@ -17,7 +17,18 @@ import {
   SelectValue,
 } from "../select";
 import { Rating } from "./Rating";
+import { useGetCompanyReviews } from "@/hooks/review";
+import { Loader } from "lucide-react";
+import { notFound } from "next/navigation";
+import { useGetCompany } from "@/hooks/company";
+import { safeParseDate } from "@/lib/utils";
+import { format } from "date-fns";
 
+const calculateAverageRating = (ratings: number[]) => {
+  const total = ratings.reduce((acc, rating) => acc + rating, 0);
+  const average = total / ratings.length;
+  return +average.toFixed(1);
+};
 const ReviewModal: FC<{
   open: boolean;
   onClose: () => void;
@@ -61,42 +72,68 @@ const ReviewModal: FC<{
     </Dialog>
   );
 };
-export const CustomerReviews = () => {
+
+const AllReviews: FC<{ companyId: string }> = ({ companyId }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const onClose = useCallback(() => setModalOpen(false), []);
+  const {
+    isLoading: isLoadingReviews,
+    data: reviews,
+    error: reviewsError,
+  } = useGetCompanyReviews(companyId);
+  if (isLoadingReviews)
+    return (
+      <div className="flex justify-center pt-10 scale-125">
+        <Loader className="animate-spin inline-block" />
+      </div>
+    );
+  if ((!isLoadingReviews && reviewsError) || !reviews) {
+    return (
+      <p className="p-3 py-12 text-center text-red-400">
+        {reviewsError?.cause
+          ? reviewsError.message
+          : "Could not fetch reviews. Kindly reload or try again later."}
+      </p>
+    );
+  }
+  const fiveStarRatings = reviews.filter((r) => r.rating === 5);
+  const fourStarRatings = reviews.filter((r) => r.rating === 4);
+  const threeStarRatings = reviews.filter((r) => r.rating === 3);
+  const twoStarRatings = reviews.filter((r) => r.rating === 2);
+  const oneStarRatings = reviews.filter((r) => r.rating === 1);
+
+  const averageRating = calculateAverageRating(
+    reviews.map((r) => r.rating ?? 0)
+  );
+
   const ratings: Record<number, Record<"count" | "percentage", number>> = {
     5: {
-      count: 56,
-      percentage: 50,
+      count: fiveStarRatings.length,
+      percentage: (fiveStarRatings.length / reviews.length) * 100,
     },
     4: {
-      count: 22,
-      percentage: 20,
+      count: fourStarRatings.length,
+      percentage: (fourStarRatings.length / reviews.length) * 100,
     },
     3: {
-      count: 22,
-      percentage: 20,
+      count: threeStarRatings.length,
+      percentage: (threeStarRatings.length / reviews.length) * 100,
     },
     2: {
-      count: 22,
-      percentage: 20,
+      count: twoStarRatings.length,
+      percentage: (twoStarRatings.length / reviews.length) * 100,
     },
     1: {
-      count: 22,
-      percentage: 20,
+      count: oneStarRatings.length,
+      percentage: (oneStarRatings.length / reviews.length) * 100,
     },
   };
-  const onClose = useCallback(() => setModalOpen(false), []);
   return (
     <>
       <div>
         <div className="flex justify-between items-center flex-wrap gap-5 max-w-full">
           <div>
-            <Select
-              onValueChange={() => {
-                console.log("select change");
-              }}
-              defaultValue="newest"
-            >
+            <Select onValueChange={() => {}} defaultValue="newest">
               <SelectTrigger className="w-[429px] max-w-[calc(100vw-2rem)] border-none rounded-sm">
                 <SelectValue placeholder="Sort" className="text-[#0D0C22]" />
               </SelectTrigger>
@@ -117,9 +154,11 @@ export const CustomerReviews = () => {
         <div className="bg-white-100 rounded-md mt-6 px-[clamp(2rem,10vw,6rem)] py-6 flex justify-between items-center flex-wrap gap-6 max-w-full overflow-hidden">
           <div>
             <h3>Customer Reviews</h3>
-            <p className="text-5xl font-bold my-3">4.7</p>
-            <Rating btnClassName="px-1 first:pl-0 mb-1" />
-            <p className="text-gray-400 text-sm">(70 Reviews)</p>
+            <p className="text-5xl font-bold my-3">{averageRating}</p>
+            <Rating btnClassName="px-1 first:pl-0 mb-1" value={averageRating} />
+            <p className="text-gray-400 text-sm">
+              ({reviews?.length ?? 0} Reviews)
+            </p>
           </div>
           <div className="space-y-2">
             {Object.entries(ratings)
@@ -144,34 +183,67 @@ export const CustomerReviews = () => {
           </div>
         </div>
         <div className="mt-4 bg-white-100 rounded-md pb-8">
-          <div className="w-[700px] max-w-[calc(100vw-4rem)] mx-auto py-8 [&:not(:last-child)]:border-b last:pb-0">
-            <p className="text-sm text-gray-500">Jan 20, 2024</p>
-            <Rating
-              btnClassName="px-0.5 first:pl-0 mb-1"
-              className="inline-block my-1"
-              iconClassName="!scale-[.85]"
-            />
-            <div className="flex flex-wrap gap-3 items-center">
-              <Picture
-                container={{ className: "w-10 h-10 rounded-full" }}
-                image={{
-                  alt: "movers doodle",
-                  src: "/images/green-doodle.png",
-                  className: "rounded-full ",
-                }}
-              />
-              <h4 className="text-gray-800">Balthazar reld</h4>
-              <p className="text-gray-700 mt-8">
-                Moving with Tiyende was very easy. The movers were efficient,
-                they came over and basically disassembled, packed, transported
-                and all in record time. All my furniture arrived at my new place
-                not a dent, not a scratch. A+ A+ A+
-              </p>
-            </div>
-          </div>
+          {reviews?.map((review) => {
+            return (
+              <div
+                key={review.id}
+                className="w-[700px] max-w-[calc(100vw-4rem)] mx-auto py-8 [&:not(:last-child)]:border-b last:pb-0"
+              >
+                <p className="text-sm text-gray-500">
+                  {format(
+                    safeParseDate(review.reviewDate) as Date,
+                    "MMM dd, yyyy"
+                  )}
+                </p>
+                <Rating
+                  btnClassName="px-0.5 first:pl-0 mb-1"
+                  className="inline-block my-1"
+                  iconClassName="!scale-[.85]"
+                  value={review.rating ?? 0}
+                />
+                <div className="flex flex-wrap gap-3 items-center">
+                  <Picture
+                    container={{ className: "w-10 h-10 rounded-full" }}
+                    image={{
+                      alt: "movers doodle",
+                      src: "/images/green-doodle.png",
+                      className: "rounded-full ",
+                    }}
+                  />
+                  <h4 className="text-gray-800">{review.userName ?? "Anon"}</h4>
+                </div>
+                <p className="text-gray-700 mt-8 text-left">{review.comment}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
       <ReviewModal open={modalOpen} onClose={onClose} />
     </>
   );
+};
+
+export const CustomerReviews: FC<{ companyId: string }> = ({ companyId }) => {
+  const {
+    isLoading: isLoadingCompany,
+    data: company,
+    error: companyError,
+  } = useGetCompany(companyId);
+  if (isLoadingCompany)
+    return (
+      <div className="flex justify-center pt-10 scale-125">
+        <Loader className="animate-spin inline-block" />
+      </div>
+    );
+  if (!isLoadingCompany && companyError) {
+    if (companyError.cause === 404) notFound();
+    return (
+      <p className="p-3 py-12 text-center text-red-400">
+        {companyError?.cause
+          ? companyError.message
+          : "Could not get company information. Kindly reload or try again later."}
+      </p>
+    );
+  }
+  return <AllReviews companyId={companyId} />;
 };

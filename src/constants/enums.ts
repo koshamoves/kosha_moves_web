@@ -21,6 +21,7 @@ export enum FIREBASE_COLLECTIONS {
   CHAT_MESSAGES = "chat_messages",
   VOUCHERS = "vouchers",
   REVIEWS = "reviews",
+  COMPANIES = "companies",
 }
 
 export enum SUCCESS_MESSAGE {
@@ -45,4 +46,6 @@ export enum CacheKey {
   CHAT_MESSAGES_STATE = "CHAT_MESSAGES_STATE",
   QUOTE_STATE = "QUOTE_STATE",
   REVIEW_STATE = "REVIEW_STATE",
+  COMPANIES_STATE = "COMPANIES_STATE",
+  COMPANY_STATE = "COMPANY_STATE",
 }

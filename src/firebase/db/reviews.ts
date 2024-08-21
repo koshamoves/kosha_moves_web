@@ -5,8 +5,8 @@ import {
   query,
   addDoc,
   limit,
+  orderBy,
 } from "firebase/firestore";
-import {} from "firebase/database";
 import { FIREBASE_COLLECTIONS } from "@/constants/enums";
 import { Review } from "@/types/structs";
 import { db } from ".";
@@ -17,7 +17,8 @@ export const getCompanyReview = async (companyId: string) => {
   try {
     const q = query(
       collection(db, FIREBASE_COLLECTIONS.REVIEWS),
-      where("companyId", "==", companyId)
+      where("companyId", "==", companyId),
+      orderBy("reviewDate", "desc")
     );
     const querySnapshot = await getDocs(q);
     const reviews = querySnapshot.docs.map(
