@@ -68,6 +68,6 @@ export const canWriteCompanyReview = async (companyId: string) => {
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
   } catch (err) {
-    throw err;
+    return false;
   }
 };
