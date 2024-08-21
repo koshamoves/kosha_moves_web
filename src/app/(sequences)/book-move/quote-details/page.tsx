@@ -7,7 +7,7 @@ import {
   Piano,
   TruckFrontGrey,
 } from "@/components/Icons";
-import { P } from "@/components/atoms";
+import { Button, P } from "@/components/atoms";
 import { Column, Row } from "@/components/layout";
 import {
   QuoteDetails,
@@ -26,7 +26,7 @@ import {
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
 import { formatCurrency } from "@/lib/utils";
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
 import useBookMoveStore from "@/stores/book-move.store";
@@ -165,6 +165,8 @@ const Page = () => {
     );
   }
 
+  const companyId =
+    selectedBooking?.quote?.companyId ?? quoteDetailsData.companyId;
   return (
     <Column className="w-full">
       {finishing && (
@@ -299,6 +301,13 @@ const Page = () => {
               />
               {finishing && <QuoteDetailsEditRequest type="RegularMove" />}
             </>
+          )}
+          {companyId && (
+            <Button className=" text-white-100" asChild>
+              <Link href={`/reviews/${quoteDetailsData.companyId}`}>
+                <StarIcon className="scale-75 mr-2" /> See company reviews
+              </Link>
+            </Button>
           )}
         </Column>
       </QuoteDetails>
