@@ -21,19 +21,33 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/tabs";
+import useBookDeliveryStore from "@/stores/book-delivery.store";
 // import { BookDeliveryMock } from "@/mocks";
 import useShowQuotes from "@/stores/show-quotes.store";
+import { useSearchParams } from "next/navigation";
 // import { DeliveryQuote } from "@/types/structs";
 import { useEffect, useState } from "react";
 
 const Page = () => {
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const isTakingAction = ["update", "finish"].includes(action ?? "");
   const showQuote = useShowQuotes((state) => state.showQuote);
   const [activeTab, setActiveTab] = useState<string>("dlt");
+  const [isMounted, setIsMounted] = useState(false);
+  const resetBookDeliveryStore = useBookDeliveryStore((state) => state.reset);
   useEffect(() => {
     document
       .querySelector("#layoutMainWrapper")
       ?.scrollTo({ left: 0, top: 0, behavior: "smooth" });
   }, [activeTab]);
+  useEffect(() => {
+    if (!isTakingAction) {
+      resetBookDeliveryStore();
+    }
+    setIsMounted(true);
+  }, [isTakingAction, resetBookDeliveryStore]);
+  if (!isMounted) return null;
   return (
     <>
       {!showQuote && (
@@ -126,8 +140,8 @@ const getMobileTitle = (active: string): string => {
       return "Items to Pick up";
       break;
     case "serviceRequirement":
-        return "Add-on Services";
-        break;
+      return "Add-on Services";
+      break;
     default:
       return "";
       break;
@@ -135,4 +149,3 @@ const getMobileTitle = (active: string): string => {
 };
 
 export default Page;
-

@@ -26,7 +26,7 @@ import { CalendarIcon } from "lucide-react";
 import { Column, Row } from "@/components/layout";
 import { Input } from "@/components/input";
 import { InputDirectives } from "@/lib/helpers/inputDirectives";
-import { Add, Camera, Cancel, Check } from "@/components/Icons";
+import { Add, Camera, Cancel } from "@/components/Icons";
 import {
   Select,
   SelectContent,
@@ -53,7 +53,12 @@ import {
 } from "@/components/locationAutoCompleteInput";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Routes } from "@/core/routing";
-import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
 import { storage } from "@/firebase/firestore";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { ErrorMessage } from "@/constants/enums";
@@ -81,8 +86,8 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   });
 
   useEffect(() => {
-    localStorage.removeItem("bookingId")
-  }, [])
+    localStorage.removeItem("bookingId");
+  }, []);
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep1Schema>) => {
     onChangeStep("propertyDetail");
     update(data);
@@ -710,7 +715,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     numberOfBoxes,
     instructions,
     images,
-    tempImages
+    tempImages,
   } = formData;
   const form = useForm<z.infer<typeof bookMoveSequenceStep3Schema>>({
     resolver: zodResolver(bookMoveSequenceStep3Schema),
@@ -726,30 +731,30 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const [bookingId, setBookingId] = useState<string>('');
+  const [bookingId, setBookingId] = useState<string>("");
 
   // Generate a new unique ID when the component mounts
   useEffect(() => {
     const storedBookingId = localStorage.getItem("bookingId");
-    if(storedBookingId){
-       setBookingId(storedBookingId)
-      }else{
-        const newBookingId = generateBookingId();
-        setBookingId(newBookingId);
-        localStorage.setItem("bookingId", newBookingId)
-      }
+    if (storedBookingId) {
+      setBookingId(storedBookingId);
+    } else {
+      const newBookingId = generateBookingId();
+      setBookingId(newBookingId);
+      localStorage.setItem("bookingId", newBookingId);
+    }
   }, []);
 
   const handleRemoveImage = async (index: number) => {
     try {
       const imageUrl = formData.images[index];
-      const urlParts = imageUrl.split('%2F');
-      const folder = urlParts[0].split('/').pop();
-      const fileName = urlParts[1].split('?')[0];
-  
+      const urlParts = imageUrl.split("%2F");
+      const folder = urlParts[0].split("/").pop();
+      const fileName = urlParts[1].split("?")[0];
+
       const imageRef = ref(storage, `${folder}/${fileName}`);
       await deleteObject(imageRef);
-  
+
       removeImage(index);
       form.setValue(
         "images",
@@ -774,7 +779,9 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     return downloadURL;
   };
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  const handleChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
     if (e.target.files) {
       const fileArray = Array.from(e.target.files);
       const tempUrls = fileArray.map((file) => URL.createObjectURL(file));

@@ -10,15 +10,29 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/tabs";
+import useHireLabourStore from "@/stores/hire-labour.store";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Page = () => {
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const isTakingAction = ["update", "finish"].includes(action ?? "");
   const [activeTab, setActiveTab] = useState<string>("dlt");
+  const [isMounted, setIsMounted] = useState(false);
+  const resetHireLabourStore = useHireLabourStore((state) => state.reset);
   useEffect(() => {
     document
       .querySelector("#layoutMainWrapper")
       ?.scrollTo({ left: 0, top: 0, behavior: "smooth" });
   }, [activeTab]);
+  useEffect(() => {
+    if (!isTakingAction) {
+      resetHireLabourStore();
+    }
+    setIsMounted(true);
+  }, [isTakingAction, resetHireLabourStore]);
+  if (!isMounted) return null;
   return (
     <SequencesLayout>
       <H level={1} className="md:hidden text-center text-primary text-2xl my-6">
@@ -76,4 +90,3 @@ const getMobileTitle = (active: string): string => {
   }
 };
 export default Page;
-

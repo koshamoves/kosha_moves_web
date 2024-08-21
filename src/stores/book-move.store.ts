@@ -65,6 +65,15 @@ const useBookMoveStore = create<Store>()(
   persist(
     immer<Store>((set) => ({
       formData: initialState,
+      updateLSFormData: () => {
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
       update: (newData) => {
         set((state) => ({
           formData: { ...state.formData, ...newData },
@@ -77,7 +86,7 @@ const useBookMoveStore = create<Store>()(
           return { ...state };
         });
       },
-      updateField: (fieldName, newValue) =>
+      updateField: (fieldName, newValue) => {
         set((state) => {
           if (fieldName.startsWith("stops")) {
             const stopIndex = parseInt(fieldName.split(".")[1]);
@@ -94,16 +103,32 @@ const useBookMoveStore = create<Store>()(
           return {
             formData: { ...state.formData, [fieldName]: newValue },
           };
-        }),
-      removeStop: (index) =>
+        });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      removeStop: (index) => {
         set((state) => ({
           formData: {
             ...state.formData,
             stops: state.formData.stops.filter((_, i) => i !== index),
             PUDStops: state.formData.PUDStops?.filter((_, i) => i !== index),
           },
-        })),
-      removeImage: (index) =>
+        }));
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      removeImage: (index) => {
         set((state) => {
           const newImages = state?.formData?.tempImages!.filter(
             (_, i) => i !== index
@@ -111,8 +136,25 @@ const useBookMoveStore = create<Store>()(
           return {
             formData: { ...state.formData, tempImages: newImages },
           };
-        }),
-      reset: () => set({ formData: initialState }),
+        });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      reset: () => {
+        set({ formData: initialState });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
     })),
     {
       name: "bmo5ibreyw7a0zt2h67_3",
