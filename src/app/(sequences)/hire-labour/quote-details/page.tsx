@@ -267,7 +267,7 @@ const Page = () => {
           />
           {finishing && (
             <QuoteDetailsNotesImages
-              images={[]}
+              images={formData?.images ?? []}
               notes={selectedBooking?.additionalNotes ?? ""}
             />
           )}
