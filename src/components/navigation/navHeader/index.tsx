@@ -34,8 +34,6 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
     setHeaderContent(switchHeaderContent(path, showQuote));
   }, [path, showQuote]);
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     const reviewNavInfoListener = (event: Event) => {
       const evt = event as CustomEvent<{
@@ -56,7 +54,7 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
         reviewNavInfoListener
       );
     };
-  });
+  }, []);
 
   return (
     <Row className="justify-between items-center gap-4 w-full py-2">
@@ -77,7 +75,7 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
         <Column className="hidden lg:block">
           <P className="text-blue-300 text-sm">{headerContent.title}</P>
           <Row>
-            {isValidRoute && (
+            {(isValidRoute || headerContent.title === "Review") && (
               <Row
                 onClick={() => router.back()}
                 className="items-center border p-2 rounded-md hover:cursor-pointer"
