@@ -54,6 +54,7 @@ import { useCancelBooking } from "@/hooks/fireStore/useCancelBooking";
 import { useGetVoucher } from "@/hooks/misc/useGetVoucher";
 import useHireLabourStore from "@/stores/hire-labour.store";
 import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
+import Link from "next/link";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -119,10 +120,11 @@ interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
     charge: number;
     reviews: number;
     movesCompleted: string;
+    companyId: string
   };
 }
 const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
-  const { location, name, charge, reviews, movesCompleted } = data;
+  const { location, name, charge, reviews, movesCompleted, companyId } = data;
   return (
     <Column
       className={cn(
@@ -149,12 +151,14 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
             </P>
             <P className="text-sm font-dm-sans text-grey-300">per hour</P>
           </Column>
+          <Link href={`/reviews/${companyId}`}>
           <Column className="gap-0 flex-1">
             <P className="text-primary font-bold font-dm-sans text-lg">
               {reviews}
             </P>
             <P className="text-sm font-dm-sans text-grey-300">reviews</P>
           </Column>
+          </Link>
           {movesCompleted !== "nil" && (
             <Column className="gap-0 flex-1">
               <P className="text-primary font-bold font-dm-sans text-lg">
