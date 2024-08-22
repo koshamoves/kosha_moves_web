@@ -25,7 +25,7 @@ import {
 } from "@/components/quotations/quote-details";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, safeParseDate } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
@@ -83,11 +83,11 @@ const Page = () => {
 
   if (finishing) {
     bookingDate = format(
-      new Date(selectedBooking?.movingDate ?? ""),
+      safeParseDate(selectedBooking?.movingDate) as Date,
       "d MMMM yyyy"
     );
     bookingTime = format(
-      new Date(selectedBooking?.movingDate ?? ""),
+      safeParseDate(selectedBooking?.movingDate) as Date,
       "hh:mm a"
     );
     locations = [
@@ -196,7 +196,7 @@ const Page = () => {
                 charge: hourlyRate,
                 reviews: numberOfReviews,
                 movesCompleted: "nil",
-                companyId: companyId
+                companyId: companyId,
               }}
             />
             <QuoteDetailsWorkers

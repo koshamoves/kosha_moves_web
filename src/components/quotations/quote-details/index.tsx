@@ -120,7 +120,7 @@ interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
     charge: number;
     reviews: number;
     movesCompleted: string;
-    companyId: string
+    companyId: string;
   };
 }
 const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
@@ -152,12 +152,12 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
             <P className="text-sm font-dm-sans text-grey-300">per hour</P>
           </Column>
           <Link href={`/reviews/${companyId}`}>
-          <Column className="gap-0 flex-1">
-            <P className="text-primary font-bold font-dm-sans text-lg">
-              {reviews}
-            </P>
-            <P className="text-sm font-dm-sans text-grey-300">reviews</P>
-          </Column>
+            <Column className="gap-0 flex-1">
+              <P className="text-primary font-bold font-dm-sans text-lg">
+                {reviews}
+              </P>
+              <P className="text-sm font-dm-sans text-grey-300">reviews</P>
+            </Column>
           </Link>
           {movesCompleted !== "nil" && (
             <Column className="gap-0 flex-1">
