@@ -265,12 +265,18 @@ const Page = () => {
               },
             ]}
           />
-          {finishing && (
-            <QuoteDetailsNotesImages
-              images={formData?.images ?? []}
-              notes={selectedBooking?.additionalNotes ?? ""}
-            />
-          )}
+          <QuoteDetailsNotesImages
+            images={
+              !finishing
+                ? formData?.images ?? []
+                : selectedBooking?.images ?? []
+            }
+            notes={
+              !finishing
+                ? formData.instructions ?? ""
+                : selectedBooking?.additionalNotes ?? ""
+            }
+          />
         </Column>
         <Column className="gap-4 max-w-[400px] flex-1">
           <QuoteDetailsServiceRequirement
