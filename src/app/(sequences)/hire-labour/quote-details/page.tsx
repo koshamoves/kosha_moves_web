@@ -190,6 +190,7 @@ const Page = () => {
                 charge: hourlyRate,
                 reviews: numberOfReviews,
                 movesCompleted: "nil",
+                companyId,
               }}
             />
             <QuoteDetailsWorkers
