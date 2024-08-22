@@ -1,3 +1,4 @@
+import { StorageKeys } from "@/constants/enums";
 import { BookDelivery } from "@/types/structs";
 import { create } from "zustand";
 
@@ -17,7 +18,7 @@ interface Store {
 }
 
 const initialState: BookDelivery = {
-  deliveryDate: new Date(),
+  deliveryDate: undefined as unknown as Date,
   time: "",
   pickUpLocation: {
     location: "",
@@ -43,16 +44,24 @@ const initialState: BookDelivery = {
   pictures: [],
   receipts: [],
   instructions: "",
-  services: []
+  services: [],
 };
 
 const useBookDeliveryStore = create<Store>((set) => ({
   formData: initialState,
-  update: (newData) =>
+  update: (newData) => {
     set((state) => ({
       formData: { ...state.formData, ...newData },
-    })),
-    updateField: (fieldName, newValue) =>
+    }));
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  updateField: (fieldName, newValue) => {
     set((state) => {
       if (fieldName.startsWith("stops")) {
         const stopIndex = parseInt(fieldName.split(".")[1]);
@@ -69,23 +78,57 @@ const useBookDeliveryStore = create<Store>((set) => ({
       return {
         formData: { ...state.formData, [fieldName]: newValue },
       };
-    }),
-    removeStop: (index) =>
+    });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  removeStop: (index) => {
     set((state) => ({
       formData: {
         ...state.formData,
         stops: state.formData.stops.filter((_, i) => i !== index),
         PUDStops: state.formData.PUDStops?.filter((_, i) => i !== index),
       },
-    })),
-  removeImage: (index, type: "images" | "pictures" | "receipts" = "images") =>
+    }));
     set((state) => {
-      const newImages = state.formData[type]?.filter((_, i) => i !== index) ?? [];
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  removeImage: (index, type: "images" | "pictures" | "receipts" = "images") => {
+    set((state) => {
+      const newImages =
+        state.formData[type]?.filter((_, i) => i !== index) ?? [];
       return {
         formData: { ...state.formData, [type]: newImages },
       };
-    }),
-    reset: () => set({ formData: initialState }),
+    });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
+  reset: () => {
+    set({ formData: initialState });
+    set((state) => {
+      localStorage.setItem(
+        StorageKeys.FORM_DATA,
+        JSON.stringify(state.formData)
+      );
+      return { ...state };
+    });
+  },
 }));
 
 export default useBookDeliveryStore;

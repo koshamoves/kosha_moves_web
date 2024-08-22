@@ -879,7 +879,6 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const onSubmit = (data: z.infer<typeof bookDeliverySequenceStep4Schema>) => {
     const updatedFormData = { ...formData, ...data };
     update(updatedFormData);
-    console.log(updatedFormData)
     // if (formData.pickUpLocation.location)
     //   getQuotes(bookMoveFactory(updatedFormData));
   };

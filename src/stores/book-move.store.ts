@@ -3,6 +3,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import appConfig from "../../env.config";
+import { fileToString } from "@/lib/helpers/file.helpers";
+import { StorageKeys } from "@/constants/enums";
 
 interface Store {
   formData: BookMove;
@@ -20,7 +22,7 @@ interface Store {
 const whiteList: (keyof Store)[] = [];
 
 const initialState: BookMove = {
-  moveDate: new Date(),
+  moveDate: undefined as unknown as Date,
   time: "",
   pickUpLocation: {
     location: "",
@@ -34,13 +36,13 @@ const initialState: BookMove = {
     googlePlaceId: "",
   },
   PUDFinalDestination: {
-    elevatorAccess: "Yes",
+    elevatorAccess: "",
     flightOfStairs: "0",
     // buildingType: "Condo",
     buildingType: "",
   },
   PUDPickUpLocation: {
-    elevatorAccess: "Yes",
+    elevatorAccess: "",
     flightOfStairs: "0",
     // buildingType: "Condo",
     buildingType: "",
@@ -55,17 +57,36 @@ const initialState: BookMove = {
   instructions: "",
   images: [],
   services: [],
+  tempImages: [],
+  bookingId: "",
 };
 
 const useBookMoveStore = create<Store>()(
   persist(
     immer<Store>((set) => ({
       formData: initialState,
-      update: (newData) =>
+      updateLSFormData: () => {
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      update: (newData) => {
         set((state) => ({
           formData: { ...state.formData, ...newData },
-        })),
-      updateField: (fieldName, newValue) =>
+        }));
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      updateField: (fieldName, newValue) => {
         set((state) => {
           if (fieldName.startsWith("stops")) {
             const stopIndex = parseInt(fieldName.split(".")[1]);
@@ -82,23 +103,58 @@ const useBookMoveStore = create<Store>()(
           return {
             formData: { ...state.formData, [fieldName]: newValue },
           };
-        }),
-      removeStop: (index) =>
+        });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      removeStop: (index) => {
         set((state) => ({
           formData: {
             ...state.formData,
             stops: state.formData.stops.filter((_, i) => i !== index),
             PUDStops: state.formData.PUDStops?.filter((_, i) => i !== index),
           },
-        })),
-      removeImage: (index) =>
+        }));
         set((state) => {
-          const newImages = state.formData.images.filter((_, i) => i !== index);
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      removeImage: (index) => {
+        set((state) => {
+          const newImages = state?.formData?.tempImages!.filter(
+            (_, i) => i !== index
+          );
           return {
-            formData: { ...state.formData, images: newImages },
+            formData: { ...state.formData, tempImages: newImages },
           };
-        }),
-      reset: () => set({ formData: initialState }),
+        });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
+      reset: () => {
+        set({ formData: initialState });
+        set((state) => {
+          localStorage.setItem(
+            StorageKeys.FORM_DATA,
+            JSON.stringify(state.formData)
+          );
+          return { ...state };
+        });
+      },
     })),
     {
       name: "bmo5ibreyw7a0zt2h67_3",

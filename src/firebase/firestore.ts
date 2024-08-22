@@ -10,7 +10,6 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  queryEqual,
 } from "firebase/firestore";
 import firebaseApp from "./config";
 import { FIREBASE_COLLECTIONS } from "@/constants/enums";
@@ -19,9 +18,10 @@ import { toast } from "@/components/toast/use-toast";
 import { getFirebaseErrorMessage } from "@/lib/helpers/getErrorMessage";
 import type { FirebaseError } from "firebase/app";
 import { safeParseDate } from "@/lib/utils";
-import { current } from "immer";
+import { getStorage } from "firebase/storage";
 
 export const db = getFirestore(firebaseApp);
+export const storage = getStorage(firebaseApp);
 
 export const addToBookings = async (payload: Booking) => {
   try {
@@ -190,7 +190,7 @@ export const getVoucher = async (code: string) => {
     );
     if (querySnapshot.empty)
       throw new Error("Voucher not found", { cause: 404 });
-    const vouchers = querySnapshot.docs.filter((item, idx) => {
+    const vouchers = querySnapshot.docs.filter((item) => {
       const voucher = item.data() as Voucher,
         startDate = safeParseDate(voucher.startDate)?.getTime(),
         endDate = safeParseDate(voucher.endDate)?.getTime(),
@@ -247,7 +247,10 @@ export const cancelBooking = async (bookingId: string) => {
   }
 };
 
-export const updateUserDetails = async (name?: string, phoneNumber?: string) => {
+export const updateUserDetails = async (
+  name?: string,
+  phoneNumber?: string
+) => {
   try {
     const userId = getAuth().currentUser?.uid;
     const userDocRef = doc(db, FIREBASE_COLLECTIONS.USERS, userId ?? "");
@@ -265,8 +268,8 @@ export const updateUserDetails = async (name?: string, phoneNumber?: string) => 
   }
 };
 
-// For conversations
-// - Fetch conversations from chat collections
-// - Filter by currentUserLoggedIn user id
-// - Fetch recipient user profile from user's collection
-// - Fetch latest message from chat_messages collection using the chat id gotten from conversations query.
+// export const uploadFileToFirebase = async (file: File, path: string): Promise<string> => {
+//   const storageRef = ref(storage, path);
+//   await uploadBytes(storageRef, file);
+//   return getDownloadURL(storageRef);
+// }
