@@ -31,6 +31,8 @@ const initialState: HireLabour = {
   instructions: "",
   images: [],
   services: [],
+  tempImages: [],
+  bookingId: ""
 };
 
 const useHireLabourStore = create<Store>((set) => ({
