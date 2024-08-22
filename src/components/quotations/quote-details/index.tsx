@@ -557,6 +557,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       estimatedNumberOfBoxes: formData.numberOfBoxes
         ? parseInt(formData.numberOfBoxes)
         : 0,
+      images: formData?.images ?? [],
     };
     const { date, addOns, ...dataWithoutDate } = data;
     if (updating) {

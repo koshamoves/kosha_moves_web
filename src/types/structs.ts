@@ -36,7 +36,11 @@ export type BookMove = z.infer<typeof bookMoveSequenceStep1Schema> &
   };
 export type HireLabour = z.infer<typeof hireLabourSequenceStep1Schema> &
   z.infer<typeof hireLabourSequenceStep2Schema> &
-  z.infer<typeof hireLabourSequenceStep3Schema>;
+  z.infer<typeof hireLabourSequenceStep3Schema> & {
+    requestType?: string;
+    tempImages?: string[];
+    bookingId?: string;
+  };
 export type BookDelivery = z.infer<typeof bookDeliverySequenceStep1Schema> &
   z.infer<typeof bookDeliverySequenceStep2Schema> &
   z.infer<typeof bookDeliverySequenceStep3Schema> &

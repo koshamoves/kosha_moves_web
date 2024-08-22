@@ -106,9 +106,9 @@ export const bookMoveReverseFactory = (booking: Partial<Booking>): BookMove => {
     hotTubs: `${booking.hotTubsQuantity ?? ""}`,
     poolTables: `${booking.poolTablesQuantity ?? ""}`,
     numberOfBoxes: `${booking.estimatedNumberOfBoxes ?? ""}`,
-    instructions: "",
-    images: [],
+    instructions: booking.additionalNotes ?? "",
+    images: booking.images ?? [],
+    tempImages: booking.images ?? [],
     services: booking.serviceAddOns ?? [],
   };
 };
-

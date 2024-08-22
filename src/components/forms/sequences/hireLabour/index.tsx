@@ -51,6 +51,15 @@ import { Routes } from "@/core/routing";
 import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
 import { hireLabourFactory } from "@/core/models/hireLabourFactory";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ErrorMessage } from "@/constants/enums";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { storage } from "@/firebase/firestore";
+import { generateBookingId } from "@/lib/helpers/generateBookingId";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -81,6 +90,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     control: form.control,
     name: "elevatorAccess",
   });
+
+  useEffect(() => {
+    localStorage.removeItem("bookingId");
+  }, []);
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep1Schema>) => {
     onChangeStep("itm");
@@ -279,6 +292,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     numberOfBoxes,
     instructions,
     images,
+    tempImages
   } = formData;
   const form = useForm<z.infer<typeof hireLabourSequenceStep2Schema>>({
     resolver: zodResolver(hireLabourSequenceStep2Schema),
@@ -294,15 +308,50 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const handleRemoveImage = (index: number) => {
-    removeImage(index);
-    form.setValue(
-      "images",
-      formData.images.filter((_, i) => i !== index)
-    ); // Update the form state
+  const [bookingId, setBookingId] = useState<string>("");
+
+  // Generate a new unique ID when the component mounts
+  useEffect(() => {
+    const storedBookingId = localStorage.getItem("bookingId");
+    if (storedBookingId) {
+      setBookingId(storedBookingId);
+    } else {
+      const newBookingId = generateBookingId();
+      setBookingId(newBookingId);
+      localStorage.setItem("bookingId", newBookingId);
+    }
+  }, []);
+
+  const handleRemoveImage = async (index: number) => {
+    try {
+      const imageUrl = formData.images[index];
+      const urlParts = imageUrl.split("%2F");
+      const folder = urlParts[0].split("/").pop();
+      const fileName = urlParts[1].split("?")[0];
+
+      const imageRef = ref(storage, `${folder}/${fileName}`);
+      await deleteObject(imageRef);
+
+      removeImage(index);
+      form.setValue(
+        "images",
+        formData.images.filter((_, i) => i !== index)
+      );
+      updateField(
+        "tempImages",
+        tempImages!.filter((_, i) => i !== index)
+      );
+    } catch (error) {
+      toast({
+        title: "Oops!",
+        description: ErrorMessage.FAILED_ACTION,
+        variant: "destructive",
+      });
+    }
   };
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep2Schema>) => {
+    updateField("bookingId", bookingId);
     onChangeStep("generalInfo");
     update(data);
   };

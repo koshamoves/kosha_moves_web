@@ -124,6 +124,17 @@ const Page = () => {
   //   flightOfStairsFee,
   // ]);
 
+  const totalAmount =
+    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    +(formData.pianos ?? 0) * pianosFee +
+    +(formData.PUDStops?.length ?? 0) * stopOverFee +
+    +(formData.hotTubs ?? 0) * hotTubsFee +
+    +(formData.poolTables ?? 0) * poolTablesFee +
+    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
+    hourlyRate * minimumHours * minimumHours * movers +
+    truckFee * movers +
+    minimumAmount;
+
   if (companyName === "") {
     return (
       <Row className="w-full h-full items-center justify-center">
@@ -254,12 +265,18 @@ const Page = () => {
               },
             ]}
           />
-          {finishing && (
-            <QuoteDetailsNotesImages
-              images={[]}
-              notes={selectedBooking?.additionalNotes ?? ""}
-            />
-          )}
+          <QuoteDetailsNotesImages
+            images={
+              !finishing
+                ? formData?.images ?? []
+                : selectedBooking?.images ?? []
+            }
+            notes={
+              !finishing
+                ? formData.instructions ?? ""
+                : selectedBooking?.additionalNotes ?? ""
+            }
+          />
         </Column>
         <Column className="gap-4 max-w-[400px] flex-1">
           <QuoteDetailsServiceRequirement
@@ -270,7 +287,7 @@ const Page = () => {
             selectedBooking?.status !== "Cancelled") && (
             <>
               <QuoteDetailsCharge
-                amount={minimumAmount}
+                amount={totalAmount}
                 hourlyRate={formatCurrency(hourlyRate)}
                 finishing={finishing}
                 updating={updating}

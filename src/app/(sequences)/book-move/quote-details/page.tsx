@@ -76,6 +76,7 @@ const Page = () => {
     +(formData.poolTables ?? 0) * poolTablesFee +
     +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
     hourlyRate * minimumHours * minimumHours * movers +
+    truckFee * movers +
     minimumAmount;
 
   let bookingDate, bookingTime, locations;
@@ -208,8 +209,8 @@ const Page = () => {
             rates={[
               {
                 icon: <TruckFrontGrey {...iconSizes} />,
-                label: "Truck Fee",
-                rate: truckFee,
+                label: "Travelers Fee",
+                rate: truckFee * movers,
               },
               {
                 icon: <Appliances {...iconSizes} />,
@@ -272,12 +273,18 @@ const Page = () => {
               },
             ]}
           />
-          {finishing && (
-            <QuoteDetailsNotesImages
-              images={[]}
-              notes={selectedBooking?.additionalNotes ?? ""}
-            />
-          )}
+          <QuoteDetailsNotesImages
+            images={
+              !finishing
+                ? formData?.images ?? []
+                : selectedBooking?.images ?? []
+            }
+            notes={
+              !finishing
+                ? formData.instructions ?? ""
+                : selectedBooking?.additionalNotes ?? ""
+            }
+          />
         </Column>
         <Column className="gap-4 flex-1 max-w-[400px]">
           <QuoteDetailsServiceRequirement
