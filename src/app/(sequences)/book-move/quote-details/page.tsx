@@ -76,6 +76,7 @@ const Page = () => {
     +(formData.poolTables ?? 0) * poolTablesFee +
     +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
     hourlyRate * minimumHours * minimumHours * movers +
+    truckFee * movers +
     minimumAmount;
 
   let bookingDate, bookingTime, locations;
@@ -208,8 +209,8 @@ const Page = () => {
             rates={[
               {
                 icon: <TruckFrontGrey {...iconSizes} />,
-                label: "Truck Fee",
-                rate: truckFee,
+                label: "Travelers Fee",
+                rate: truckFee * movers,
               },
               {
                 icon: <Appliances {...iconSizes} />,
