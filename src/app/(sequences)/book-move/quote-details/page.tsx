@@ -68,7 +68,6 @@ const Page = () => {
     ? (selectedBooking?.quote as Quote) ?? {}
     : quoteDetailsData || {};
 
-  console.log({ quoteDetailsData });
   const totalAmount =
     +(formData.majorAppliances ?? 0) * majorAppliancesFee +
     +(formData.pianos ?? 0) * pianosFee +

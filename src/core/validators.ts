@@ -117,7 +117,7 @@ export const hireLabourSequenceStep1Schema = z
     apartmentNumber: z.string().optional(),
     googlePlaceId: z.string().optional(),
   })
-  .extend(pickUpDetailSchema.shape);
+  .extend(pickUpDetailSchema._def.schema.shape);
 
 export const hireLabourSequenceStep2Schema = bookMoveSequenceStep3Schema;
 
