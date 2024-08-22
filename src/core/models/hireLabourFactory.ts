@@ -66,8 +66,8 @@ export const hireLabourReverseFactory = (
     poolTables: `${booking.poolTablesQuantity ?? ""}`,
     numberOfBoxes: `${booking.estimatedNumberOfBoxes ?? ""}`,
     instructions: booking.additionalNotes ?? "",
-    images: [],
+    images: booking.images ?? [],
+    tempImages: booking.images ?? [],
     services: booking.serviceAddOns ?? [],
   };
 };
-
