@@ -1,4 +1,9 @@
-import { BookingLocation, BookingTime, InfoCircle, TruckFront } from "@/components/Icons";
+import {
+  BookingLocation,
+  BookingTime,
+  InfoCircle,
+  TruckFront,
+} from "@/components/Icons";
 import { Button, H, P, Picture } from "@/components/atoms";
 import { Checkbox } from "@/components/checkbox";
 import {
@@ -13,8 +18,14 @@ import { Column, Row } from "@/components/layout";
 import { toast } from "@/components/toast/use-toast";
 import { ErrorMessage, StorageKeys } from "@/constants/enums";
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
-import { bookMoveFactory } from "@/core/models/bookMoveFactory";
-import { hireLabourFactory } from "@/core/models/hireLabourFactory";
+import {
+  bookMoveFactory,
+  bookMoveReverseFactory,
+} from "@/core/models/bookMoveFactory";
+import {
+  hireLabourFactory,
+  hireLabourReverseFactory,
+} from "@/core/models/hireLabourFactory";
 import { Routes } from "@/core/routing";
 import { useAddToBookings } from "@/hooks/fireStore/useAddToBookings";
 import { useValidRoute } from "@/hooks/useValidRoute";
@@ -42,6 +53,8 @@ import { getAuth } from "firebase/auth";
 import { useCancelBooking } from "@/hooks/fireStore/useCancelBooking";
 import { useGetVoucher } from "@/hooks/misc/useGetVoucher";
 import useHireLabourStore from "@/stores/hire-labour.store";
+import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
+import Link from "next/link";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -56,35 +69,45 @@ interface QuotesDetailsLocationProps {
     googlePlaceId: string;
     hasElevator: string;
     id: string;
-  }>
+  }>;
 }
-const QuoteDetailsLocation:FC<QuotesDetailsLocationProps> = ({ locations}) => {
+const QuoteDetailsLocation: FC<QuotesDetailsLocationProps> = ({
+  locations,
+}) => {
   return (
     <Row className="flex-1 bg-white-100 p-2 px-6 shadow-custom rounded-lg gap-1 order-2 lg:order-1">
-      <BookingLocation className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]"/>
-      <Row className={cn("gap-0 flex-wrap", {
-        // "flex-col" : locations.length > 2
-      })}>
-          {
-            locations.map((item, index) => {
-              return (
-                <Row key={index} className="items-center flex-1 min-w-[200px] max-w-[350px]">
-                  {
-                    index !== 0 && (
-                      <div className="h-[50px] w-[6px] sm:w-[50px] sm:h-[6px] bg-primary rounded-md"/>
-                    )
-                  }
-                  <Column className="gap-0 flex-1">
-                    <P className="text-primary text-base font-semibold">{item.address || item.location}</P>
-                    <P className="text-grey-100 text-sm font-semibold">{item.buildingType}, {item.hasElevator === "Yes" ? "Elevator Available" : "No Elevator"}</P>
-                  </Column>
-                </Row>
-              )
-            })
-          }
+      <BookingLocation className="w-[40px] h-[40px] min-w-[40px] min-h-[40px]" />
+      <Row
+        className={cn("gap-0 flex-wrap", {
+          // "flex-col" : locations.length > 2
+        })}
+      >
+        {locations.map((item, index) => {
+          return (
+            <Row
+              key={index}
+              className="items-center flex-1 min-w-[200px] max-w-[350px]"
+            >
+              {index !== 0 && (
+                <div className="h-[50px] w-[6px] sm:w-[50px] sm:h-[6px] bg-primary rounded-md" />
+              )}
+              <Column className="gap-0 flex-1">
+                <P className="text-primary text-base font-semibold">
+                  {item.address || item.location}
+                </P>
+                <P className="text-grey-100 text-sm font-semibold">
+                  {item.buildingType},{" "}
+                  {item.hasElevator === "Yes"
+                    ? "Elevator Available"
+                    : "No Elevator"}
+                </P>
+              </Column>
+            </Row>
+          );
+        })}
       </Row>
     </Row>
-  )
+  );
 };
 
 interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
@@ -97,10 +120,11 @@ interface QuoteDetailsMapProps extends HTMLAttributes<HTMLDivElement> {
     charge: number;
     reviews: number;
     movesCompleted: string;
+    companyId: string;
   };
 }
 const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
-  const { location, name, charge, reviews, movesCompleted } = data;
+  const { location, name, charge, reviews, movesCompleted, companyId } = data;
   return (
     <Column
       className={cn(
@@ -127,12 +151,14 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
             </P>
             <P className="text-sm font-dm-sans text-grey-300">per hour</P>
           </Column>
-          <Column className="gap-0 flex-1">
-            <P className="text-primary font-bold font-dm-sans text-lg">
-              {reviews}
-            </P>
-            <P className="text-sm font-dm-sans text-grey-300">reviews</P>
-          </Column>
+          <Link href={`/reviews/${companyId}`}>
+            <Column className="gap-0 flex-1">
+              <P className="text-primary font-bold font-dm-sans text-lg">
+                {reviews}
+              </P>
+              <P className="text-sm font-dm-sans text-grey-300">reviews</P>
+            </Column>
+          </Link>
           {movesCompleted !== "nil" && (
             <Column className="gap-0 flex-1">
               <P className="text-primary font-bold font-dm-sans text-lg">
@@ -245,6 +271,7 @@ interface QuoteDetailsRatesProps extends HTMLAttributes<HTMLDivElement> {
   rates: Array<QuoteDetailsRate>;
 }
 const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
+  const { quoteDetailsData } = useQuoteDetailsData();
   return (
     <Column className="p-4 bg-white-100 shadow-custom rounded-lg">
       <H level={2} className="text-primary font-dm-sans text-lg">
@@ -252,10 +279,16 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
       </H>
       <Column>
         {rates
-          .filter((item) => (item.count || 0) > 0)
+          // .filter((item) => {
+          //   return (
+          //     ["Truck Fee", "Flight of Stairs"].includes(item.label) ||
+          //     (item.count || 0) > 0
+          //   );
+          // })
           .map((item, index) => {
             if (!item.rate) return null;
-
+            const newCount = +(item.count || 0) || 0;
+            const newRate = (newCount > 0 ? newCount : 1) * item.rate;
             return (
               <Row
                 key={item.label + index}
@@ -270,7 +303,11 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
                   </P>
                 </Row>
                 <P className="text-primary font-bold">
-                  {formatCurrency(item.rate)}
+                  {formatCurrency(
+                    item.label === "Minimum Hours"
+                      ? newRate * quoteDetailsData.movers
+                      : newRate
+                  )}
                 </P>
               </Row>
             );
@@ -354,55 +391,68 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
 
   return (
     <Column className="gap-6 w-full p-4 bg-white-100 shadow-custom rounded-lg">
-      <H level={2} className="text-primary font-dm-sans text-lg">
-        Choose Truck
-      </H>
+      {!!NaN && (
+        <H level={2} className="text-primary font-dm-sans text-lg">
+          Choose Truck
+        </H>
+      )}
       <Column className="gap-4">
-        {trucks.map((item, index) => (
-          <Row key={index} className="justify-between items-center">
-            <Row
-              onClick={() => handleSelectTruck(item.type)}
-              className={twMerge(`items-center`, !disabled && "cursor-pointer")}
-            >
-              {selectedTruck.type === item.type ? (
-                <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
-                  <span className="bg-primary w-[10px] h-[10px] rounded-full" />
-                </span>
-              ) : (
-                <span className="border border-primary w-[20px] h-[20px] rounded-full" />
-              )}
-              <Picture
-                container={{ className: "w-[60px] h-[60px] rounded-full ml-4" }}
-                image={{
-                  alt: item.type,
-                  src: item.image,
-                  className: "rounded-full",
-                }}
-              />
-            </Row>
-            {!finishing && (
-              <Row className="items-center gap-4">
-                <Button
-                  disabled={disabled}
-                  size="icon"
-                  className="max-w-[20px] max-h-[20px]"
-                  onClick={() => handleDecrease(index)}
-                >
-                  -
-                </Button>
-                <span>{item.quantity}</span>
-                <Button
-                  disabled={disabled}
-                  size="icon"
-                  className="max-w-[20px] max-h-[20px]"
-                  onClick={() => handleIncrease(index)}
-                >
-                  +
-                </Button>
+        {trucks.filter((truck) => truck.type === truckType).length === 0 && (
+          <p className="text-gray-600">No truck available.</p>
+        )}
+        {trucks
+          .filter((truck) => truck.type === truckType)
+          .map((item, index) => (
+            <Row key={index} className="justify-between items-center">
+              <Row
+                onClick={() => !!NaN && handleSelectTruck(item.type)}
+                className={twMerge(
+                  `items-center`,
+                  !disabled && !!NaN && "cursor-pointer"
+                )}
+              >
+                {!!NaN &&
+                  (selectedTruck.type === item.type ? (
+                    <span className="rounded-full border border-primary w-[20px] h-[20px] flex items-center justify-center">
+                      <span className="bg-primary w-[10px] h-[10px] rounded-full" />
+                    </span>
+                  ) : (
+                    <span className="border border-primary w-[20px] h-[20px] rounded-full" />
+                  ))}
+                <Picture
+                  container={{
+                    className: "w-[60px] h-[60px] rounded-full ml-4",
+                  }}
+                  image={{
+                    alt: item.type,
+                    src: item.image,
+                    className: "rounded-full",
+                  }}
+                />
               </Row>
-            )}
-          </Row>
-        ))}
+              {!finishing && !!NaN && (
+                <Row className="items-center gap-4">
+                  <Button
+                    disabled={disabled}
+                    size="icon"
+                    className="max-w-[20px] max-h-[20px]"
+                    onClick={() => handleDecrease(index)}
+                  >
+                    -
+                  </Button>
+                  <span>{item.quantity}</span>
+                  <Button
+                    disabled={disabled}
+                    size="icon"
+                    className="max-w-[20px] max-h-[20px]"
+                    onClick={() => handleIncrease(index)}
+                  >
+                    +
+                  </Button>
+                </Row>
+              )}
+            </Row>
+          ))}
       </Column>
     </Column>
   );
@@ -446,6 +496,23 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       setGottenVoucher(null);
     },
   });
+  const { isPending: isGettingQuotes, getQuotes } = useGetQuotes({
+    onSuccess: () => {
+      if (
+        selectedBooking &&
+        (selectedBooking.requestType === "RegularMove" ||
+          selectedBooking.requestType === "LabourOnly")
+      ) {
+        router.push(
+          `${
+            selectedBooking.requestType === "RegularMove"
+              ? Routes.bookMoveQuotes
+              : Routes.hireLabourQuotes
+          }?action=update`
+        );
+      }
+    },
+  });
 
   if (!formData || !quoteDetailsData) {
     toast({
@@ -462,7 +529,9 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       ? hireLabourFactory(formData)
       : bookMoveFactory(formData);
     const data = {
-      bookingId: generateBookingId(),
+      bookingId: formattedFormData.bookingId
+        ? formattedFormData.bookingId
+        : generateBookingId(),
       clientId: user?.uid ?? "",
       driverId: "", //TODO: where is driverId from?
       ...formattedFormData,
@@ -492,6 +561,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       estimatedNumberOfBoxes: formData.numberOfBoxes
         ? parseInt(formData.numberOfBoxes)
         : 0,
+      images: formData?.images ?? [],
     };
     const { date, addOns, ...dataWithoutDate } = data;
     if (updating) {
@@ -598,21 +668,45 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
             {user?.hasCreditCard ? (
               <Button className="bg-[#19B000]">Make Payment</Button>
             ) : (
-              <Button className="bg-[#19B000]">Pay on site</Button>
+              !!NaN && <Button className="bg-[#19B000]">Pay on site</Button>
             )}
-            <Button
-              disabled={isDeletePending}
-              loading={isDeletePending}
-              className="bg-[#CD1A1A33] text-[#DB3434]"
-              onClick={() => {
-                if (!selectedBooking?.bookingId) return;
-                deleteBooking({
-                  bookingId: selectedBooking.bookingId,
-                });
-              }}
-            >
-              Cancel Request
-            </Button>
+            {selectedBooking?.status === "Pending" && (
+              <Button
+                disabled={isDeletePending}
+                loading={isDeletePending}
+                className="bg-[#CD1A1A33] text-[#DB3434]"
+                onClick={() => {
+                  if (!selectedBooking?.bookingId) return;
+                  deleteBooking({
+                    bookingId: selectedBooking.bookingId,
+                  });
+                }}
+              >
+                Cancel Request
+              </Button>
+            )}
+            {selectedBooking?.status === "Rejected" && (
+              <Button
+                disabled={isGettingQuotes}
+                loading={isGettingQuotes}
+                onClick={() => {
+                  if (!selectedBooking?.bookingId) return;
+                  if (selectedBooking.requestType === "RegularMove") {
+                    getQuotes(
+                      bookMoveFactory(bookMoveReverseFactory(selectedBooking))
+                    );
+                  } else if (selectedBooking.requestType === "LabourOnly") {
+                    getQuotes(
+                      hireLabourFactory(
+                        hireLabourReverseFactory(selectedBooking)
+                      )
+                    );
+                  }
+                }}
+              >
+                Search for new vendor
+              </Button>
+            )}
           </>
         )}
       </Column>
@@ -640,86 +734,9 @@ const QuoteDetailsEditRequest: FC<{ type: Booking["requestType"] }> = ({
         className="bg-white-500 text-black-500"
         onClick={() => {
           if (type === "RegularMove") {
-            updateBookMove({
-              moveDate: new Date(selectedBooking.movingDate ?? new Date()),
-              time: selectedBooking.movingDate
-                ? format(selectedBooking.movingDate, "HH:mm")
-                : "",
-              pickUpLocation: {
-                location: selectedBooking.fromAddress?.address ?? "",
-                apartmentNumber:
-                  selectedBooking.fromAddress?.apartmentNumber ?? "",
-                googlePlaceId: selectedBooking.fromAddress?.googlePlaceId ?? "",
-              },
-              stops: (selectedBooking.additionalStops as []) ?? [],
-              finalDestination: {
-                location: selectedBooking.toAddress?.address ?? "",
-                apartmentNumber:
-                  selectedBooking.toAddress?.apartmentNumber ?? "",
-                googlePlaceId: selectedBooking.toAddress?.googlePlaceId ?? "",
-              },
-              PUDFinalDestination: {
-                elevatorAccess: selectedBooking.toAddress?.hasElevator ?? "Yes",
-                flightOfStairs: `${
-                  selectedBooking.toAddress?.flightOfStairs ?? "0"
-                }`,
-                buildingType:
-                  selectedBooking.toAddress?.buildingType ?? "Condo",
-              },
-              PUDPickUpLocation: {
-                elevatorAccess:
-                  selectedBooking.fromAddress?.hasElevator ?? "Yes",
-                flightOfStairs: `${
-                  selectedBooking.fromAddress?.flightOfStairs ?? "0"
-                }`,
-                buildingType:
-                  selectedBooking.fromAddress?.buildingType ?? "Condo",
-              },
-              PUDStops: [],
-              majorAppliances: `${
-                selectedBooking.majorAppliancesQuantity ?? ""
-              }`,
-              workOutEquipment: `${
-                selectedBooking.workoutEquipmentsQuantity ?? ""
-              }`,
-              pianos: `${selectedBooking.pianosQuantity ?? ""}`,
-              hotTubs: `${selectedBooking.hotTubsQuantity ?? ""}`,
-              poolTables: `${selectedBooking.poolTablesQuantity ?? ""}`,
-              numberOfBoxes: `${selectedBooking.estimatedNumberOfBoxes ?? ""}`,
-              instructions: "",
-              images: [],
-              services: selectedBooking.serviceAddOns ?? [],
-            });
+            updateBookMove(bookMoveReverseFactory(selectedBooking));
           } else if (type === "LabourOnly") {
-            updateHireLabour({
-              date: new Date(selectedBooking.movingDate ?? new Date()),
-              time: selectedBooking.movingDate
-                ? format(selectedBooking.movingDate, "HH:mm")
-                : "",
-              serviceLocation: selectedBooking.fromAddress?.address ?? "",
-              googlePlaceId: selectedBooking.fromAddress?.googlePlaceId ?? "",
-              apartmentNumber:
-                selectedBooking.fromAddress?.apartmentNumber ?? "",
-              elevatorAccess: selectedBooking.fromAddress?.hasElevator ?? "Yes",
-              flightOfStairs: `${
-                selectedBooking.fromAddress?.flightOfStairs ?? "0"
-              }`,
-              buildingType:
-                selectedBooking.fromAddress?.buildingType ?? "Condo",
-              majorAppliances: `${
-                selectedBooking.majorAppliancesQuantity ?? ""
-              }`,
-              workOutEquipment: `${
-                selectedBooking.workoutEquipmentsQuantity ?? ""
-              }`,
-              pianos: `${selectedBooking.pianosQuantity ?? ""}`,
-              hotTubs: `${selectedBooking.hotTubsQuantity ?? ""}`,
-              poolTables: `${selectedBooking.poolTablesQuantity ?? ""}`,
-              numberOfBoxes: `${selectedBooking.estimatedNumberOfBoxes ?? ""}`,
-              instructions: selectedBooking.additionalNotes ?? "",
-              images: [],
-              services: selectedBooking.serviceAddOns ?? [],
-            });
+            updateHireLabour(hireLabourReverseFactory(selectedBooking));
           }
           router.push(
             `${
@@ -753,6 +770,7 @@ const QuoteDetailsServiceRequirement: FC<
     "straps",
     "floor runners",
     "tape",
+
     "move garage items",
     "move patio items",
   ];
@@ -848,9 +866,8 @@ const QuoteDetailsNotesImages: FC<QuoteDetailsNotesImagesProps> = ({
       <H level={2} className="text-grey-300 font-dm-sans text-lg">
         Notes & Images
       </H>
-      {
-        images.length > 0 && (
-          <Row className="flex-wrap gap-4">
+      {images.length > 0 && (
+        <Row className="flex-wrap gap-4">
           {images.map((image, index) => (
             <div
               key={image + index}
@@ -869,8 +886,7 @@ const QuoteDetailsNotesImages: FC<QuoteDetailsNotesImagesProps> = ({
             </div>
           ))}
         </Row>
-        )
-      }
+      )}
       <P className="text-grey-400">
         <i>{notes}</i>
       </P>
@@ -896,7 +912,18 @@ const QuoteDetailsEDT = () => {
   );
 };
 interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
-  status: "New" | "Pending" | "Confirmed" | "Rejected" | "InProgress" | "Completed" | "DepositHeld" | "Cancelled" | "Edited" | "Paused" | "PendingPayment";
+  status:
+    | "New"
+    | "Pending"
+    | "Confirmed"
+    | "Rejected"
+    | "InProgress"
+    | "Completed"
+    | "DepositHeld"
+    | "Cancelled"
+    | "Edited"
+    | "Paused"
+    | "PendingPayment";
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (
@@ -906,7 +933,7 @@ const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
         className={cn("font-bold text-lg text-grey-600", {
           "text-orange-500": status === "Pending",
           "text-green-200": status === "Confirmed",
-          "text-red-500": status == "Cancelled"
+          "text-red-500": status == "Cancelled",
         })}
       >
         {status}
@@ -915,21 +942,21 @@ const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   );
 };
 
-interface QuoteDetailsDateProps{
-  date: string,
-  time: string
+interface QuoteDetailsDateProps {
+  date: string;
+  time: string;
 }
-const QuoteDetailsDate:FC<QuoteDetailsDateProps> = ({ date, time }) => {
+const QuoteDetailsDate: FC<QuoteDetailsDateProps> = ({ date, time }) => {
   return (
     <Row className="flex-1 items-center bg-white-100 p-2 gap-2 px-6 shadow-custom rounded-lg">
       <BookingTime className="w-[30px] h-[30px]" />
       <Column className="gap-0">
-          <P className="text-grey-100 text-sm font-semibold">{date}</P>
-          <P className="text-sm font-semibold">{time}</P>
+        <P className="text-grey-100 text-sm font-semibold">{date}</P>
+        <P className="text-sm font-semibold">{time}</P>
       </Column>
     </Row>
-  )
-}
+  );
+};
 
 const QuoteDetailsEdit = () => {
   return (
@@ -958,5 +985,5 @@ export {
   QuoteDetailsStatus,
   QuoteDetailsEdit,
   QuoteDetailsEditRequest,
-  QuoteDetailsDate
+  QuoteDetailsDate,
 };

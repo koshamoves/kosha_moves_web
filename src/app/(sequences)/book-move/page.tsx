@@ -16,18 +16,24 @@ import { Column, Row } from "@/components/layout";
 import Link from "next/link";
 import { Routes } from "@/core/routing";
 import { useSearchParams } from "next/navigation";
+import useBookMoveStore from "@/stores/book-move.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const isTakingAction = ["update", "finish"].includes(action ?? "");
   const updating = searchParams.get("action") === "update";
   const [activeTab, setActiveTab] = useState<string>("dateAndTime");
   const selectedBooking = useBookingStore.use.selectedBooking();
-
   const [isMounted, setIsMounted] = useState(false);
+  const resetBookMoveStore = useBookMoveStore((state) => state.reset);
 
   useEffect(() => {
+    if (!isTakingAction) {
+      resetBookMoveStore();
+    }
     setIsMounted(true);
-  }, []);
+  }, [isTakingAction, resetBookMoveStore]);
 
   useEffect(() => {
     document

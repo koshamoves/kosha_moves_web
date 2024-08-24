@@ -26,13 +26,35 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
   const path = usePathname();
   const showQuote = useShowQuotes((state) => state.showQuote);
   const [headerContent, setHeaderContent] = useState({
-    title: "",
+    title: "asd",
     description: "",
   });
 
   useEffect(() => {
     setHeaderContent(switchHeaderContent(path, showQuote));
   }, [path, showQuote]);
+
+  useEffect(() => {
+    const reviewNavInfoListener = (event: Event) => {
+      const evt = event as CustomEvent<{
+        title: string;
+        description: string;
+      }>;
+      setTimeout(() => {
+        setHeaderContent({
+          title: evt.detail.title ?? "",
+          description: evt.detail.description ?? "",
+        });
+      }, 0);
+    };
+    document.addEventListener("kosha:review_nav_info", reviewNavInfoListener);
+    return () => {
+      document.removeEventListener(
+        "kosha:review_nav_info",
+        reviewNavInfoListener
+      );
+    };
+  }, []);
 
   return (
     <Row className="justify-between items-center gap-4 w-full py-2">
@@ -43,7 +65,9 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
             className="font-medium text-grey-300 text-lg lg:hidden text-left justify-start"
           >
             <MenuIcon className="w-[22px] h-[22px] text-primary block mr-2" />
-            <P className="max-w-[calc(100vw-16em)] whitespace-nowrap overflow-hidden text-ellipsis">{headerContent.title}</P>
+            <P className="max-w-[calc(100vw-16em)] whitespace-nowrap overflow-hidden text-ellipsis">
+              {headerContent.title}
+            </P>
           </Button>
         }
       />
@@ -51,7 +75,7 @@ export const NavHeader: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
         <Column className="hidden lg:block">
           <P className="text-blue-300 text-sm">{headerContent.title}</P>
           <Row>
-            {isValidRoute && (
+            {(isValidRoute || headerContent.title === "Review") && (
               <Row
                 onClick={() => router.back()}
                 className="items-center border p-2 rounded-md hover:cursor-pointer"
