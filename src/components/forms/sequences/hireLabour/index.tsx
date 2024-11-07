@@ -60,6 +60,8 @@ import {
 } from "firebase/storage";
 import { storage } from "@/firebase/firestore";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
+import TimePicker from '../../../TimePicker';
+
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -147,7 +149,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormItem className="flex-1">
                   <FormLabel className="text-grey-300">Time</FormLabel>
                   <FormControl>
-                    <Input type="time" {...field} />
+                    <TimePicker onChange={(value) => field.onChange(value)} />
                   </FormControl>
                   <FormMessage className="text-destructive" />
                 </FormItem>
@@ -261,7 +263,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           </Row>
         </Column>
         <Row className="items-center justify-center my-8">
-          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl" onClick={()=>{
+          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl" onClick={() => {
             reset()
             router.push(Routes.root)
           }}>
@@ -717,14 +719,14 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                               onCheckedChange={(checked) => {
                                 return checked
                                   ? field.onChange([
-                                      ...(field.value || []),
-                                      service.id,
-                                    ])
+                                    ...(field.value || []),
+                                    service.id,
+                                  ])
                                   : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== service.id
-                                      )
-                                    );
+                                    field.value?.filter(
+                                      (value) => value !== service.id
+                                    )
+                                  );
                               }}
                             />
                           </FormControl>

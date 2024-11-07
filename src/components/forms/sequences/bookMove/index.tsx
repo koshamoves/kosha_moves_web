@@ -63,6 +63,8 @@ import { storage } from "@/firebase/firestore";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { ErrorMessage } from "@/constants/enums";
 import { toast } from "@/components/toast/use-toast";
+import TimePicker from '../../../TimePicker';
+
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -135,15 +137,11 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="time"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Time</FormLabel>
+                  <FormLabel className="text-grey-300">Time</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      defaultValue={formData.time}
-                      type="time"
-                    />
+                    <TimePicker onChange={(value) => field.onChange(value)} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-destructive" />
                 </FormItem>
               )}
             />
@@ -321,10 +319,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         (PUDStops?.length || 0) > 0
           ? PUDStops
           : formData.stops.map(() => ({
-              buildingType: "",
-              flightOfStairs: "0",
-              elevatorAccess: "",
-            })),
+            buildingType: "",
+            flightOfStairs: "0",
+            elevatorAccess: "",
+          })),
     },
   });
 
@@ -442,27 +440,27 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 )}
                 {(pickUpLocationElevatorAccess === "No" ||
                   pickUpLocationBuildingType === "House") && (
-                  <FormField
-                    control={form.control}
-                    name="PUDPickUpLocation.flightOfStairs"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Flight of Stairs
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            placeholder="0"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-destructive sm:absolute" />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                    <FormField
+                      control={form.control}
+                      name="PUDPickUpLocation.flightOfStairs"
+                      render={({ field }) => (
+                        <FormItem className="flex-1 relative">
+                          <FormLabel className="text-grey-300">
+                            Flight of Stairs
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="h-10 rounded-lg"
+                              placeholder="0"
+                              {...field}
+                              {...InputDirectives.numbersOnly}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-destructive sm:absolute" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
               </Row>
             </Row>
           </Row>
@@ -520,59 +518,59 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   />
                   {(stopsBuildingType as unknown as string[])[index] !==
                     "House" && (
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.elevatorAccess`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Elevator Access
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                      <FormField
+                        control={form.control}
+                        name={`PUDStops.${index}.elevatorAccess`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1 relative">
+                            <FormLabel className="text-grey-300">
+                              Elevator Access
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Yes">Yes</SelectItem>
+                                <SelectItem value="No">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage className="text-destructive sm:absolute" />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   {((stopsElevatorAccess as unknown as ("Yes" | "No")[])[
                     index
                   ] === "No" ||
                     (stopsBuildingType as unknown as string[])[index] ===
-                      "House") && (
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.flightOfStairs`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Flight of Stairs
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              className="h-10 rounded-lg"
-                              {...field}
-                              {...InputDirectives.numbersOnly}
-                              defaultValue={0}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                    "House") && (
+                      <FormField
+                        control={form.control}
+                        name={`PUDStops.${index}.flightOfStairs`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1 relative">
+                            <FormLabel className="text-grey-300">
+                              Flight of Stairs
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="h-10 rounded-lg"
+                                {...field}
+                                {...InputDirectives.numbersOnly}
+                                defaultValue={0}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-destructive sm:absolute" />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                 </Row>
               </Row>
             </Row>
@@ -658,26 +656,26 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 )}
                 {(finalDestinationElevatorAccess === "No" ||
                   finalDestinationBuildingType === "House") && (
-                  <FormField
-                    control={form.control}
-                    name="PUDFinalDestination.flightOfStairs"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Flight of Stairs
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-destructive sm:absolute" />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                    <FormField
+                      control={form.control}
+                      name="PUDFinalDestination.flightOfStairs"
+                      render={({ field }) => (
+                        <FormItem className="flex-1 relative">
+                          <FormLabel className="text-grey-300">
+                            Flight of Stairs
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              className="h-10 rounded-lg"
+                              {...field}
+                              {...InputDirectives.numbersOnly}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-destructive sm:absolute" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
               </Row>
             </Row>
           </Row>

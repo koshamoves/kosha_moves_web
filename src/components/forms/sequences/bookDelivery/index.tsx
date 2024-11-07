@@ -43,6 +43,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/table";
 import { Checkbox } from "@/components/checkbox";
 // import useShowQuotes from "@/stores/show-quotes.store";
+import TimePicker from '../../../TimePicker';
+
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -77,60 +79,60 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       >
         <Column className="bg-white-100 shadow-sm rounded-xl gap-6 p-6 sm:p-12">
           <Row className="gap-6 flex-col sm:flex-row">
-              <FormField
-                control={form.control}
-                name="deliveryDate"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <Column className="gap-3">
-                      <FormLabel className="text-grey-300">Date</FormLabel>
-                      <DateInput
-                        field={field}
-                        trigger={
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "h-14 pl-3 text-left font-normal hover:bg-white-100 hover:scale-1",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span></span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        }
-                      />
-                      <FormMessage className="text-destructive" />
-                    </Column>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="text-grey-300">Time</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="time" />
-                    </FormControl>
+            <FormField
+              control={form.control}
+              name="deliveryDate"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <Column className="gap-3">
+                    <FormLabel className="text-grey-300">Date</FormLabel>
+                    <DateInput
+                      field={field}
+                      trigger={
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "h-14 pl-3 text-left font-normal hover:bg-white-100 hover:scale-1",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span></span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      }
+                    />
                     <FormMessage className="text-destructive" />
-                  </FormItem>
-                )}
-              />
+                  </Column>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="time"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="text-grey-300">Time</FormLabel>
+                  <FormControl>
+                    <TimePicker onChange={(value) => field.onChange(value)} />
+                  </FormControl>
+                  <FormMessage className="text-destructive" />
+                </FormItem>
+              )}
+            />
           </Row>
           <Row className="gap-6 flex-col sm:flex-row">
             <LocationInput
-                name="pickUpLocation.location"
-                control={form.control}
-                label="Pickup Location"
-                defaultValue={pickUpLocation.location}
-              />
+              name="pickUpLocation.location"
+              control={form.control}
+              label="Pickup Location"
+              defaultValue={pickUpLocation.location}
+            />
             <FormField
               control={form.control}
               name="pickUpLocation.apartmentNumber"
@@ -213,53 +215,53 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         </AnimatePresence>
         <div>
           <div className="px-6">
-              <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="bg-transparent hover:bg-transparent px-0 max-w-max absolute top-[50%] -left-[14.5px] translate-y-[-50%]"
-                  onClick={() =>
-                    append({
-                      location: "",
-                      apartmentNumber: "",
-                    })
-                  }
-                >
-                  <Add className="w-[27px] h-[27px] mr-2" />
-                  Add Stop
-                </Button>
-              </div>
+            <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary">
+              <Button
+                type="button"
+                variant="ghost"
+                className="bg-transparent hover:bg-transparent px-0 max-w-max absolute top-[50%] -left-[14.5px] translate-y-[-50%]"
+                onClick={() =>
+                  append({
+                    location: "",
+                    apartmentNumber: "",
+                  })
+                }
+              >
+                <Add className="w-[27px] h-[27px] mr-2" />
+                Add Stop
+              </Button>
             </div>
-            <Row className="bg-white-100 shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
-              <LocationInput
-                  name="deliveryLocation.location"
-                  control={form.control}
-                  label="Final Destination"
-                  defaultValue={deliveryLocation.location}
-                />
-              <FormField
-                control={form.control}
-                name="deliveryLocation.apartmentNumber"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="text-grey-300">Apartment/Unit</FormLabel>
-                    <FormControl>
-                      <Input {...field} {...InputDirectives.numbersOnly} />
-                    </FormControl>
-                    <FormMessage className="text-destructive" />
-                  </FormItem>
-                )}
-              />
-            </Row>
+          </div>
+          <Row className="bg-white-100 shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
+            <LocationInput
+              name="deliveryLocation.location"
+              control={form.control}
+              label="Final Destination"
+              defaultValue={deliveryLocation.location}
+            />
+            <FormField
+              control={form.control}
+              name="deliveryLocation.apartmentNumber"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormLabel className="text-grey-300">Apartment/Unit</FormLabel>
+                  <FormControl>
+                    <Input {...field} {...InputDirectives.numbersOnly} />
+                  </FormControl>
+                  <FormMessage className="text-destructive" />
+                </FormItem>
+              )}
+            />
+          </Row>
         </div>
         <Row className="items-center justify-center my-8">
-          <Button 
-              type="button" 
-              className="flex-1 max-w-[180px] rounded-3xl"
-              onClick={()=>{
-                reset()
-                router.push(Routes.root)
-              }}
+          <Button
+            type="button"
+            className="flex-1 max-w-[180px] rounded-3xl"
+            onClick={() => {
+              reset()
+              router.push(Routes.root)
+            }}
           >
             Cancel
           </Button>
@@ -284,9 +286,9 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       PUDPickUpLocation,
       PUDFinalDestination,
       PUDStops:
-      (PUDStops?.length || 0) > 0
-        ? PUDStops
-        : formData.stops.map(() => ({
+        (PUDStops?.length || 0) > 0
+          ? PUDStops
+          : formData.stops.map(() => ({
             buildingType: "",
             flightOfStairs: "0",
             elevatorAccess: "Yes",
@@ -415,80 +417,80 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
           </div>
         </div>
-          {formData.stops.map((stop, index) => (
-            <div key={stop.location + index}>
-              <Row className="bg-white-100 justify-between shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
-                <Column className="flex-1 max-w-[250px]">
-                  <P className="font-semibold text-lg">Stop {index + 1}</P>
-                  <P className="font-bold text-primary text-xl">
-                    {stop.location}
-                  </P>
-                </Column>
-                <Row className="gap-4 flex-1 items-center">
-                  <div className="hidden sm:flex items-center">
-                    <div className="mt-8 w-[80px] border border-dotted" />
-                  </div>
-                  <Row className="gap-4 flex-col sm:flex-row w-full">
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.buildingType`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-grey-300">
-                            Building Type
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Condo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Condo">Condo</SelectItem>
-                              <SelectItem value="Apartment">Apartment</SelectItem>
-                              <SelectItem value="House">House</SelectItem>
-                              <SelectItem value="Office">Office</SelectItem>
-                              <SelectItem value="TownHouse">TownHouse</SelectItem>
-                              <SelectItem value="Storage">Storage</SelectItem>
-                              <SelectItem value="Store">Store</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-destructive" />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.elevatorAccess`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel className="text-grey-300">
-                            Elevator Access
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Yes" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-destructive" />
-                        </FormItem>
-                      )}
-                    />
-                    {(stopsElevatorAccess as unknown as ("Yes" | "No")[])[
-                      index
-                    ] === "No" && (
+        {formData.stops.map((stop, index) => (
+          <div key={stop.location + index}>
+            <Row className="bg-white-100 justify-between shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
+              <Column className="flex-1 max-w-[250px]">
+                <P className="font-semibold text-lg">Stop {index + 1}</P>
+                <P className="font-bold text-primary text-xl">
+                  {stop.location}
+                </P>
+              </Column>
+              <Row className="gap-4 flex-1 items-center">
+                <div className="hidden sm:flex items-center">
+                  <div className="mt-8 w-[80px] border border-dotted" />
+                </div>
+                <Row className="gap-4 flex-col sm:flex-row w-full">
+                  <FormField
+                    control={form.control}
+                    name={`PUDStops.${index}.buildingType`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-grey-300">
+                          Building Type
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Condo" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Condo">Condo</SelectItem>
+                            <SelectItem value="Apartment">Apartment</SelectItem>
+                            <SelectItem value="House">House</SelectItem>
+                            <SelectItem value="Office">Office</SelectItem>
+                            <SelectItem value="TownHouse">TownHouse</SelectItem>
+                            <SelectItem value="Storage">Storage</SelectItem>
+                            <SelectItem value="Store">Store</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-destructive" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`PUDStops.${index}.elevatorAccess`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel className="text-grey-300">
+                          Elevator Access
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Yes" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Yes">Yes</SelectItem>
+                            <SelectItem value="No">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-destructive" />
+                      </FormItem>
+                    )}
+                  />
+                  {(stopsElevatorAccess as unknown as ("Yes" | "No")[])[
+                    index
+                  ] === "No" && (
                       <FormField
                         control={form.control}
                         name={`PUDStops.${index}.flightOfStairs`}
@@ -510,14 +512,14 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                         )}
                       />
                     )}
-                  </Row>
                 </Row>
               </Row>
-              <div className="px-6">
-                <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
-              </div>
+            </Row>
+            <div className="px-6">
+              <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
             </div>
-          ))}
+          </div>
+        ))}
         <div>
           <Row className="bg-white-100 justify-between shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
             <Column className="flex-1 max-w-[238px]">
@@ -827,7 +829,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-                <Row className="items-center justify-center my-8 flex-wrap">
+        <Row className="items-center justify-center my-8 flex-wrap">
           <Button
             type="button"
             className="order-1 sm:order-0 flex-1 min-w-[200px] sm:max-w-[180px] rounded-3xl"
