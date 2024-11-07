@@ -41,8 +41,13 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
   );
 
   const formattedDate = format(new Date(a.moveDate), "M/d/yyyy");
-  const formattedTime = format(new Date(`1970-01-01T${a.time}:00`), "h:mm a");
-
+  const formattedTime = (() => {
+    const [time, period] = a.time.split(' '); // e.g., "12:30 PM"
+    const [hours, minutes] = time.split(':').map(Number);
+    const adjustedHours = period === 'PM' && hours !== 12 ? hours + 12 : hours === 12 && period === 'AM' ? 0 : hours;
+    return format(new Date(1970, 0, 1, adjustedHours, minutes), "h:mm a");
+  })();
+  
   return {
     fromAddress: {
       address: a.pickUpLocation.location,
