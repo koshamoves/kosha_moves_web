@@ -414,18 +414,21 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   <FormField
                     control={form.control}
                     name="PUDPickUpLocation.elevatorAccess"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Elevator Access
-                        </FormLabel>
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex-1 min-w-[70px]">
+                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value); // Update the field's value
+                            if (value) {
+                              form.clearErrors("PUDPickUpLocation.elevatorAccess"); // Clear the "Required" error as soon as a selection is made
+                            }
+                          }}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="" />
+                              <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -433,7 +436,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             <SelectItem value="No">No</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-destructive sm:absolute" />
+                        <FormMessage className="text-destructive min-h-[1.5rem]" /> {/* Reserve space */}
                       </FormItem>
                     )}
                   />
@@ -630,26 +633,29 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   <FormField
                     control={form.control}
                     name="PUDFinalDestination.elevatorAccess"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Elevator Access
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-destructive sm:absolute" />
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex-1 min-w-[70px]">
+                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
+                        <div className="flex flex-col"> {/* Wrap Select and FormMessage */}
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              form.trigger("PUDFinalDestination.elevatorAccess"); // Trigger validation on selection
+                            }}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select an option" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-destructive mt-2 min-h-[1.5rem]" /> {/* Add margin and height */}
+                        </div>
                       </FormItem>
                     )}
                   />
