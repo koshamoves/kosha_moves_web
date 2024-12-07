@@ -1,14 +1,14 @@
 import { cn } from '@/lib/utils';
-import React, { ChangeEvent, MouseEvent } from 'react';
+import { FC, ChangeEvent, MouseEvent } from 'react';
 
 interface Props {
-  count?: string,
-  className?: string,
+  count: string | undefined,
+  style?: { button?: string, input?: string },
   onChange: (num: string) => void,
 }
 
-// FIXME: should we be passing refs from react-hook-form to here? 
-export const CountableInput: React.FC<Props> = ({ className, count: maybe_count, onChange }) => {
+// FIXME: should we be passing refs from react-hook-form to here? Figure out later perhaps? 
+export const CountableInput: FC<Props> = ({ style, count: maybe_count, onChange }) => {
   const count: string = maybe_count || "";
 
   // the invariant here is that we assume that count is a string that can be trivially
@@ -34,7 +34,6 @@ export const CountableInput: React.FC<Props> = ({ className, count: maybe_count,
   const change = (e: ChangeEvent<HTMLInputElement>) => {
     const str = e.target.value;
 
-    // FIXME: there exists InputDirectives.numbersOnly. Take advantage of that?
     // either empty or a string of 1 or more digits 
     const is_valid = /^$|\d+\s*$/.test(str);
     if (!is_valid) return;
@@ -42,23 +41,21 @@ export const CountableInput: React.FC<Props> = ({ className, count: maybe_count,
     onChange(str);
   }
 
-  // TODO: switch to Kosha Moves Colours (is there a theme file somewhere?)
-  const input_style = "flex-auto h-14 w-full rounded-xl border border-input bg-background px-6 py-4 text-base text-primary ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
-  const btn_style = "flex-none border border-1 border-blue-500 hover:border-blue-700 text-white font-bold w-14 rounded";
+  const input_style = "min-w-[4.5em] flex-auto h-14 w-full rounded-xl border border-input bg-background px-6 py-4 text-base text-primary ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  const btn_style = "flex-none self-center bg-secondary border text-white hover:text-white-500 hover:bg-primary font-bold aspect-square rounded";
+  const btn_flex = "text-center"
 
   return (
     <div className="flex space-x-1" >
       <input
-        className={cn(input_style, className)}
+        className={cn(input_style, style?.input)}
         value={count}
         placeholder="0"
         onChange={change}
       />
 
-      {/* TODO: is there some way to have the elements hover over the input field? Does this look halfway decent on mobile? */}
-      {/* FIXME: Mobile *works*, needs critique from UI designer */}
-      <button className={btn_style} onClick={increment}>+</button>
-      <button className={btn_style} onClick={decrement}>-</button>
+      <button className={cn(btn_style, btn_flex, style?.button)} onClick={increment}>+</button>
+      <button className={cn(btn_style, btn_flex, style?.button)} onClick={decrement}>-</button>
     </div>
   );
 }

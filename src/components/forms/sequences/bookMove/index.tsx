@@ -452,7 +452,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             Flight of Stairs
                           </FormLabel>
                           <CountableInput
-                            className="h-10 rounded-lg"
+                            style={{ input: "h-10 rounded-lg", button: "h-8" }}
                             count={field.value}
                             onChange={field.onChange}
                           />
@@ -560,7 +560,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             </FormLabel>
                             <FormControl>
                               <CountableInput
-                                className="h-10 rounded-lg"
+                                style={{ input: "h-10 rounded-lg" }}
                                 count={field.value}
                                 onChange={field.onChange}
                               />
@@ -668,7 +668,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           </FormLabel>
                           <FormControl>
                             <CountableInput
-                              className="h-10 rounded-lg"
+                              style={{ input: "h-10 rounded-lg", button: "w-4 " }}
                               count={field.value}
                               onChange={field.onChange}
                             />
