@@ -211,66 +211,59 @@ const Page = () => {
               {
                 icon: <TruckFrontGrey {...iconSizes} />,
                 label: "Travelers Fee",
-                rate: truckFee * movers,
+                rate: truckFee,
+                count: movers,
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Appliances",
                 rate: majorAppliancesFee,
-                ...(+(formData.majorAppliances ?? 0)
-                  ? { count: +(formData.majorAppliances ?? 0) }
-                  : {}),
+                count: +(formData.majorAppliances ?? 0),
               },
               {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
+                count: (formData.PUDStops ?? []).reduce(
+      (t, s) => t + +(s.flightOfStairs ?? 0),
+    +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
+                ),
               },
               {
                 icon: <Piano {...iconSizes} />,
                 label: "Piano",
                 rate: pianosFee,
-                ...(+(formData.pianos ?? 0)
-                  ? { count: +(formData.pianos ?? 0) }
-                  : {}),
+                count: +(formData.pianos ?? 0),
               },
               {
                 icon: <AdditionalStops {...iconSizes} />,
                 label: "Additional Stops",
                 rate: stopOverFee,
-                ...(formData.PUDStops?.length
-                  ? { count: formData.PUDStops.length }
-                  : {}),
+                count: +(formData.PUDStops?.length ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Hot Tub",
                 rate: hotTubsFee,
-                ...(+(formData.hotTubs ?? 0)
-                  ? { count: +(formData.hotTubs ?? 0) }
-                  : {}),
+                count: +(formData.hotTubs ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Pool Table",
                 rate: poolTablesFee,
-                ...(+(formData.poolTables ?? 0)
-                  ? { count: +(formData.poolTables ?? 0) }
-                  : {}),
+                count: +(formData.poolTables ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
-                label: "Workout Equipments",
+                label: "Workout Equipment",
                 rate: workoutEquipmentsFee,
-                ...(+(formData.workOutEquipment ?? 0)
-                  ? { count: +(formData.workOutEquipment ?? 0) }
-                  : {}),
-              },
+                count: +(formData.workOutEquipment ?? 0),
+              }, // FIXME: Is it okay that numberOfBoxes doesn't show up here?
               {
                 icon: <Alarm {...iconSizes} />,
                 label: "Minimum Hours",
-                count: minimumHours,
-                rate: hourlyRate * minimumHours,
+                count: minimumHours * Math.max(1, movers), // FIXME: max() call might be redundant?
+                rate: hourlyRate,
               },
             ]}
           />
