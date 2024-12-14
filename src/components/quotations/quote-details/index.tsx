@@ -271,7 +271,6 @@ interface QuoteDetailsRatesProps extends HTMLAttributes<HTMLDivElement> {
   rates: Array<QuoteDetailsRate>;
 }
 const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
-  const { quoteDetailsData } = useQuoteDetailsData();
   return (
     <Column className="p-4 bg-white-100 shadow-custom rounded-lg">
       <H level={2} className="text-primary font-dm-sans text-lg">
@@ -279,16 +278,10 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
       </H>
       <Column>
         {rates
-          // .filter((item) => {
-          //   return (
-          //     ["Truck Fee", "Flight of Stairs"].includes(item.label) ||
-          //     (item.count || 0) > 0
-          //   );
-          // })
+          .filter((item) => item.count > 0)
           .map((item, index) => {
-            if (!item.rate) return null;
-            const newCount = +(item.count || 0) || 0;
-            const newRate = (newCount > 0 ? newCount : 1) * item.rate;
+            const price = item.rate * item.count; // due to filter, item.count is at least 1 
+
             return (
               <Row
                 key={item.label + index}
@@ -303,11 +296,7 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
                   </P>
                 </Row>
                 <P className="text-primary font-bold">
-                  {formatCurrency(
-                    item.label === "Minimum Hours"
-                      ? newRate * quoteDetailsData.movers
-                      : newRate
-                  )}
+                  {formatCurrency(price) /* FIXME: some behaviour changed here. Is it still correct? */} 
                 </P>
               </Row>
             );

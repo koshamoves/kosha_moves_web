@@ -152,7 +152,7 @@ export interface QuoteDetailsRate {
   icon: ReactNode;
   label: string;
   rate: number;
-  count?: number;
+  count: number;
 }
 
 export interface IUser extends User {
