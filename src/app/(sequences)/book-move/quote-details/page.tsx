@@ -225,8 +225,8 @@ const Page = () => {
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
                 count: (formData.PUDStops ?? []).reduce(
-      (t, s) => t + +(s.flightOfStairs ?? 0),
-    +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
+                  (t, s) => t + +(s.flightOfStairs ?? 0),
+                  +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
                 ),
               },
               {
@@ -258,7 +258,7 @@ const Page = () => {
                 label: "Workout Equipment",
                 rate: workoutEquipmentsFee,
                 count: +(formData.workOutEquipment ?? 0),
-              }, // FIXME: Is it okay that numberOfBoxes doesn't show up here?
+              },
               {
                 icon: <Alarm {...iconSizes} />,
                 label: "Minimum Hours",

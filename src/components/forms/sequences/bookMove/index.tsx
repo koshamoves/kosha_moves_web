@@ -560,7 +560,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             </FormLabel>
                             <FormControl>
                               <CountableInput
-                                style={{ input: "h-10 rounded-lg" }}
+                                style={{ input: "h-10 rounded-lg", button: "h-8" }}
                                 count={field.value}
                                 onChange={field.onChange}
                               />
@@ -668,7 +668,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           </FormLabel>
                           <FormControl>
                             <CountableInput
-                              style={{ input: "h-10 rounded-lg", button: "w-4 " }}
+                              style={{ input: "h-10 rounded-lg", button: "h-8" }}
                               count={field.value}
                               onChange={field.onChange}
                             />
@@ -817,6 +817,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -834,6 +835,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -852,6 +854,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Pianos</FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -868,6 +871,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Hot Tubs</FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -886,6 +890,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Pool Tables</FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -902,6 +907,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Number of Boxes</FormLabel>
                 <FormControl>
                   <CountableInput
+                    style={{ button: "h-8 "}}
                     count={field.value}
                     onChange={field.onChange}
                   />

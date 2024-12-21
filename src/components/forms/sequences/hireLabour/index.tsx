@@ -61,6 +61,7 @@ import {
 import { storage } from "@/firebase/firestore";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import TimePicker from '../../../TimePicker';
+import { CountableInput } from "@/components/input/CountableInput";
 
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
@@ -249,10 +250,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       Flight of Stairs
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        className="h-10 rounded-lg"
-                        {...field}
-                        {...InputDirectives.numbersOnly}
+                      <CountableInput
+                        style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                        count={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage className="text-destructive" />
@@ -374,10 +375,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Major Appliances
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -393,10 +394,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Workout Equipment
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -412,10 +413,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pianos</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -429,10 +430,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Hot Tubs</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -448,10 +449,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pool Tables</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -465,10 +466,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Number of Boxes</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
