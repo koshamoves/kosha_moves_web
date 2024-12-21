@@ -32,7 +32,7 @@ import useBookingStore from "@/stores/booking.store";
 import useBookMoveStore from "@/stores/book-move.store";
 import type { Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 
 const Page = () => {
@@ -48,6 +48,8 @@ const Page = () => {
   };
 
   const { quoteDetailsData } = useQuoteDetailsData();
+
+  // TODO: I think there are still unused sizes here
   const {
     companyName,
     numberOfReviews,
@@ -62,22 +64,48 @@ const Page = () => {
     hotTubsFee,
     poolTablesFee,
     workoutEquipmentsFee,
-    minimumAmount,
+    minimumAmount, // FIXME: What to do with This? Update this value Perhaps? 
+    additionalMoverHourlyRate,
     movingTruck,
   } = finishing
     ? (selectedBooking?.quote as Quote) ?? {}
     : quoteDetailsData || {};
 
+
+  // FIXME: Ensure that we're properly editing the right stuff
+
+  // FIXME: My current understanding is that lets, say that truckFee is 109, and movers is 3 by default.
+  // If we add one mover, the current rate becomes truckFee + (1 * additionalMoverHourlyRate)
+  // If we remove one mover, the current rate becomes truckFee + (-1 * additionalMoverHourlyRate). 
+  //
+  // This means that the truckFee assumes 3 movers by default and therefore that can't be included in our calculation.
+  // <QuoteDetailsWorkers /> messess with the actual `movers` value we work with, so to remember what's alrady priced in,
+  // we should cache the Original Mover Count
+  //
+
+  // TODO: Ensure that we can't go below the minimum amount of movers in <QuoteDetailsWorkers />
+
+  const [originalMoverCount, _] = useState(movers);
+  const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
+  const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
+
+  const totalStairs = (formData.PUDStops ?? []).reduce(
+    (t, s) => t + +(s.flightOfStairs ?? 0),
+    +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
+  );
+
+  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves 
   const totalAmount =
+    realTruckFee +
+    realHourlyRate +
     +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    totalStairs * flightOfStairsFee +
     +(formData.pianos ?? 0) * pianosFee +
     +(formData.PUDStops?.length ?? 0) * stopOverFee +
     +(formData.hotTubs ?? 0) * hotTubsFee +
     +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
-    hourlyRate * minimumHours * minimumHours * movers +
-    truckFee * movers +
-    minimumAmount;
+    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   let bookingDate, bookingTime, locations;
 
@@ -96,6 +124,9 @@ const Page = () => {
       selectedBooking?.toAddress,
     ].filter(Boolean);
   }
+
+  // TODO: Anything to salvage from this? 
+  // 
   // const amount = useMemo(() => {
   //   const majorAppliancesAmount =
   //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
@@ -141,6 +172,11 @@ const Page = () => {
   //   formData.PUDStops,
   //   flightOfStairsFee,
   // ]);
+
+
+  // TODO: Remove 
+  console.debug(formData);
+  console.debug(quoteDetailsData);
 
   if (companyName === "") {
     return (
@@ -193,7 +229,7 @@ const Page = () => {
                   long: "",
                 },
                 name: companyName,
-                charge: hourlyRate,
+                charge: realHourlyRate,
                 reviews: numberOfReviews,
                 movesCompleted: "nil",
                 companyId: companyId,
@@ -211,8 +247,8 @@ const Page = () => {
               {
                 icon: <TruckFrontGrey {...iconSizes} />,
                 label: "Travelers Fee",
-                rate: truckFee,
-                count: movers,
+                rate: realTruckFee,
+                count: 1, // FIXME: is the count always 1? 
               },
               {
                 icon: <Appliances {...iconSizes} />,
@@ -224,10 +260,7 @@ const Page = () => {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
-                count: (formData.PUDStops ?? []).reduce(
-                  (t, s) => t + +(s.flightOfStairs ?? 0),
-                  +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
-                ),
+                count: totalStairs,
               },
               {
                 icon: <Piano {...iconSizes} />,
@@ -262,8 +295,8 @@ const Page = () => {
               {
                 icon: <Alarm {...iconSizes} />,
                 label: "Minimum Hours",
-                count: minimumHours * Math.max(1, movers), // FIXME: max() call might be redundant?
-                rate: hourlyRate,
+                count: minimumHours,
+                rate: realHourlyRate,
               },
             ]}
           />
@@ -292,16 +325,16 @@ const Page = () => {
           />
           {((!updating && !finishing) ||
             selectedBooking?.status !== "Cancelled") && (
-            <>
-              <QuoteDetailsCharge
-                amount={totalAmount}
-                hourlyRate={formatCurrency(hourlyRate)}
-                finishing={finishing}
-                updating={updating}
-              />
-              {finishing && <QuoteDetailsEditRequest type="RegularMove" />}
-            </>
-          )}
+              <>
+                <QuoteDetailsCharge
+                  amount={totalAmount}
+                  hourlyRate={formatCurrency(realHourlyRate)}
+                  finishing={finishing}
+                  updating={updating}
+                />
+                {finishing && <QuoteDetailsEditRequest type="RegularMove" />}
+              </>
+            )}
           {companyId && (
             <Button className=" text-white-100" asChild>
               <Link href={`/reviews/${companyId}`}>
