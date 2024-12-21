@@ -44,6 +44,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/checkbox";
 // import useShowQuotes from "@/stores/show-quotes.store";
 import TimePicker from '../../../TimePicker';
+import { CountableInput } from "@/components/input/CountableInput";
 
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
@@ -399,10 +400,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           Flight of Stairs
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
+                          <CountableInput
+                            style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                            count={field.value}
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage className="text-destructive" />
@@ -500,11 +501,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                               Flight of Stairs
                             </FormLabel>
                             <FormControl>
-                              <Input
-                                className="h-10 rounded-lg"
-                                {...field}
-                                {...InputDirectives.numbersOnly}
-                                defaultValue={0}
+                              <CountableInput
+                                style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                                count={field.value}
+                                onChange={field.onChange}
                               />
                             </FormControl>
                             <FormMessage className="text-destructive" />
@@ -600,10 +600,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                           Flight of Stairs
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
+                          <CountableInput
+                            style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                            count={field.value}
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage className="text-destructive" />
