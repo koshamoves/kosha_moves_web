@@ -8,7 +8,6 @@ const functions = getFunctions(firebaseApp);
 const getGooglePlaceAutoComplete = httpsCallable(functions, Endpoints.GET_GOOGLE_PLACE_AUTO_COMPLETE);
 
 export const googleAutoComplete = async (payload: GoogleAutoCompleteDto): Promise<ApiResponse<any>> => {
-  const res = await getGooglePlaceAutoComplete({ data: payload });
-  return res.data as any;
+  return await getGooglePlaceAutoComplete(payload);
 };
 
