@@ -30,6 +30,7 @@ const Page = () => {
   const { setQuoteDetailsData } = useQuoteDetailsData();
   const { quotesResult } = useShowQuotes((state) => state);
   const updating = searchParams.get("action") === "update";
+
   if (!selectedBooking && updating) {
     return (
       <Row className="w-full h-full items-center justify-center">

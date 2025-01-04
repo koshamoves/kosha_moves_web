@@ -11,15 +11,11 @@ import { Routes } from "@/core/routing";
 import hireLabourStore from "@/stores/hire-labour.store";
 
 export const useGetQuotes = (
-  useMutationOptions: Omit<
-    UseMutationOptions<any, any, Partial<BookMoveDto>>,
-    "mutationFn"
-  > = {}
+  useMutationOptions: Omit<UseMutationOptions<any, any, Partial<BookMoveDto>>, "mutationFn"> = {}
 ) => {
-  const { isValidRoute: isHireLabourRoute } = useValidRoute(
-    Routes.sequence.hireLabour
-  );
+  const { isValidRoute: isHireLabourRoute } = useValidRoute(Routes.sequence.hireLabour);
   const setQuotesResult = useShowQuotes((state) => state.setQuotesResult);
+
   const methods = useMutation<any, any, Partial<BookMoveDto>>({
     mutationFn: (props) => getQuotesData(props),
     ...useMutationOptions,
@@ -36,10 +32,11 @@ export const useGetQuotes = (
             StorageKeys.FORM_DATA,
             JSON.stringify(hireLabourFormData)
           );
-          setQuotesResult(res.result as Array<Quote>);
+
+          setQuotesResult(res);
         } else {
           localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(formData));
-          setQuotesResult(res.result as Array<Quote>);
+          setQuotesResult(res);
         }
       })
       .catch(() => {
