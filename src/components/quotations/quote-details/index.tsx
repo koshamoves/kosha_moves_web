@@ -39,6 +39,7 @@ import {
   Booking,
   HireLabour,
   QuoteDetailsRate,
+  RequestType,
   Voucher,
 } from "@/types/structs";
 import { format } from "date-fns";
@@ -492,14 +493,13 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
     onSuccess: () => {
       if (
         selectedBooking &&
-        (selectedBooking.requestType === "RegularMove" ||
-          selectedBooking.requestType === "LabourOnly")
+        (selectedBooking.requestType === RequestType.RegularMove ||
+          selectedBooking.requestType === RequestType.LabourOnly)
       ) {
         router.push(
-          `${
-            selectedBooking.requestType === "RegularMove"
-              ? Routes.bookMoveQuotes
-              : Routes.hireLabourQuotes
+          `${selectedBooking.requestType === RequestType.RegularMove
+            ? Routes.bookMoveQuotes
+            : Routes.hireLabourQuotes
           }?action=update`
         );
       }
@@ -648,10 +648,10 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
               {!currentUser
                 ? "Sign in to complete booking"
                 : updating
-                ? isPending
-                  ? "Updating..."
-                  : "Update Booking"
-                : "Book Now"}
+                  ? isPending
+                    ? "Updating..."
+                    : "Update Booking"
+                  : "Book Now"}
             </Button>
           </>
         )}
@@ -683,11 +683,11 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
                 loading={isGettingQuotes}
                 onClick={() => {
                   if (!selectedBooking?.bookingId) return;
-                  if (selectedBooking.requestType === "RegularMove") {
+                  if (selectedBooking.requestType === RequestType.RegularMove) {
                     getQuotes(
                       bookMoveFactory(bookMoveReverseFactory(selectedBooking))
                     );
-                  } else if (selectedBooking.requestType === "LabourOnly") {
+                  } else if (selectedBooking.requestType === RequestType.LabourOnly) {
                     getQuotes(
                       hireLabourFactory(
                         hireLabourReverseFactory(selectedBooking)
@@ -725,16 +725,15 @@ const QuoteDetailsEditRequest: FC<{ type: Booking["requestType"] }> = ({
       <Button
         className="bg-white-500 text-black-500"
         onClick={() => {
-          if (type === "RegularMove") {
+          if (type === RequestType.RegularMove) {
             updateBookMove(bookMoveReverseFactory(selectedBooking));
-          } else if (type === "LabourOnly") {
+          } else if (type === RequestType.LabourOnly) {
             updateHireLabour(hireLabourReverseFactory(selectedBooking));
           }
           router.push(
-            `${
-              selectedBooking.requestType === "RegularMove"
-                ? Routes.sequence.bookMove
-                : Routes.sequence.hireLabour
+            `${selectedBooking.requestType === RequestType.RegularMove
+              ? Routes.sequence.bookMove
+              : Routes.sequence.hireLabour
             }?action=update`
           );
         }}
@@ -905,17 +904,17 @@ const QuoteDetailsEDT = () => {
 };
 interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
   status:
-    | "New"
-    | "Pending"
-    | "Confirmed"
-    | "Rejected"
-    | "InProgress"
-    | "Completed"
-    | "DepositHeld"
-    | "Cancelled"
-    | "Edited"
-    | "Paused"
-    | "PendingPayment";
+  | "New"
+  | "Pending"
+  | "Confirmed"
+  | "Rejected"
+  | "InProgress"
+  | "Completed"
+  | "DepositHeld"
+  | "Cancelled"
+  | "Edited"
+  | "Paused"
+  | "PendingPayment";
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (

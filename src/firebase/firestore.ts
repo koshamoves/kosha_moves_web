@@ -65,10 +65,10 @@ export const getBookings = async (inputDate: Date) => {
     const bookings = querySnapshot.docs
       .map(
         (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Partial<Booking>)
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Partial<Booking>)
       )
       .filter((booking) => booking.quote && booking.movingDate && isSameDay(booking.movingDate, date));
     return bookings;

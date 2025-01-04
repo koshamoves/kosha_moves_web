@@ -30,7 +30,7 @@ import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
 import useBookMoveStore from "@/stores/book-move.store";
-import type { Quote } from "@/types/structs";
+import { Quote, RequestType } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
@@ -64,8 +64,8 @@ const Page = () => {
     additionalMoverHourlyRate,
     movingTruck,
   } = finishing
-    ? (selectedBooking?.quote as Quote) ?? {}
-    : quoteDetailsData || {};
+      ? (selectedBooking?.quote as Quote) ?? {}
+      : quoteDetailsData || {};
 
 
   // FIXME: Ensure that we're properly editing the right stuff
@@ -94,8 +94,7 @@ const Page = () => {
   // TODO: use useMemo to cache the total amount
   const totalAmount =
     realTruckFee +
-    realHourlyRate +
-    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    realHourlyRate * minimumHours +
     +(formData.majorAppliances ?? 0) * majorAppliancesFee +
     totalStairs * flightOfStairsFee +
     +(formData.pianos ?? 0) * pianosFee +
@@ -277,7 +276,7 @@ const Page = () => {
                   finishing={finishing}
                   updating={updating}
                 />
-                {finishing && <QuoteDetailsEditRequest type="RegularMove" />}
+                {finishing && <QuoteDetailsEditRequest type={RequestType.RegularMove} />}
               </>
             )}
           {companyId && (

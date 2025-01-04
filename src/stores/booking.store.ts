@@ -1,4 +1,4 @@
-import { Booking } from "@/types/structs";
+import { Booking, RequestType } from "@/types/structs";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -26,9 +26,9 @@ const useBookingStore = createSelectorFunctions(
           const updateHireLabour = useHireLabourStore.getState().update;
           set((state) => {
             state.selectedBooking = booking;
-            if (booking?.requestType === "RegularMove") {
+            if (booking?.requestType === RequestType.RegularMove) {
               updateBookMove(bookMoveReverseFactory(booking));
-            } else if (booking?.requestType === "LabourOnly") {
+            } else if (booking?.requestType === RequestType.LabourOnly) {
               updateHireLabour(hireLabourReverseFactory(booking));
             }
           });
