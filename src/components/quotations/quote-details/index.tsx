@@ -177,12 +177,15 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
 
 interface QuotesDetailsWorkersProps extends HTMLAttributes<HTMLDivElement> {
   movers: number;
+  minMovers: number;
   finishing: boolean;
   disabled?: boolean;
   workerTag?: string;
 }
+
 const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
   movers,
+  minMovers = 1,
   disabled,
   workerTag = "Movers",
   finishing,
@@ -214,7 +217,7 @@ const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
             disabled={disabled}
             onClick={() =>
               !disabled &&
-              setCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1))
+              setCount((prev) => (prev > minMovers ? prev - 1 : minMovers))
             }
             className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
           >
@@ -296,7 +299,7 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
                   </P>
                 </Row>
                 <P className="text-primary font-bold">
-                  {formatCurrency(price) /* FIXME: some behaviour changed here. Is it still correct? */} 
+                  {formatCurrency(price) /* FIXME: some behaviour changed here. Is it still correct? */}
                 </P>
               </Row>
             );

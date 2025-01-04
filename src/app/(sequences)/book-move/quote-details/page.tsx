@@ -39,15 +39,11 @@ const Page = () => {
   const searchParams = useSearchParams();
   const formData = useBookMoveStore((store) => store.formData);
   const selectedBooking = useBookingStore.use.selectedBooking();
-  const finishing = searchParams.get("action") === "finish",
-    updating = searchParams.get("action") === "update";
-
-  const iconSizes = {
-    width: 21,
-    height: 21,
-  };
-
+  const finishing = searchParams.get("action") === "finish";
+  const updating = searchParams.get("action") === "update";
   const { quoteDetailsData } = useQuoteDetailsData();
+
+  const iconSizes = { width: 21, height: 21 };
 
   // TODO: I think there are still unused sizes here
   const {
@@ -94,7 +90,8 @@ const Page = () => {
     +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
   );
 
-  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves 
+  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
+  // TODO: use useMemo to cache the total amount
   const totalAmount =
     realTruckFee +
     realHourlyRate +
@@ -124,59 +121,6 @@ const Page = () => {
       selectedBooking?.toAddress,
     ].filter(Boolean);
   }
-
-  // TODO: Anything to salvage from this? 
-  // 
-  // const amount = useMemo(() => {
-  //   const majorAppliancesAmount =
-  //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
-  //   const workoutEquipmentsAmount =
-  //     (+formData.workOutEquipment! || 0) * workoutEquipmentsFee;
-  //   const pianosAmount = (+formData.pianos! || 0) * pianosFee;
-  //   const hotTubsAmount = (+formData.hotTubs! || 0) * hotTubsFee;
-  //   const poolTablesAmount = (+formData.poolTables! || 0) * poolTablesFee;
-  //   const stopsAmount = formData.stops.length * stopOverFee;
-  //   const flightOfStairsAmount =
-  //     ((+formData.PUDPickUpLocation.flightOfStairs! || 0) +
-  //       (+formData.PUDFinalDestination.flightOfStairs! || 0) +
-  //       (formData.PUDStops?.reduce(
-  //         (acc, curr) => acc + (+curr.flightOfStairs! || 0),
-  //         0
-  //       ) ?? 0) ?? 0) * flightOfStairsFee;
-  //   return (
-  //     minimumAmount +
-  //     majorAppliancesAmount +
-  //     workoutEquipmentsAmount +
-  //     pianosAmount +
-  //     hotTubsAmount +
-  //     poolTablesAmount +
-  //     stopsAmount +
-  //     flightOfStairsAmount
-  //   );
-  // }, [
-  //   minimumAmount,
-  //   formData.majorAppliances,
-  //   majorAppliancesFee,
-  //   formData.workOutEquipment,
-  //   workoutEquipmentsFee,
-  //   formData.pianos,
-  //   pianosFee,
-  //   formData.hotTubs,
-  //   hotTubsFee,
-  //   formData.poolTables,
-  //   poolTablesFee,
-  //   formData.stops.length,
-  //   stopOverFee,
-  //   formData.PUDPickUpLocation.flightOfStairs,
-  //   formData.PUDFinalDestination.flightOfStairs,
-  //   formData.PUDStops,
-  //   flightOfStairsFee,
-  // ]);
-
-
-  // TODO: Remove 
-  console.debug(formData);
-  console.debug(quoteDetailsData);
 
   if (companyName === "") {
     return (
@@ -238,6 +182,7 @@ const Page = () => {
             <QuoteDetailsWorkers
               className="flex-1"
               movers={movers}
+              minMovers={originalMoverCount}
               disabled={finishing}
               finishing={finishing}
             />
