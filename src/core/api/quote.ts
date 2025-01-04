@@ -13,7 +13,6 @@ export const getQuote = async (payload: Partial<BookMoveDto>): Promise<Quote> =>
   return (await _getQuote({ searchRequest: JSON.stringify(payload) })).data as Quote;
 };
 
-export const getQuotes = async (payload: Partial<BookMoveDto>): Promise<Array<Quote>> => {
-  return (await _getQuotes({ searchRequest: JSON.stringify(payload) })).data as Array<Quote>;
+export const getQuotes = async (payload: Partial<BookMoveDto>): Promise<Quote[]> => {
+  return (await _getQuotes({ searchRequest: JSON.stringify(payload) })).data as Quote[];
 };
-

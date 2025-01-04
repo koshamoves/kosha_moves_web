@@ -24,20 +24,17 @@ export const useGetQuotes = (
   const _useGetQuotes = (payload: Partial<BookMoveDto>) =>
     methods
       .mutateAsync(payload)
-      .then((res) => {
+      .then((res: Quote[]) => {
         const { formData } = bookMoveStore.getState();
         const { formData: hireLabourFormData } = hireLabourStore.getState();
-        if (isHireLabourRoute) {
-          localStorage.setItem(
-            StorageKeys.FORM_DATA,
-            JSON.stringify(hireLabourFormData)
-          );
 
-          setQuotesResult(res);
+        if (isHireLabourRoute) {
+          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourFormData));
         } else {
           localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(formData));
-          setQuotesResult(res);
         }
+
+        setQuotesResult(res);
       })
       .catch(() => {
         toast({
