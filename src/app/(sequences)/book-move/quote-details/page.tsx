@@ -273,7 +273,7 @@ const Page = () => {
               <>
                 <QuoteDetailsCharge
                   amount={totalAmount}
-                  hourlyRate={formatCurrency(realHourlyRate)}
+                  hourlyRate={realHourlyRate}
                   finishing={finishing}
                   updating={updating}
                 />

@@ -185,18 +185,20 @@ export const getVoucher = async (code: string) => {
         where("code", "==", code)
       )
     );
-    if (querySnapshot.empty)
-      throw new Error("Voucher not found", { cause: 404 });
+
+    if (querySnapshot.empty) throw new Error("Voucher not found", { cause: 404 });
+
     const vouchers = querySnapshot.docs.filter((item) => {
-      const voucher = item.data() as Voucher,
-        startDate = safeParseDate(voucher.startDate)?.getTime(),
-        endDate = safeParseDate(voucher.endDate)?.getTime(),
-        currentDate = new Date().getTime(),
-        valid = currentDate > startDate! && currentDate < endDate!;
-      return valid;
+      const voucher = item.data() as Voucher;
+
+      const startDate = safeParseDate(voucher.startDate)?.getTime();
+      const endDate = safeParseDate(voucher.endDate)?.getTime();
+      const timestamp = new Date().getTime();
+
+      return timestamp > startDate! && timestamp < endDate!;
     });
-    if (vouchers.length === 0)
-      throw new Error("Voucher not found", { cause: 404 });
+
+    if (vouchers.length === 0) throw new Error("Voucher not found", { cause: 404 });
     return vouchers[0].data() as Voucher;
   } catch (err) {
     toast({

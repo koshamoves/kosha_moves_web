@@ -451,7 +451,7 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
 };
 interface QuoteDetailsChargeProps extends HTMLAttributes<HTMLDivElement> {
   amount: number;
-  hourlyRate: string;
+  hourlyRate: number;
   finishing?: boolean;
   updating?: boolean;
 }
@@ -569,9 +569,11 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       addToBookings(dataWithoutDate as Booking);
     }
   };
+
   //TODO: how the voucher code works
   if (!selectedBooking && updating) return null;
   const currentUser = getAuth().currentUser;
+
   return (
     <Column
       {...props}
@@ -583,7 +585,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       {gottenVoucher ? (
         <div className="flex flex-wrap gap-2 items-end leading-[100%]">
           <H level={3} className="text-xl font-bold line-through">
-            {amount}
+            {"$" + amount}
           </H>
           <H className="text-3xl font-bold">
             {formatCurrency(
@@ -594,7 +596,6 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
                 } else {
                   return amt - (clientDiscount / 100) * amt;
                 }
-                // })(Number(amount.replace(/[^\d.-]+/g, "")))}
               })(amount)
             )}
           </H>
@@ -614,33 +615,32 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       )}
       <Column className="gap-6">
         <P className="text-grey-600 text-sm">
-          Note: After Minimum Charge Billing Cost {hourlyRate} After Every
-          Additional Hour
+          Note: After the minimum charge, you would be charged
+          {` ${formatCurrency(hourlyRate / 4)} `}
+          for every additional 15 minutes
         </P>
 
         {!finishing && (
           <>
-            {currentUser && (
-              <>
-                <DebouncedInput
-                  placeholder="Input Discount Code"
-                  className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
-                  debounce={1500}
-                  onChange={(e) => {
-                    getVoucher({ code: e.target.value });
-                  }}
-                />
-                {isGettingVoucher && (
-                  <p className="text-sm italic">Checking voucher...</p>
-                )}
-              </>
-            )}
+            <>
+              <DebouncedInput
+                placeholder="Input Discount Code"
+                className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
+                debounce={1500}
+                onChange={(e) => {
+                  getVoucher({ code: e.target.value });
+                }}
+              />
+              {isGettingVoucher && (
+                <p className="text-sm italic">Checking voucher...</p>
+              )}
+            </>
+
             <Button
               disabled={loading || isPending}
               loading={loading || isPending}
               onClick={() => {
-                if (!currentUser)
-                  router.push(`${Routes.signIn}?returnUrl=${pathname}`);
+                if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
                 if (!(!formData || !quoteDetailsData) && currentUser)
                   handleBook();
               }}
