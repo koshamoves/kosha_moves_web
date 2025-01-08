@@ -11,15 +11,11 @@ import { Routes } from "@/core/routing";
 import hireLabourStore from "@/stores/hire-labour.store";
 
 export const useGetQuotes = (
-  useMutationOptions: Omit<
-    UseMutationOptions<any, any, Partial<BookMoveDto>>,
-    "mutationFn"
-  > = {}
+  useMutationOptions: Omit<UseMutationOptions<any, any, Partial<BookMoveDto>>, "mutationFn"> = {}
 ) => {
-  const { isValidRoute: isHireLabourRoute } = useValidRoute(
-    Routes.sequence.hireLabour
-  );
+  const { isValidRoute: isHireLabourRoute } = useValidRoute(Routes.sequence.hireLabour);
   const setQuotesResult = useShowQuotes((state) => state.setQuotesResult);
+
   const methods = useMutation<any, any, Partial<BookMoveDto>>({
     mutationFn: (props) => getQuotesData(props),
     ...useMutationOptions,
@@ -28,19 +24,17 @@ export const useGetQuotes = (
   const _useGetQuotes = (payload: Partial<BookMoveDto>) =>
     methods
       .mutateAsync(payload)
-      .then((res) => {
+      .then((res: Quote[]) => {
         const { formData } = bookMoveStore.getState();
         const { formData: hireLabourFormData } = hireLabourStore.getState();
+
         if (isHireLabourRoute) {
-          localStorage.setItem(
-            StorageKeys.FORM_DATA,
-            JSON.stringify(hireLabourFormData)
-          );
-          setQuotesResult(res.result as Array<Quote>);
+          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourFormData));
         } else {
           localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(formData));
-          setQuotesResult(res.result as Array<Quote>);
         }
+
+        setQuotesResult(res);
       })
       .catch(() => {
         toast({

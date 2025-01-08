@@ -4,7 +4,7 @@ import { H, HeadingProps, P, Picture } from "../../atoms";
 import { Column, Row } from "../../layout";
 import { Stars, TruckFront } from "../../Icons";
 import { generateDoodles } from "@/lib/helpers/generateDoodle";
-import { Booking } from "@/types/structs";
+import { Booking, RequestType } from "@/types/structs";
 
 interface QuotesImageProps {
   src: string;
@@ -44,11 +44,11 @@ const QuotesImage: FC<QuotesImageProps> = ({ type }) => {
         image={{
           alt: "",
           src:
-            type === "RegularMove"
+            type === RequestType.RegularMove
               ? "/images/book-move.png"
-              : type === "Delivery"
-              ? "/images/book-delivery.png"
-              : "/images/hire-labor.png",
+              : type === RequestType.Delivery
+                ? "/images/book-delivery.png"
+                : "/images/hire-labor.png",
         }}
       />
     </div>

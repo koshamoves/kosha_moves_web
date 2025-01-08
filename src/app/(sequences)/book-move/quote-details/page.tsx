@@ -30,24 +30,22 @@ import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
 import useBookMoveStore from "@/stores/book-move.store";
-import type { Quote } from "@/types/structs";
+import { Quote, RequestType } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 
 const Page = () => {
   const searchParams = useSearchParams();
   const formData = useBookMoveStore((store) => store.formData);
   const selectedBooking = useBookingStore.use.selectedBooking();
-  const finishing = searchParams.get("action") === "finish",
-    updating = searchParams.get("action") === "update";
-
-  const iconSizes = {
-    width: 21,
-    height: 21,
-  };
-
+  const finishing = searchParams.get("action") === "finish";
+  const updating = searchParams.get("action") === "update";
   const { quoteDetailsData } = useQuoteDetailsData();
+
+  const iconSizes = { width: 21, height: 21 };
+
+  // TODO: I think there are still unused sizes here
   const {
     companyName,
     numberOfReviews,
@@ -62,22 +60,48 @@ const Page = () => {
     hotTubsFee,
     poolTablesFee,
     workoutEquipmentsFee,
-    minimumAmount,
+    minimumAmount, // FIXME: What to do with This? Update this value Perhaps? 
+    additionalMoverHourlyRate,
     movingTruck,
   } = finishing
-    ? (selectedBooking?.quote as Quote) ?? {}
-    : quoteDetailsData || {};
+      ? (selectedBooking?.quote as Quote) ?? {}
+      : quoteDetailsData || {};
 
+
+  // FIXME: Ensure that we're properly editing the right stuff
+
+  // FIXME: My current understanding is that lets, say that truckFee is 109, and movers is 3 by default.
+  // If we add one mover, the current rate becomes truckFee + (1 * additionalMoverHourlyRate)
+  // If we remove one mover, the current rate becomes truckFee + (-1 * additionalMoverHourlyRate). 
+  //
+  // This means that the truckFee assumes 3 movers by default and therefore that can't be included in our calculation.
+  // <QuoteDetailsWorkers /> messess with the actual `movers` value we work with, so to remember what's alrady priced in,
+  // we should cache the Original Mover Count
+  //
+
+  // TODO: Ensure that we can't go below the minimum amount of movers in <QuoteDetailsWorkers />
+
+  const [originalMoverCount, _] = useState(movers);
+  const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
+  const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
+
+  const totalStairs = (formData.PUDStops ?? []).reduce(
+    (t, s) => t + +(s.flightOfStairs ?? 0),
+    +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
+  );
+
+  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
+  // TODO: use useMemo to cache the total amount
   const totalAmount =
+    realTruckFee +
+    realHourlyRate * minimumHours +
     +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    totalStairs * flightOfStairsFee +
     +(formData.pianos ?? 0) * pianosFee +
     +(formData.PUDStops?.length ?? 0) * stopOverFee +
     +(formData.hotTubs ?? 0) * hotTubsFee +
     +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
-    hourlyRate * minimumHours * minimumHours * movers +
-    truckFee * movers +
-    minimumAmount;
+    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   let bookingDate, bookingTime, locations;
 
@@ -96,51 +120,6 @@ const Page = () => {
       selectedBooking?.toAddress,
     ].filter(Boolean);
   }
-  // const amount = useMemo(() => {
-  //   const majorAppliancesAmount =
-  //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
-  //   const workoutEquipmentsAmount =
-  //     (+formData.workOutEquipment! || 0) * workoutEquipmentsFee;
-  //   const pianosAmount = (+formData.pianos! || 0) * pianosFee;
-  //   const hotTubsAmount = (+formData.hotTubs! || 0) * hotTubsFee;
-  //   const poolTablesAmount = (+formData.poolTables! || 0) * poolTablesFee;
-  //   const stopsAmount = formData.stops.length * stopOverFee;
-  //   const flightOfStairsAmount =
-  //     ((+formData.PUDPickUpLocation.flightOfStairs! || 0) +
-  //       (+formData.PUDFinalDestination.flightOfStairs! || 0) +
-  //       (formData.PUDStops?.reduce(
-  //         (acc, curr) => acc + (+curr.flightOfStairs! || 0),
-  //         0
-  //       ) ?? 0) ?? 0) * flightOfStairsFee;
-  //   return (
-  //     minimumAmount +
-  //     majorAppliancesAmount +
-  //     workoutEquipmentsAmount +
-  //     pianosAmount +
-  //     hotTubsAmount +
-  //     poolTablesAmount +
-  //     stopsAmount +
-  //     flightOfStairsAmount
-  //   );
-  // }, [
-  //   minimumAmount,
-  //   formData.majorAppliances,
-  //   majorAppliancesFee,
-  //   formData.workOutEquipment,
-  //   workoutEquipmentsFee,
-  //   formData.pianos,
-  //   pianosFee,
-  //   formData.hotTubs,
-  //   hotTubsFee,
-  //   formData.poolTables,
-  //   poolTablesFee,
-  //   formData.stops.length,
-  //   stopOverFee,
-  //   formData.PUDPickUpLocation.flightOfStairs,
-  //   formData.PUDFinalDestination.flightOfStairs,
-  //   formData.PUDStops,
-  //   flightOfStairsFee,
-  // ]);
 
   if (companyName === "") {
     return (
@@ -193,7 +172,7 @@ const Page = () => {
                   long: "",
                 },
                 name: companyName,
-                charge: hourlyRate,
+                charge: realHourlyRate,
                 reviews: numberOfReviews,
                 movesCompleted: "nil",
                 companyId: companyId,
@@ -202,6 +181,7 @@ const Page = () => {
             <QuoteDetailsWorkers
               className="flex-1"
               movers={movers}
+              minMovers={originalMoverCount}
               disabled={finishing}
               finishing={finishing}
             />
@@ -211,8 +191,8 @@ const Page = () => {
               {
                 icon: <TruckFrontGrey {...iconSizes} />,
                 label: "Travelers Fee",
-                rate: truckFee,
-                count: movers,
+                rate: realTruckFee,
+                count: 1, // FIXME: is the count always 1? 
               },
               {
                 icon: <Appliances {...iconSizes} />,
@@ -224,10 +204,7 @@ const Page = () => {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
-                count: (formData.PUDStops ?? []).reduce(
-                  (t, s) => t + +(s.flightOfStairs ?? 0),
-                  +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
-                ),
+                count: totalStairs,
               },
               {
                 icon: <Piano {...iconSizes} />,
@@ -262,8 +239,8 @@ const Page = () => {
               {
                 icon: <Alarm {...iconSizes} />,
                 label: "Minimum Hours",
-                count: minimumHours * Math.max(1, movers), // FIXME: max() call might be redundant?
-                rate: hourlyRate,
+                count: minimumHours,
+                rate: realHourlyRate,
               },
             ]}
           />
@@ -292,16 +269,16 @@ const Page = () => {
           />
           {((!updating && !finishing) ||
             selectedBooking?.status !== "Cancelled") && (
-            <>
-              <QuoteDetailsCharge
-                amount={totalAmount}
-                hourlyRate={formatCurrency(hourlyRate)}
-                finishing={finishing}
-                updating={updating}
-              />
-              {finishing && <QuoteDetailsEditRequest type="RegularMove" />}
-            </>
-          )}
+              <>
+                <QuoteDetailsCharge
+                  amount={totalAmount}
+                  hourlyRate={realHourlyRate}
+                  finishing={finishing}
+                  updating={updating}
+                />
+                {finishing && <QuoteDetailsEditRequest type={RequestType.RegularMove} />}
+              </>
+            )}
           {companyId && (
             <Button className=" text-white-100" asChild>
               <Link href={`/reviews/${companyId}`}>

@@ -1,6 +1,6 @@
 import { mergeArrays } from "@/lib/utils";
 import { BookMoveDto } from "@/types/dtos";
-import { BookMove, Booking } from "@/types/structs";
+import { BookMove, Booking, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
 const parseFlightOfStairs = (stop: any) => ({
@@ -9,8 +9,8 @@ const parseFlightOfStairs = (stop: any) => ({
     typeof stop.flightOfStairs === "string"
       ? parseInt(stop.flightOfStairs) || 0
       : typeof stop.flightOfStairs === "number"
-      ? stop.flightOfStairs
-      : 0,
+        ? stop.flightOfStairs
+        : 0,
 });
 
 /**
@@ -47,7 +47,7 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
     const adjustedHours = period === 'PM' && hours !== 12 ? hours + 12 : hours === 12 && period === 'AM' ? 0 : hours;
     return format(new Date(1970, 0, 1, adjustedHours, minutes), "h:mm a");
   })();
-  
+
   return {
     fromAddress: {
       address: a.pickUpLocation.location,
@@ -74,7 +74,7 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
     date: `${formattedDate} ${formattedTime}`,
     additionalStops: mergeArrays(a.stops, a.PUDStops).map(parseFlightOfStairs),
     addOns: filteredAddOns,
-    requestType: "RegularMove",
+    requestType: RequestType.RegularMove,
     bookingId: a.bookingId ?? "",
   };
 };

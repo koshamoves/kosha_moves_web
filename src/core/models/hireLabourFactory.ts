@@ -1,5 +1,5 @@
 import { BookMoveDto } from "@/types/dtos";
-import { Booking, HireLabour } from "@/types/structs";
+import { Booking, HireLabour, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
 export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
@@ -48,7 +48,7 @@ export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
     date: `${formattedDate} ${formattedTime}`,
     additionalStops: [],
     addOns: filteredAddOns,
-    requestType: "LabourOnly",
+    requestType: RequestType.LabourOnly,
   };
 };
 

@@ -15,7 +15,7 @@ import {
 import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
 import useShowQuotes from "@/stores/show-quotes.store";
-import { Quote } from "@/types/structs";
+import { Quote, RequestType } from "@/types/structs";
 import { useRouter } from "next/navigation";
 import useBookingStore from "@/stores/booking.store";
 import { P } from "@/components/atoms";
@@ -53,14 +53,13 @@ const Page = () => {
           onClick={() => {
             setQuoteDetailsData(item);
             router.push(
-              `${Routes.hireLabourQuoteDetails}${
-                updating ? "?action=update" : ""
+              `${Routes.hireLabourQuoteDetails}${updating ? "?action=update" : ""
               }`
             );
           }}
           key={item.companyName + index}
         >
-          <QuotesImage src="" type="LabourOnly" />
+          <QuotesImage src="" type={RequestType.LabourOnly} />
           <QuotesContent>
             <Row className="items-start justify-between gap-6 flex-wrap">
               <Column>

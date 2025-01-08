@@ -36,7 +36,7 @@ const LocationInput: FC<LocationInputProps> = ({ name, control, label, defaultVa
   useEffect(() => {
     // TODO: I gotta clean this up a bit, also deal with types and stuff :(
     if (data) {
-      setSuggestions(data.data.predictions);
+      setSuggestions(data.predictions);
     } else {
       setSuggestions([]);
     }
@@ -132,7 +132,7 @@ const StopsLocationInput: FC<LocationInputProps> = ({ name, index, label, defaul
 
   useEffect(() => {
     if (data) {
-      setSuggestions(data.data.predictions);
+      setSuggestions(data.predictions);
     } else {
       setSuggestions([]);
     }
