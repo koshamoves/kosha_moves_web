@@ -21,17 +21,13 @@ The `.nvmrc` file would automatically pick up the right node version for the app
 Once you have that sorted, you can go ahead and install the dependencies:
 
 ```bash
-yarn 
-```
-Or
-```bash
-yarn install
-```
+npm install
+````
 
 Now run the below command to run the app on the development server
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
