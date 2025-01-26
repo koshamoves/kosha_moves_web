@@ -203,7 +203,7 @@ export interface Company {
 
 // https://github.com/koshamoves/kosha_moves_functions/blob/ba2ee1f5c3279843e9361be89ae20e55c622f1c3/functions/src/models/search-request.ts#L27C1-L31C2
 export enum RequestType {
-  RegularMove = "RequestType.RegularMove",
-  LabourOnly = "RequestType.LabourOnly",
-  Delivery = "RequestType.Delivery",
+  RegularMove = "RegularMove",
+  LabourOnly = "LabourOnly",
+  Delivery = "Delivery",
 }
