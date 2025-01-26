@@ -56,6 +56,10 @@ import { useGetVoucher } from "@/hooks/misc/useGetVoucher";
 import useHireLabourStore from "@/stores/hire-labour.store";
 import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
 import Link from "next/link";
+import { useBookMove } from "@/hooks/booking/useBookMove";
+import { useUpdateMove } from "@/hooks/booking/useUpdateMove";
+import { BookingStatusDto, MoveRequestDto, MoveUpdateDto } from "@/types/dtos";
+import { updateMove } from "@/core/api/booking";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -468,8 +472,9 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   );
   const selectedBooking = useBookingStore.use.selectedBooking();
   const { user } = useUserStore((state) => state);
-  const { loading, addToBookings } = useAddToBookings();
-  const { isPending, mutate: updateBooking } = useUpdateBooking();
+  const { bookMove } = useBookMove();
+  const { isPending, updateMove } = useUpdateMove();
+  //const { isPending, mutate: updateBooking } = useUpdateBooking();
   const formData = JSON.parse(
     localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
   );
@@ -516,57 +521,40 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   }
 
   const handleBook = () => {
+    console.log("here");
+    console.log(selectedBooking);
+    console.log(updating);
     if (!selectedBooking && updating) return;
+    console.log("here 2");
     const formattedFormData = isHireLabourRoute
       ? hireLabourFactory(formData)
       : bookMoveFactory(formData);
     const data = {
-      bookingId: formattedFormData.bookingId
-        ? formattedFormData.bookingId
-        : generateBookingId(),
+  
       clientId: user?.uid ?? "",
-      driverId: "", //TODO: where is driverId from?
-      ...formattedFormData,
-      hasAdditionalStops: formattedFormData.additionalStops
-        ? formattedFormData.additionalStops.length > 0
-          ? true
-          : false
-        : false,
-      hasAddOns: formData.services.length > 0 ? true : false,
-      status: "Pending" as "Pending",
-      movingDate: formattedFormData.date,
-      bookingDate: format(new Date(), "M/dd/yyyy h:mm a"),
-      workoutEquipmentsQuantity: formData.workOutEquipment
-        ? parseInt(formData.workOutEquipment)
-        : 0,
-      majorAppliancesQuantity: formData.majorAppliances
-        ? parseInt(formData.majorAppliances)
-        : 0,
-      pianosQuantity: formData.pianos ? parseInt(formData.pianos ?? "0") : 0,
-      hotTubsQuantity: formData.hotTubs ? parseInt(formData.hotTubs ?? "0") : 0,
-      poolTablesQuantity: formData.poolTables
-        ? parseInt(formData.poolTables)
-        : 0,
+      clientName: user?.fullName ?? "",
+      searchRequest: {
+        ...formattedFormData, 
+        additionalNotes: formData.instructions
+      },
+     
+    bookingDate: new Date(), 
       quote: { ...quoteDetailsData, voucherCode: gottenVoucher?.code ?? "" },
-      additionalNotes: formData.instructions,
-      serviceAddOns: formData.services,
-      estimatedNumberOfBoxes: formData.numberOfBoxes
-        ? parseInt(formData.numberOfBoxes)
-        : 0,
-      images: formData?.images ?? [],
-    };
-    const { date, addOns, ...dataWithoutDate } = data;
+  
+    } as MoveRequestDto;
+   
     if (updating) {
       if (!selectedBooking?.bookingId) return;
-      updateBooking({
+      const moveUpdateDto : MoveUpdateDto = {
         bookingId: selectedBooking.bookingId,
-        booking: {
-          ...dataWithoutDate,
-          bookingDate: selectedBooking.bookingDate,
-        } as Booking,
-      });
-    } else {
-      addToBookings(dataWithoutDate as Booking);
+        moveRequest: data,
+        status: BookingStatusDto.Edited,
+        modifiedDate: new Date()
+      };
+
+      updateMove(moveUpdateDto);   
+    } else {     
+      bookMove(data);
     }
   };
 
@@ -637,8 +625,8 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
             </>
 
             <Button
-              disabled={loading || isPending}
-              loading={loading || isPending}
+              disabled={isPending}
+              loading={isPending}
               onClick={() => {
                 if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
                 if (!(!formData || !quoteDetailsData) && currentUser)

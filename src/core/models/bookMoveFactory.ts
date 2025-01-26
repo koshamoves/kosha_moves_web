@@ -1,5 +1,5 @@
 import { mergeArrays } from "@/lib/utils";
-import { BookMoveDto } from "@/types/dtos";
+import { photoDto, SearchRequestDto } from "@/types/dtos";
 import { BookMove, Booking, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
@@ -21,13 +21,13 @@ const parseFlightOfStairs = (stop: any) => ({
  *
  * requestType is defaulted
  */
-export const bookMoveFactory = (a: BookMove): BookMoveDto => {
+export const bookMoveFactory = (a: BookMove): SearchRequestDto => {
   //TODO: Handle driverId
 
   const addOns = [
     { name: "Major Appliances", quantity: parseInt(a.majorAppliances ?? "0") },
     {
-      name: "Workout Equipment",
+      name: "Workout Equipments",
       quantity: parseInt(a.workOutEquipment ?? "0"),
     },
     { name: "Pianos", quantity: parseInt(a.pianos ?? "0") },
@@ -39,6 +39,14 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
   const filteredAddOns = addOns.filter(
     (item) => !isNaN(item.quantity) && item.quantity > 0
   );
+
+  const photos : photoDto [] = [
+    {
+      name: "",
+      savedInStorage: false,
+      bytes: undefined
+    }
+  ]
 
   const formattedDate = format(new Date(a.moveDate), "M/d/yyyy");
   const formattedTime = (() => {
@@ -71,11 +79,13 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
       hasElevator: a.PUDFinalDestination.elevatorAccess,
       id: "",
     },
-    date: `${formattedDate} ${formattedTime}`,
+    date: a.moveDate,
     additionalStops: mergeArrays(a.stops, a.PUDStops).map(parseFlightOfStairs),
     addOns: filteredAddOns,
     requestType: RequestType.RegularMove,
     bookingId: a.bookingId ?? "",
+    numberOfBoxes: parseInt(a.numberOfBoxes ?? "0"),
+    photos: photos
   };
 };
 

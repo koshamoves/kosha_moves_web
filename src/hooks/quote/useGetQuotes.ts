@@ -3,7 +3,7 @@ import { ErrorMessage, StorageKeys } from "@/constants/enums";
 import { getQuotes as getQuotesData } from "@/core/api/quote";
 import bookMoveStore from "@/stores/book-move.store";
 import useShowQuotes from "@/stores/show-quotes.store";
-import { BookMoveDto } from "@/types/dtos";
+import { SearchRequestDto } from "@/types/dtos";
 import { Quote } from "@/types/structs";
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import { useValidRoute } from "../useValidRoute";
@@ -11,17 +11,17 @@ import { Routes } from "@/core/routing";
 import hireLabourStore from "@/stores/hire-labour.store";
 
 export const useGetQuotes = (
-  useMutationOptions: Omit<UseMutationOptions<any, any, Partial<BookMoveDto>>, "mutationFn"> = {}
+  useMutationOptions: Omit<UseMutationOptions<any, any, Partial<SearchRequestDto>>, "mutationFn"> = {}
 ) => {
   const { isValidRoute: isHireLabourRoute } = useValidRoute(Routes.sequence.hireLabour);
   const setQuotesResult = useShowQuotes((state) => state.setQuotesResult);
 
-  const methods = useMutation<any, any, Partial<BookMoveDto>>({
+  const methods = useMutation<any, any, Partial<SearchRequestDto>>({
     mutationFn: (props) => getQuotesData(props),
     ...useMutationOptions,
   });
 
-  const _useGetQuotes = (payload: Partial<BookMoveDto>) =>
+  const _useGetQuotes = (payload: Partial<SearchRequestDto>) =>
     methods
       .mutateAsync(payload)
       .then((res: Quote[]) => {

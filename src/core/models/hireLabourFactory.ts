@@ -1,12 +1,12 @@
-import { BookMoveDto } from "@/types/dtos";
+import { SearchRequestDto } from "@/types/dtos";
 import { Booking, HireLabour, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
-export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
+export const hireLabourFactory = (a: HireLabour): Partial<SearchRequestDto> => {
   const addOns = [
     { name: "Major Appliances", quantity: parseInt(a.majorAppliances ?? "0") },
     {
-      name: "Workout Equipment",
+      name: "Workout Equipments",
       quantity: parseInt(a.workOutEquipment ?? "0"),
     },
     { name: "Pianos", quantity: parseInt(a.pianos ?? "0") },
@@ -45,8 +45,7 @@ export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
       hasElevator: "",
       id: "",
     },
-    date: `${formattedDate} ${formattedTime}`,
-    additionalStops: [],
+    date: a.date,
     addOns: filteredAddOns,
     requestType: RequestType.LabourOnly,
   };
