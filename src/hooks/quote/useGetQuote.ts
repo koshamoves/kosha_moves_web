@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { getQuote } from "@/core/api/quote";
-import { BookMoveDto } from "@/types/dtos";
+import { SearchRequestDto } from "@/types/dtos";
 
-export const useGetQuote = ({ payload }: { payload?: BookMoveDto } = {}) => {
+export const useGetQuote = ({ payload }: { payload?: SearchRequestDto } = {}) => {
   const { mutate, ...others } = useMutation({
-    mutationFn: async (payload: BookMoveDto) => {
+    mutationFn: async (payload: SearchRequestDto) => {
       try {
         const quote = getQuote(payload);
         return quote;

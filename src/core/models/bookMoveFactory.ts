@@ -14,10 +14,10 @@ const parseFlightOfStairs = (stop: any) => ({
 });
 
 /**
- * Creates a BookMoveDto from a given BookMove.
+ * Creates a SearchRequestDto from a given BookMove.
  *
  * @param a - The BookMove object to convert.
- * @returns The corresponding BookMoveDto.
+ * @returns The corresponding SearchRequestDto.
  *
  * requestType is defaulted
  */
