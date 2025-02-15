@@ -19,7 +19,7 @@ export const signUpSchema = z.object({
       },
       {
         message: "Full name should include both first name and last name",
-      }
+      },
     ),
   phone: z.string().regex(/^(?:\+234|0)?(70|80|81|90|91)\d{8}$/, {
     message: "Invalid Nigerian phone number format",
@@ -45,7 +45,7 @@ export const addCardSchema = z.object({
       },
       {
         message: "Full name should include both first name and last name",
-      }
+      },
     ),
   cardNumber: z.string().regex(creditCardNumberPattern, {
     message: "Invalid credit card number",
@@ -57,7 +57,7 @@ export const addCardSchema = z.object({
     .max(3, { message: "CVV must be exactly 3 digits" }),
 });
 
-const locationSchema = z.object({
+export const locationSchema = z.object({
   location: z.string().min(1, { message: "Location is required" }),
   apartmentNumber: z.string().optional(),
   googlePlaceId: z.string().optional(),
@@ -78,17 +78,18 @@ const pickUpDetailSchema = z
     flightOfStairs: z.string().optional(),
   })
   .superRefine(({ buildingType, elevatorAccess }, ctx) => {
-    if (buildingType !== "House" && elevatorAccess.length === 0)
+    if (buildingType !== "House" && elevatorAccess.length === 0) {
       ctx.addIssue({
         code: "custom",
         message: "Required",
         path: ["elevatorAccess"],
       });
+    }
   });
 
 export const bookMoveSequenceStep2Schema = z.object({
   PUDPickUpLocation: pickUpDetailSchema,
-  PUDStops: z.array(pickUpDetailSchema).optional(),
+  PUDStops: z.array(pickUpDetailSchema).optional(), // FIXME: are stops and PUDStops both optional or not?
   PUDFinalDestination: pickUpDetailSchema,
 });
 
@@ -139,15 +140,14 @@ export const bookDeliverySequenceStep3Schema = bookMoveSequenceStep3Schema.pick(
     instructions: true,
     pictures: true,
     receipts: true,
-  }
+  },
 );
 
 export const bookDeliverySequenceStep4Schema = bookMoveSequenceStep4Schema;
 
 export const sendMessageSchema = z.object({
   message: z.string().optional(),
-  file:
-    typeof window === "undefined"
-      ? z.any().optional()
-      : z.instanceof(File).optional(),
+  file: typeof window === "undefined"
+    ? z.any().optional()
+    : z.instanceof(File).optional(),
 });

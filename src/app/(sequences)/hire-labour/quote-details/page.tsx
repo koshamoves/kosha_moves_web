@@ -23,9 +23,8 @@ import {
   QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { StorageKeys } from "@/constants/enums";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
-import { formatCurrency, safeParseDate } from "@/lib/utils";
+import { formatCurrency, safeParseDate, thing2 } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
@@ -33,6 +32,7 @@ import { RequestType, type Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -43,7 +43,9 @@ const Page = () => {
     width: 21,
     height: 21,
   };
-  const { quoteDetailsData } = useQuoteDetailsData();
+
+  const quoteDetails = thing2(useQuoteDetailsStore());
+
   const {
     companyName,
     numberOfReviews,
@@ -61,7 +63,8 @@ const Page = () => {
     additionalMoverHourlyRate
   } = finishing
       ? (selectedBooking?.quote as Quote) ?? {}
-      : quoteDetailsData || {};
+      : quoteDetails || {};
+
   const formData = JSON.parse(
     localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
   );
@@ -78,8 +81,8 @@ const Page = () => {
     locations = [selectedBooking?.fromAddress];
   }
 
-
-  console.debug(quoteDetailsData);
+  // TODO: remove
+  console.debug(quoteDetails);
 
   /// FIXME: see app/(sequences)/hire-labour/quote-details/page.tsx
   const [originalMoverCount, _] = useState(movers);
@@ -121,7 +124,7 @@ const Page = () => {
     );
   }
 
-  const companyId = selectedBooking?.quote?.companyId ?? quoteDetailsData.companyId;
+  const companyId = selectedBooking?.quote?.companyId ?? quoteDetails.companyId;
   return (
     <Column className="w-full">
       {finishing && (

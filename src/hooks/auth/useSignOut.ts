@@ -6,7 +6,7 @@ import useUserStore from "@/stores/user.store";
 import { useState } from "react";
 
 export const useSignOut = () => {
-      const {updateUser} =  useUserStore((state) => state);
+      const { update: updateUser, reset: resetUser } = useUserStore((state) => state);
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState(null);
 
@@ -15,22 +15,22 @@ export const useSignOut = () => {
             setError(null);
 
             signOutUser()
-            .then(() => {
-                  updateUser(null);
-                  localStorage.clear();
-                  wait(1000).then(() => window.location.reload())
-            })
-            .catch((err) => {
-                  setError(err);
-                  toast({
-                        title:"Oops!",
-                        description: getFirebaseErrorMessage(err),
-                        variant:"destructive"
+                  .then(() => {
+                        resetUser();
+                        localStorage.clear();
+                        wait(1000).then(() => window.location.reload())
                   })
-            })            
-            .finally(() => {
-                  wait(2000).then(() => setLoading(false));
-            })
+                  .catch((err) => {
+                        setError(err);
+                        toast({
+                              title: "Oops!",
+                              description: getFirebaseErrorMessage(err),
+                              variant: "destructive"
+                        })
+                  })
+                  .finally(() => {
+                        wait(2000).then(() => setLoading(false));
+                  })
       }
       return {
             signOut,

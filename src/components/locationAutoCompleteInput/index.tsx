@@ -91,7 +91,8 @@ const LocationInput: FC<LocationInputProps> = ({ name, control, label, defaultVa
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <div ref={ref} className="flex flex-col gap-2">
-              <Input {...field} value={inputValue} onChange={handleChange} />
+              {/* TODO: How can I make value be field.value instead? */}
+              <Input {...field} defaultValue={field.value} value={inputValue} onChange={handleChange} />
               {isOpen && (
                 <ul className="bg-white border p-4 flex flex-col gap-2 shadow-custom rounded-md max-h-[200px] overflow-y-auto">
                   {isPending ? (

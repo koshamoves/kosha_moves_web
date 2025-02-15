@@ -3,22 +3,28 @@ import { Quote } from '@/types/structs';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface Store {
-  showQuote: boolean;
-  quotesResult: Array<Quote>;
+interface Actions {
   setShowQuote: (value: boolean) => void;
-  setQuotesResult: (quotes: Array<Quote> | undefined) => void;
+  setQuotesResult: (quotes: Quote[] | undefined) => void;
   reset: () => void;
 }
+
+type State = {
+  showQuote: boolean,
+  quotesResult: Quote[]
+}
+
+type Store = State & Actions;
+
+const init: State = { showQuote: false, quotesResult: [] };
 
 const useShowQuotes = create<Store>()(
   persist(
     (set) => ({
-      showQuote: false,
-      quotesResult: [],
+      ...init,
       setShowQuote: (value: boolean) => set({ showQuote: value }),
-      setQuotesResult: (quotes: Array<Quote> | undefined) => set({ quotesResult: quotes || [] }),
-      reset: () => set({ quotesResult: [] })
+      setQuotesResult: (quotes: Quote[] | undefined) => set({ quotesResult: quotes || [] }),
+      reset: () => set({ ...init })
     }),
     {
       name: StorageKeys.QUOTES_RESULT,
@@ -27,9 +33,6 @@ const useShowQuotes = create<Store>()(
   )
 );
 
-const clearQuotesStorage = () => {
-  localStorage.removeItem(StorageKeys.QUOTES_RESULT);
-};
+
 
 export default useShowQuotes;
-export { clearQuotesStorage }

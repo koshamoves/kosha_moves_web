@@ -65,13 +65,15 @@ import { ErrorMessage } from "@/constants/enums";
 import { toast } from "@/components/toast/use-toast";
 import TimePicker from '../../../TimePicker';
 import { CountableInput } from '../../../input/CountableInput';
+import { BookMove } from "@/types/structs";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
-  const { update, formData, removeStop, reset } = useBookMoveStore(
-    (state) => state
-  );
-  const { moveDate, time, stops, pickUpLocation, finalDestination } = formData;
+
+  // FIXME: might be worth to fully spell out these fields for memoization
+  const { update, removeStop, reset } = useBookMoveStore(state => state);
+  let { moveDate, time, stops, pickUpLocation, finalDestination } = useBookMoveStore(state => state);
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep1Schema>>({
     resolver: zodResolver(bookMoveSequenceStep1Schema),
     defaultValues: {
@@ -82,18 +84,22 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       finalDestination,
     },
   });
+
   const { fields, append, remove } = useFieldArray({
     name: "stops",
     control: form.control,
   });
 
   useEffect(() => {
+    // TODO: use zustand for this 
     localStorage.removeItem("bookingId");
   }, []);
+
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep1Schema>) => {
     onChangeStep("propertyDetail");
     update(data);
   };
+
   return (
     <Form {...form}>
       <form className="text-grey-300" onSubmit={form.handleSubmit(onSubmit)}>
@@ -151,7 +157,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="pickUpLocation.location"
               control={form.control}
               label="Pickup Location"
-              defaultValue={pickUpLocation.location}
+              defaultValue={pickUpLocation?.location}
             />
             <FormField
               control={form.control}
@@ -163,8 +169,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     <Input
                       {...field}
                       {...InputDirectives.numbersOnly}
-                      defaultValue={formData.pickUpLocation.apartmentNumber}
-                      placeholder=""
+                      defaultValue={pickUpLocation?.apartmentNumber}
                     />
                   </FormControl>
                   <FormMessage />
@@ -262,7 +267,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="finalDestination.location"
               control={form.control}
               label="Final Destination"
-              defaultValue={finalDestination.location}
+              defaultValue={finalDestination?.location}
             />
             <FormField
               control={form.control}
@@ -274,8 +279,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     <Input
                       {...field}
                       {...InputDirectives.numbersOnly}
-                      defaultValue={formData.finalDestination.apartmentNumber}
-                      placeholder=""
+                      defaultValue={finalDestination?.apartmentNumber}
                     />
                   </FormControl>
                   <FormMessage />
@@ -308,23 +312,25 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 };
 
 const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { formData, update } = useBookMoveStore((state) => state);
-  const { PUDFinalDestination, PUDPickUpLocation, PUDStops } = formData;
+  const update = useBookMoveStore(state => state.update);
+  let { PUDFinalDestination, PUDPickUpLocation, PUDStops, stops, pickUpLocation, finalDestination } = useBookMoveStore((state) => state);
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep2Schema>>({
     resolver: zodResolver(bookMoveSequenceStep2Schema),
     defaultValues: {
-      PUDPickUpLocation,
-      PUDFinalDestination,
-      PUDStops:
+      PUDPickUpLocation: { elevatorAccess: "", ...PUDPickUpLocation}, // FIXME: bool, not string please 
+      PUDFinalDestination: { elevatorAccess: "", ...PUDFinalDestination},
+      PUDStops: // TODO: figure out what's going on over here 
         (PUDStops?.length || 0) > 0
           ? PUDStops
-          : formData.stops.map(() => ({
+          : stops.map(() => ({
             buildingType: "",
             flightOfStairs: "0",
             elevatorAccess: "",
           })),
     },
   });
+
 
   const finalDestinationBuildingType = useWatch({
     control: form.control,
@@ -344,13 +350,13 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   });
   const stopsBuildingType = useWatch({
     control: form.control,
-    name: formData.stops.map(
+    name: stops.map(
       (_, index) => `PUDStops.${index}.buildingType`
     ) as "PUDStops"[],
   });
   const stopsElevatorAccess = useWatch({
     control: form.control,
-    name: formData.stops.map(
+    name: stops.map(
       (_, index) => `PUDStops.${index}.elevatorAccess`
     ) as "PUDStops"[],
   });
@@ -368,7 +374,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <Column className="flex-1 max-w-[250px]">
               <P className="font-semibold text-lg">Pickup Location</P>
               <P className="font-bold text-primary text-xl">
-                {formData.pickUpLocation.location}
+                {pickUpLocation?.location}
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
@@ -468,7 +474,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
           </div>
         </div>
-        {formData.stops.map((stop, index) => (
+        {stops.map((stop, index) => (
           <div key={stop.location + index}>
             <Row className="bg-white-100 justify-between shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
               <Column className="flex-1 max-w-[250px]">
@@ -583,7 +589,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <Column className="flex-1 max-w-[250px]">
               <P className="font-semibold text-lg">Final Destination</P>
               <P className="font-bold text-primary text-xl">
-                {formData.finalDestination.location}
+                {finalDestination?.location}
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
@@ -704,11 +710,11 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
 /** Additional Info Step */
 const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { update, updateField, removeImage, formData } = useBookMoveStore(
+  const { update, updateField, removeImage } = useBookMoveStore(
     (state) => state
   );
-  const {
-    majorAppliances,
+
+  let { majorAppliances,
     workOutEquipment,
     pianos,
     hotTubs,
@@ -716,8 +722,9 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     numberOfBoxes,
     instructions,
     images,
-    tempImages,
-  } = formData;
+    tempImages } = useBookMoveStore(state => state);
+
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep3Schema>>({
     resolver: zodResolver(bookMoveSequenceStep3Schema),
     defaultValues: {
@@ -736,6 +743,8 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
   // Generate a new unique ID when the component mounts
   useEffect(() => {
+    // TODO: use zustand for this? 
+    
     const storedBookingId = localStorage.getItem("bookingId");
     if (storedBookingId) {
       setBookingId(storedBookingId);
@@ -748,7 +757,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
   const handleRemoveImage = async (index: number) => {
     try {
-      const imageUrl = formData.images[index];
+      const imageUrl = images[index];
       const urlParts = imageUrl.split("%2F");
       const folder = urlParts[0].split("/").pop();
       const fileName = urlParts[1].split("?")[0];
@@ -759,7 +768,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       removeImage(index);
       form.setValue(
         "images",
-        formData.images.filter((_, i) => i !== index)
+        images.filter((_, i) => i !== index)
       );
       updateField(
         "tempImages",
@@ -817,7 +826,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -835,7 +844,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -854,7 +863,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Pianos</FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -871,7 +880,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Hot Tubs</FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -890,7 +899,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Pool Tables</FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -907,7 +916,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 <FormLabel className="text-grey-300">Number of Boxes</FormLabel>
                 <FormControl>
                   <CountableInput
-                    style={{ button: "h-8 "}}
+                    style={{ button: "h-8 " }}
                     count={field.value}
                     onChange={field.onChange}
                   />
@@ -1041,8 +1050,11 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
-  const { update, formData } = useBookMoveStore((state) => state);
   const [loading, setLoading] = useState(false);
+  
+  const { update } = useBookMoveStore((state) => state);
+  let { services, pickUpLocation } = useBookMoveStore(state => state);
+
   const { isPending, getQuotes } = useGetQuotes({
     onSuccess: () => {
       router.push(
@@ -1062,15 +1074,17 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const form = useForm<z.infer<typeof bookMoveSequenceStep4Schema>>({
     resolver: zodResolver(bookMoveSequenceStep4Schema),
     defaultValues: {
-      services: formData.services,
+      services: services,
     },
   });
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep4Schema>) => {
-    const updatedFormData = { ...formData, ...data };
-    update(updatedFormData);
-    if (formData.pickUpLocation.location)
-      getQuotes(bookMoveFactory(updatedFormData));
+    // FIXME: this is unnecesasry thanks to update()?
+    // const updatedFormData = { ...formData, ...data }; 
+    update(data);
+    
+    const state = useBookMoveStore.getState() as BookMove; // FIXME: maybe don't cast here?
+    if (pickUpLocation?.location) getQuotes(bookMoveFactory(state));
   };
 
   const handleSelectAllChange = (checked: boolean) => {

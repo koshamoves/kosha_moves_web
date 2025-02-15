@@ -12,7 +12,6 @@ import {
   QuotesTitle,
   QuotesVehicle,
 } from "@/components/quotations/quotes";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
 import useShowQuotes from "@/stores/show-quotes.store";
 import { Quote, RequestType } from "@/types/structs";
@@ -22,12 +21,13 @@ import { P } from "@/components/atoms";
 import { CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
   const selectedBooking = useBookingStore.use.selectedBooking();
   const router = useRouter();
-  const { setQuoteDetailsData } = useQuoteDetailsData();
+  const replaceQuoteData = useQuoteDetailsStore((state) => state.replace);
   const { quotesResult } = useShowQuotes((state) => state);
   const updating = searchParams.get("action") === "update";
   if (!selectedBooking && updating) {
@@ -51,7 +51,7 @@ const Page = () => {
       renderItem={({ index, item }) => (
         <Quotes
           onClick={() => {
-            setQuoteDetailsData(item);
+            replaceQuoteData(item);
             router.push(
               `${Routes.hireLabourQuoteDetails}${updating ? "?action=update" : ""
               }`

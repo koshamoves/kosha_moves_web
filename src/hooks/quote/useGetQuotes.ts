@@ -25,13 +25,15 @@ export const useGetQuotes = (
     methods
       .mutateAsync(payload)
       .then((res: Quote[]) => {
-        const { formData } = bookMoveStore.getState();
-        const { formData: hireLabourFormData } = hireLabourStore.getState();
+        const bookMoveData = bookMoveStore.getState();
+        const { formData: hireLabourData } = hireLabourStore.getState();
+
+        // FIXME: why do we want to write to storage here?
 
         if (isHireLabourRoute) {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourFormData));
+          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourData));
         } else {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(formData));
+          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(bookMoveData));
         }
 
         setQuotesResult(res);

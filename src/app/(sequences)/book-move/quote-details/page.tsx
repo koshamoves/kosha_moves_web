@@ -23,9 +23,8 @@ import {
   QuoteDetailsNotesImages,
   QuoteDetailsServiceRequirement,
 } from "@/components/quotations/quote-details";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
-import { formatCurrency, safeParseDate } from "@/lib/utils";
+import { formatCurrency, safeParseDate, thing2 } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
@@ -34,14 +33,28 @@ import { Quote, RequestType } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
-  const formData = useBookMoveStore((store) => store.formData);
   const selectedBooking = useBookingStore.use.selectedBooking();
   const finishing = searchParams.get("action") === "finish";
   const updating = searchParams.get("action") === "update";
-  const { quoteDetailsData } = useQuoteDetailsData();
+  const quoteDetails = thing2(useQuoteDetailsStore(state => state));
+
+  let {
+    PUDStops,
+    PUDPickUpLocation,
+    PUDFinalDestination,
+    majorAppliances,
+    pianos,
+    hotTubs,
+    poolTables,
+    workOutEquipment,
+    images,
+    instructions,
+    services,
+  } = useBookMoveStore(state => state);
 
   const iconSizes = { width: 21, height: 21 };
 
@@ -65,7 +78,7 @@ const Page = () => {
     movingTruck,
   } = finishing
       ? (selectedBooking?.quote as Quote) ?? {}
-      : quoteDetailsData || {};
+      : quoteDetails || {};
 
 
   // FIXME: Ensure that we're properly editing the right stuff
@@ -85,9 +98,11 @@ const Page = () => {
   const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
   const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
 
-  const totalStairs = (formData.PUDStops ?? []).reduce(
+
+  // FIXME: Assuming happy path, PUDPickUpLocation and PUDFinalDestination are defined, gracefully error otherwise?
+  const totalStairs = (PUDStops ?? []).reduce(
     (t, s) => t + +(s.flightOfStairs ?? 0),
-    +(formData.PUDPickUpLocation.flightOfStairs ?? 0) + +(formData.PUDFinalDestination.flightOfStairs ?? 0)
+    +(PUDPickUpLocation!.flightOfStairs ?? 0) + +(PUDFinalDestination!.flightOfStairs ?? 0)
   );
 
   // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
@@ -95,13 +110,13 @@ const Page = () => {
   const totalAmount =
     realTruckFee +
     realHourlyRate * minimumHours +
-    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
+    +(majorAppliances ?? 0) * majorAppliancesFee +
     totalStairs * flightOfStairsFee +
-    +(formData.pianos ?? 0) * pianosFee +
-    +(formData.PUDStops?.length ?? 0) * stopOverFee +
-    +(formData.hotTubs ?? 0) * hotTubsFee +
-    +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee;
+    +(pianos ?? 0) * pianosFee +
+    +(PUDStops?.length ?? 0) * stopOverFee +
+    +(hotTubs ?? 0) * hotTubsFee +
+    +(poolTables ?? 0) * poolTablesFee +
+    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   let bookingDate, bookingTime, locations;
 
@@ -145,7 +160,7 @@ const Page = () => {
   }
 
   const companyId =
-    selectedBooking?.quote?.companyId ?? quoteDetailsData.companyId;
+    selectedBooking?.quote?.companyId ?? quoteDetails.companyId;
   return (
     <Column className="w-full">
       {finishing && (
@@ -198,7 +213,7 @@ const Page = () => {
                 icon: <Appliances {...iconSizes} />,
                 label: "Appliances",
                 rate: majorAppliancesFee,
-                count: +(formData.majorAppliances ?? 0),
+                count: +(majorAppliances ?? 0),
               },
               {
                 icon: <FlightOfStairs {...iconSizes} />,
@@ -210,31 +225,31 @@ const Page = () => {
                 icon: <Piano {...iconSizes} />,
                 label: "Piano",
                 rate: pianosFee,
-                count: +(formData.pianos ?? 0),
+                count: +(pianos ?? 0),
               },
               {
                 icon: <AdditionalStops {...iconSizes} />,
                 label: "Additional Stops",
                 rate: stopOverFee,
-                count: +(formData.PUDStops?.length ?? 0),
+                count: +(PUDStops?.length ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Hot Tub",
                 rate: hotTubsFee,
-                count: +(formData.hotTubs ?? 0),
+                count: +(hotTubs ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Pool Table",
                 rate: poolTablesFee,
-                count: +(formData.poolTables ?? 0),
+                count: +(poolTables ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Workout Equipment",
                 rate: workoutEquipmentsFee,
-                count: +(formData.workOutEquipment ?? 0),
+                count: +(workOutEquipment ?? 0),
               },
               {
                 icon: <Alarm {...iconSizes} />,
@@ -247,19 +262,19 @@ const Page = () => {
           <QuoteDetailsNotesImages
             images={
               !finishing
-                ? formData?.images ?? []
+                ? images ?? []
                 : selectedBooking?.images ?? []
             }
             notes={
               !finishing
-                ? formData.instructions ?? ""
+                ? instructions ?? ""
                 : selectedBooking?.additionalNotes ?? ""
             }
           />
         </Column>
         <Column className="gap-4 flex-1 max-w-[400px]">
           <QuoteDetailsServiceRequirement
-            services={formData.services}
+            services={services}
             disabled={finishing || selectedBooking?.status === "Cancelled"}
           />
           <QuoteDetailsVehicle
