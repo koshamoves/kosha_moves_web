@@ -92,8 +92,6 @@ const Page = () => {
     locations = [selectedBooking?.fromAddress];
   }
 
-  // TODO: remove
-  console.debug(quoteDetails);
 
   /// FIXME: see app/(sequences)/hire-labour/quote-details/page.tsx
   const [originalMoverCount, _] = useState(movers);

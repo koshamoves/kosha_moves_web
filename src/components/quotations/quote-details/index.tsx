@@ -30,13 +30,14 @@ import { useAddToBookings } from "@/hooks/fireStore/useAddToBookings";
 import { useValidRoute } from "@/hooks/useValidRoute";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { generateDoodles } from "@/lib/helpers/generateDoodle";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, thing2 } from "@/lib/utils";
 import useBookingStore from "@/stores/booking.store";
 import useUserStore from "@/stores/user.store";
 import {
   BookMove,
   Booking,
   HireLabour,
+  Quote,
   QuoteDetailsRate,
   RequestType,
   Voucher,
@@ -476,15 +477,15 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   const { isPending, updateMove } = useUpdateMove();
   //const { isPending, mutate: updateBooking } = useUpdateBooking();
 
-  const bookData = useBookMoveStore(state => state) as BookMove;
-  const hireData = useHireLabourStore(state => state.formData) as HireLabour;
+  const bookData = useBookMoveStore(state => state) as BookMove; // FIXME: some type safety here? 
+  const hireData = useHireLabourStore(state => state) as HireLabour;
 
   // FIXME: merging the two types like this isn't the best imo. (temp fix so things aren't too broken)
   const formData: BookMove | HireLabour = isHireLabourRoute ? hireData : bookData;
 
-  const quoteDetailsData = JSON.parse(
-    localStorage.getItem(StorageKeys.QUOTE_DETAIL) || "{}"
-  );
+  const quoteDetails = useQuoteDetailsStore(state => state) as Quote;
+
+
   const router = useRouter();
   const pathname = usePathname();
   const [gottenVoucher, setGottenVoucher] = useState<Voucher | null>(null);
@@ -515,7 +516,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
     },
   });
 
-  if (!formData || !quoteDetailsData) {
+  if (!formData || !quoteDetails) {
     toast({
       title: "Oops!",
       description: ErrorMessage.SERVICE_REQUEST_MADE,
@@ -543,7 +544,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       },
      
     bookingDate: new Date(), 
-      quote: { ...quoteDetailsData, voucherCode: gottenVoucher?.code ?? "" },
+      quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
   
     } as MoveRequestDto;
    
@@ -633,7 +634,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
               loading={isPending}
               onClick={() => {
                 if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
-                if (!(!formData || !quoteDetailsData) && currentUser)
+                if (!(!formData || !quoteDetails) && currentUser)
                   handleBook();
               }}
             >
