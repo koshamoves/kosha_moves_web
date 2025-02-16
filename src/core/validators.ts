@@ -73,7 +73,7 @@ export const bookMoveSequenceStep1Schema = z.object({
 
 const pickUpDetailSchema = z
   .object({
-    buildingType: z.string().min(1, { message: "Required" }),
+    buildingType: z.string().min(1, { message: "Required" }), // FIXME: This should probably be an enum
     elevatorAccess: z.string(),
     flightOfStairs: z.string().optional(),
   })

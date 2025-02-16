@@ -33,6 +33,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import useQuoteDetailsStore from "@/stores/quote-details.store";
+import useHireLabourStore from "@/stores/hire-labour.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -65,9 +66,19 @@ const Page = () => {
       ? (selectedBooking?.quote as Quote) ?? {}
       : quoteDetails || {};
 
-  const formData = JSON.parse(
-    localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
-  );
+  let {
+    majorAppliances,
+    pianos,
+    flightOfStairs,
+    hotTubs,
+    poolTables,
+    workOutEquipment,
+    images,
+    instructions,
+    services,
+  } = useHireLabourStore(state => state);
+
+
   let bookingDate, bookingTime, locations;
   if (finishing) {
     bookingDate = format(
@@ -92,12 +103,12 @@ const Page = () => {
   const totalAmount =
     realTruckFee +
     realHourlyRate * minimumHours +
-    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
-    +(formData.pianos ?? 0) * pianosFee +
-    +(formData.flightOfStairs ?? 0) * flightOfStairsFee +
-    +(formData.hotTubs ?? 0) * hotTubsFee +
-    +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee;
+    +(majorAppliances ?? 0) * majorAppliancesFee +
+    +(pianos ?? 0) * pianosFee +
+    +(flightOfStairs ?? 0) * flightOfStairsFee +
+    +(hotTubs ?? 0) * hotTubsFee +
+    +(poolTables ?? 0) * poolTablesFee +
+    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   if (companyName === "") {
     return (
@@ -178,43 +189,44 @@ const Page = () => {
                 icon: <Appliances {...iconSizes} />,
                 label: "Appliances",
                 rate: majorAppliancesFee,
-                count: +(formData.majorAppliances ?? 0),
+                count: +(majorAppliances ?? 0),
               },
               {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
-                count: +(formData.flightOfStairs ?? 0),
+                count: +(flightOfStairs ?? 0),
               },
               {
                 icon: <Piano {...iconSizes} />,
                 label: "Piano",
                 rate: pianosFee,
-                count: +(formData.pianos ?? 0),
+                count: +(pianos ?? 0),
               },
-              {
-                icon: <AdditionalStops {...iconSizes} />,
-                label: "Additional Stops",
-                rate: stopOverFee,
-                count: +(formData.PUDStops?.length ?? 0),
-              },
+              // FIXME: can HireLabour have additional stops? 
+              // {
+              //   icon: <AdditionalStops {...iconSizes} />,
+              //   label: "Additional Stops",
+              //   rate: stopOverFee,
+              //   count: +(PUDStops?.length ?? 0),
+              // },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Hot Tub",
                 rate: hotTubsFee,
-                count: +(formData.hotTubs ?? 0),
+                count: +(hotTubs ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Pool Table",
                 rate: poolTablesFee,
-                count: +(formData.poolTables ?? 0),
+                count: +(poolTables ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Workout Equipments",
                 rate: workoutEquipmentsFee,
-                count: +(formData.workOutEquipment ?? 0),
+                count: +(workOutEquipment ?? 0),
               },
               {
                 icon: <Alarm {...iconSizes} />,
@@ -227,19 +239,19 @@ const Page = () => {
           <QuoteDetailsNotesImages
             images={
               !finishing
-                ? formData?.images ?? []
+                ? images ?? []
                 : selectedBooking?.images ?? []
             }
             notes={
               !finishing
-                ? formData.instructions ?? ""
+                ? instructions ?? ""
                 : selectedBooking?.additionalNotes ?? ""
             }
           />
         </Column>
         <Column className="gap-4 max-w-[400px] flex-1">
           <QuoteDetailsServiceRequirement
-            services={formData.services}
+            services={services}
             disabled={finishing || selectedBooking?.status === "Cancelled"}
           />
           {((!updating && !finishing) ||

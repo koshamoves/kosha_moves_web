@@ -70,8 +70,7 @@ const useBookMoveStore = create<Store>()(
       },
     })),
     {
-      // name: StorageKeys.FORM_DATA
-      name: "form-data2",
+      name: StorageKeys.BOOK_MOVE_FORM
     },
   ),
 );

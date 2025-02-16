@@ -62,20 +62,15 @@ import { storage } from "@/firebase/firestore";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import TimePicker from '../../../TimePicker';
 import { CountableInput } from "@/components/input/CountableInput";
+import { HireLabour } from "@/types/structs";
 
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
-  const { update, formData, reset } = useHireLabourStore((state) => state);
-  const {
-    date,
-    time,
-    serviceLocation,
-    apartmentNumber,
-    buildingType,
-    elevatorAccess,
-    flightOfStairs,
-  } = formData;
+
+  const { update, reset } = useHireLabourStore(state => state);
+  let { date, time, serviceLocation, apartmentNumber, buildingType, elevatorAccess, flightOfStairs } = useHireLabourStore(state => state);
+
   const form = useForm<z.infer<typeof hireLabourSequenceStep1Schema>>({
     resolver: zodResolver(hireLabourSequenceStep1Schema),
     defaultValues: {
@@ -283,20 +278,9 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 };
 
 const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { formData, update, removeImage, updateField } = useHireLabourStore(
-    (state) => state
-  );
-  const {
-    majorAppliances,
-    workOutEquipment,
-    pianos,
-    hotTubs,
-    poolTables,
-    numberOfBoxes,
-    instructions,
-    images,
-    tempImages
-  } = formData;
+  const { update, removeImage, updateField } = useHireLabourStore(state => state);
+  let { majorAppliances, workOutEquipment, pianos, hotTubs, poolTables, numberOfBoxes, instructions, images, tempImages } = useHireLabourStore(state => state);
+
   const form = useForm<z.infer<typeof hireLabourSequenceStep2Schema>>({
     resolver: zodResolver(hireLabourSequenceStep2Schema),
     defaultValues: {
@@ -327,7 +311,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
   const handleRemoveImage = async (index: number) => {
     try {
-      const imageUrl = formData.images[index];
+      const imageUrl = images[index];
       const urlParts = imageUrl.split("%2F");
       const folder = urlParts[0].split("/").pop();
       const fileName = urlParts[1].split("?")[0];
@@ -338,7 +322,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       removeImage(index);
       form.setValue(
         "images",
-        formData.images.filter((_, i) => i !== index)
+        images.filter((_, i) => i !== index)
       );
       updateField(
         "tempImages",
@@ -623,7 +607,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
-  const { update, formData } = useHireLabourStore((state) => state);
+  const { update, services, serviceLocation } = useHireLabourStore((state) => state);
   const [loading, setLoading] = useState(false);
   const { isPending, getQuotes } = useGetQuotes({
     onSuccess: () => {
@@ -644,14 +628,15 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const form = useForm<z.infer<typeof hireLabourSequenceStep3Schema>>({
     resolver: zodResolver(hireLabourSequenceStep3Schema),
     defaultValues: {
-      services: formData.services,
+      services: services,
     },
   });
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep3Schema>) => {
-    const updatedFormData = { ...formData, ...data };
-    update(updatedFormData);
-    if (formData.serviceLocation) getQuotes(hireLabourFactory(updatedFormData));
+    update(data);
+    
+    const state = useHireLabourStore.getState() as HireLabour;
+    if (serviceLocation) getQuotes(hireLabourFactory(state));
   };
 
   const handleSelectAllChange = (checked: boolean) => {
