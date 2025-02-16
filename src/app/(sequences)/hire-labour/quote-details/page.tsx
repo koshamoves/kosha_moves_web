@@ -23,9 +23,8 @@ import {
   QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { StorageKeys } from "@/constants/enums";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
-import { formatCurrency, safeParseDate } from "@/lib/utils";
+import { formatCurrency, safeParseDate, thing2 } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
@@ -33,6 +32,8 @@ import { RequestType, type Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
+import useHireLabourStore from "@/stores/hire-labour.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -43,7 +44,9 @@ const Page = () => {
     width: 21,
     height: 21,
   };
-  const { quoteDetailsData } = useQuoteDetailsData();
+
+  const quoteDetails = thing2(useQuoteDetailsStore());
+
   const {
     companyName,
     numberOfReviews,
@@ -61,10 +64,21 @@ const Page = () => {
     additionalMoverHourlyRate
   } = finishing
       ? (selectedBooking?.quote as Quote) ?? {}
-      : quoteDetailsData || {};
-  const formData = JSON.parse(
-    localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
-  );
+      : quoteDetails || {};
+
+  let {
+    majorAppliances,
+    pianos,
+    flightOfStairs,
+    hotTubs,
+    poolTables,
+    workOutEquipment,
+    images,
+    instructions,
+    services,
+  } = useHireLabourStore(state => state);
+
+
   let bookingDate, bookingTime, locations;
   if (finishing) {
     bookingDate = format(
@@ -79,8 +93,6 @@ const Page = () => {
   }
 
 
-  console.debug(quoteDetailsData);
-
   /// FIXME: see app/(sequences)/hire-labour/quote-details/page.tsx
   const [originalMoverCount, _] = useState(movers);
   const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
@@ -89,12 +101,12 @@ const Page = () => {
   const totalAmount =
     realTruckFee +
     realHourlyRate * minimumHours +
-    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
-    +(formData.pianos ?? 0) * pianosFee +
-    +(formData.flightOfStairs ?? 0) * flightOfStairsFee +
-    +(formData.hotTubs ?? 0) * hotTubsFee +
-    +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee;
+    +(majorAppliances ?? 0) * majorAppliancesFee +
+    +(pianos ?? 0) * pianosFee +
+    +(flightOfStairs ?? 0) * flightOfStairsFee +
+    +(hotTubs ?? 0) * hotTubsFee +
+    +(poolTables ?? 0) * poolTablesFee +
+    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   if (companyName === "") {
     return (
@@ -121,7 +133,7 @@ const Page = () => {
     );
   }
 
-  const companyId = selectedBooking?.quote?.companyId ?? quoteDetailsData.companyId;
+  const companyId = selectedBooking?.quote?.companyId ?? quoteDetails.companyId;
   return (
     <Column className="w-full">
       {finishing && (
@@ -175,43 +187,44 @@ const Page = () => {
                 icon: <Appliances {...iconSizes} />,
                 label: "Appliances",
                 rate: majorAppliancesFee,
-                count: +(formData.majorAppliances ?? 0),
+                count: +(majorAppliances ?? 0),
               },
               {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
-                count: +(formData.flightOfStairs ?? 0),
+                count: +(flightOfStairs ?? 0),
               },
               {
                 icon: <Piano {...iconSizes} />,
                 label: "Piano",
                 rate: pianosFee,
-                count: +(formData.pianos ?? 0),
+                count: +(pianos ?? 0),
               },
-              {
-                icon: <AdditionalStops {...iconSizes} />,
-                label: "Additional Stops",
-                rate: stopOverFee,
-                count: +(formData.PUDStops?.length ?? 0),
-              },
+              // FIXME: can HireLabour have additional stops? 
+              // {
+              //   icon: <AdditionalStops {...iconSizes} />,
+              //   label: "Additional Stops",
+              //   rate: stopOverFee,
+              //   count: +(PUDStops?.length ?? 0),
+              // },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Hot Tub",
                 rate: hotTubsFee,
-                count: +(formData.hotTubs ?? 0),
+                count: +(hotTubs ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Pool Table",
                 rate: poolTablesFee,
-                count: +(formData.poolTables ?? 0),
+                count: +(poolTables ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Workout Equipments",
                 rate: workoutEquipmentsFee,
-                count: +(formData.workOutEquipment ?? 0),
+                count: +(workOutEquipment ?? 0),
               },
               {
                 icon: <Alarm {...iconSizes} />,
@@ -224,19 +237,19 @@ const Page = () => {
           <QuoteDetailsNotesImages
             images={
               !finishing
-                ? formData?.images ?? []
+                ? images ?? []
                 : selectedBooking?.images ?? []
             }
             notes={
               !finishing
-                ? formData.instructions ?? ""
+                ? instructions ?? ""
                 : selectedBooking?.additionalNotes ?? ""
             }
           />
         </Column>
         <Column className="gap-4 max-w-[400px] flex-1">
           <QuoteDetailsServiceRequirement
-            services={formData.services}
+            services={services}
             disabled={finishing || selectedBooking?.status === "Cancelled"}
           />
           {((!updating && !finishing) ||

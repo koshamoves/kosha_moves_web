@@ -17,7 +17,6 @@ import { DebouncedInput, Input } from "@/components/input";
 import { Column, Row } from "@/components/layout";
 import { toast } from "@/components/toast/use-toast";
 import { ErrorMessage, StorageKeys } from "@/constants/enums";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import {
   bookMoveFactory,
   bookMoveReverseFactory,
@@ -31,13 +30,14 @@ import { useAddToBookings } from "@/hooks/fireStore/useAddToBookings";
 import { useValidRoute } from "@/hooks/useValidRoute";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { generateDoodles } from "@/lib/helpers/generateDoodle";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, thing2 } from "@/lib/utils";
 import useBookingStore from "@/stores/booking.store";
 import useUserStore from "@/stores/user.store";
 import {
   BookMove,
   Booking,
   HireLabour,
+  Quote,
   QuoteDetailsRate,
   RequestType,
   Voucher,
@@ -59,7 +59,7 @@ import Link from "next/link";
 import { useBookMove } from "@/hooks/booking/useBookMove";
 import { useUpdateMove } from "@/hooks/booking/useUpdateMove";
 import { BookingStatusDto, MoveRequestDto, MoveUpdateDto } from "@/types/dtos";
-import { updateMove } from "@/core/api/booking";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -196,7 +196,7 @@ const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
   finishing,
   ...props
 }) => {
-  const { updateQuoteField } = useQuoteDetailsData();
+  const updateQuoteField = useQuoteDetailsStore(state => state.updateField);
   const [count, setCount] = useState<number>(movers);
   const doodles = useMemo(() => generateDoodles({ length: 3 }), []);
 
@@ -324,7 +324,8 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
   disabled,
   finishing,
 }) => {
-  const { updateQuoteField } = useQuoteDetailsData();
+  const updateQuoteField = useQuoteDetailsStore(store => store.updateField);
+
   //TODO: confirm the types of vehicles available
   const truckList = [
     { type: "pickup truck", image: "/images/truckPickUp.png", quantity: 0 },
@@ -475,12 +476,16 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   const { bookMove } = useBookMove();
   const { isPending, updateMove } = useUpdateMove();
   //const { isPending, mutate: updateBooking } = useUpdateBooking();
-  const formData = JSON.parse(
-    localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
-  );
-  const quoteDetailsData = JSON.parse(
-    localStorage.getItem(StorageKeys.QUOTE_DETAIL) || "{}"
-  );
+
+  const bookData = useBookMoveStore(state => state) as BookMove; // FIXME: some type safety here? 
+  const hireData = useHireLabourStore(state => state) as HireLabour;
+
+  // FIXME: merging the two types like this isn't the best imo. (temp fix so things aren't too broken)
+  const formData: BookMove | HireLabour = isHireLabourRoute ? hireData : bookData;
+
+  const quoteDetails = useQuoteDetailsStore(state => state) as Quote;
+
+
   const router = useRouter();
   const pathname = usePathname();
   const [gottenVoucher, setGottenVoucher] = useState<Voucher | null>(null);
@@ -511,7 +516,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
     },
   });
 
-  if (!formData || !quoteDetailsData) {
+  if (!formData || !quoteDetails) {
     toast({
       title: "Oops!",
       description: ErrorMessage.SERVICE_REQUEST_MADE,
@@ -527,8 +532,8 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
     if (!selectedBooking && updating) return;
     console.log("here 2");
     const formattedFormData = isHireLabourRoute
-      ? hireLabourFactory(formData)
-      : bookMoveFactory(formData);
+      ? hireLabourFactory(hireData)
+      : bookMoveFactory(bookData);
     const data = {
   
       clientId: user?.uid ?? "",
@@ -539,7 +544,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       },
      
     bookingDate: new Date(), 
-      quote: { ...quoteDetailsData, voucherCode: gottenVoucher?.code ?? "" },
+      quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
   
     } as MoveRequestDto;
    
@@ -629,7 +634,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
               loading={isPending}
               onClick={() => {
                 if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
-                if (!(!formData || !quoteDetailsData) && currentUser)
+                if (!(!formData || !quoteDetails) && currentUser)
                   handleBook();
               }}
             >
@@ -737,9 +742,14 @@ interface QuoteDetailsServiceRequirementProps
   services: Array<String>;
   disabled?: boolean;
 }
+
 const QuoteDetailsServiceRequirement: FC<
   QuoteDetailsServiceRequirementProps
 > = ({ disabled, ...props }) => {
+
+  const updateMove = useBookMoveStore(state => state.update);
+
+
   const services = [
     "reassembly",
     "disassembly",
@@ -753,10 +763,10 @@ const QuoteDetailsServiceRequirement: FC<
     "move garage items",
     "move patio items",
   ];
+
   const form = useForm({
     defaultValues: {
-      services: (JSON.parse(localStorage.getItem(StorageKeys.FORM_DATA) || "{}")
-        ?.services ?? []) as typeof services,
+      services: useBookMoveStore(state => state.services),
     },
   });
 
@@ -765,14 +775,8 @@ const QuoteDetailsServiceRequirement: FC<
   const watchedServices = watch("services");
 
   useEffect(() => {
-    localStorage.setItem(
-      StorageKeys.FORM_DATA,
-      JSON.stringify({
-        ...JSON.parse(localStorage.getItem(StorageKeys.FORM_DATA) || "{}"),
-        services: watchedServices,
-      })
-    );
-  }, [watchedServices]);
+    updateMove({ services: watchedServices });
+  }, [updateMove, watchedServices]);
 
   return (
     <Column

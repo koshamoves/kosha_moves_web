@@ -1,134 +1,75 @@
 import { StorageKeys } from "@/constants/enums";
+import { OptionalExcept } from "@/lib/utils";
 import { BookDelivery } from "@/types/structs";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
-interface Store {
-  formData: BookDelivery;
+interface Actions {
   update: (newData: Partial<BookDelivery>) => void;
   updateField: <K extends keyof BookDelivery>(
-    fieldName: K,
-    newValue: BookDelivery[K]
+    name: K,
+    value: BookDelivery[K]
   ) => void;
   removeStop: (index: number) => void;
-  removeImage: (
-    index: number,
-    type?: "images" | "pictures" | "receipts"
-  ) => void;
+  removeImage: (index: number, type?: ImageKind) => void;
   reset: () => void;
 }
 
-const initialState: BookDelivery = {
-  deliveryDate: undefined as unknown as Date,
-  time: "",
-  pickUpLocation: {
-    location: "",
-    apartmentNumber: "",
-  },
-  deliveryLocation: {
-    location: "",
-    apartmentNumber: "",
-  },
-  stops: [],
-  PUDFinalDestination: {
-    buildingType: "",
-    elevatorAccess: "",
-    flightOfStairs: "",
-  },
-  PUDPickUpLocation: {
-    buildingType: "",
-    elevatorAccess: "",
-    flightOfStairs: "",
-  },
+type Store = OptionalExcept<BookDelivery, "PUDStops" | "images" | "pictures" | "receipts" | "services" | "stops"> & Actions;
+
+export enum ImageKind {
+  Image = "images",
+  Picture = "pictures",
+  Receipt = "receipts"
+}
+
+const init = {
   PUDStops: [],
   images: [],
   pictures: [],
   receipts: [],
-  instructions: "",
   services: [],
+  stops: [],
 };
 
-const useBookDeliveryStore = create<Store>((set) => ({
-  formData: initialState,
-  update: (newData) => {
-    set((state) => ({
-      formData: { ...state.formData, ...newData },
-    }));
-    set((state) => {
-      localStorage.setItem(
-        StorageKeys.FORM_DATA,
-        JSON.stringify(state.formData)
-      );
-      return { ...state };
-    });
-  },
-  updateField: (fieldName, newValue) => {
-    set((state) => {
-      if (fieldName.startsWith("stops")) {
-        const stopIndex = parseInt(fieldName.split(".")[1]);
-        const updatedStops = [...state.formData.stops];
-        const updatedStop = {
-          ...updatedStops[stopIndex],
-          ...(newValue as {}),
-        };
-        updatedStops[stopIndex] = updatedStop;
-        return {
-          formData: { ...state.formData, stops: updatedStops },
-        };
-      }
-      return {
-        formData: { ...state.formData, [fieldName]: newValue },
-      };
-    });
-    set((state) => {
-      localStorage.setItem(
-        StorageKeys.FORM_DATA,
-        JSON.stringify(state.formData)
-      );
-      return { ...state };
-    });
-  },
-  removeStop: (index) => {
-    set((state) => ({
-      formData: {
-        ...state.formData,
-        stops: state.formData.stops.filter((_, i) => i !== index),
-        PUDStops: state.formData.PUDStops?.filter((_, i) => i !== index),
-      },
-    }));
-    set((state) => {
-      localStorage.setItem(
-        StorageKeys.FORM_DATA,
-        JSON.stringify(state.formData)
-      );
-      return { ...state };
-    });
-  },
-  removeImage: (index, type: "images" | "pictures" | "receipts" = "images") => {
-    set((state) => {
-      const newImages =
-        state.formData[type]?.filter((_, i) => i !== index) ?? [];
-      return {
-        formData: { ...state.formData, [type]: newImages },
-      };
-    });
-    set((state) => {
-      localStorage.setItem(
-        StorageKeys.FORM_DATA,
-        JSON.stringify(state.formData)
-      );
-      return { ...state };
-    });
-  },
-  reset: () => {
-    set({ formData: initialState });
-    set((state) => {
-      localStorage.setItem(
-        StorageKeys.FORM_DATA,
-        JSON.stringify(state.formData)
-      );
-      return { ...state };
-    });
-  },
-}));
+const useBookDeliveryStore = create<Store>()(
+  persist(
+    immer<Store>((set) => ({
+      ...init,
+
+      update: (newData: Partial<BookDelivery>) => set(state => ({ ...state, ...newData })),
+
+      updateField: (name, value) => set(state => {
+        if (name.startsWith("stops")) {
+          const stopIndex = parseInt(name.split(".")[1]);
+          const updatedStops = [...state.stops];
+
+          updatedStops[stopIndex] = { ...updatedStops[stopIndex], ...(value as {}) };
+          return { ...state, stops: updatedStops };
+        }
+
+        return { ...state, [name]: value };
+      }),
+
+      removeStop: (index: number) => set(state => ({
+        ...state,
+        stops: state.stops.filter((_, i) => i !== index),
+        PUDStops: state.PUDStops?.filter((_, i) => i !== index)
+      })),
+
+      removeImage: (index: number, type: ImageKind = ImageKind.Image) => set(state => {
+        const newImages = state[type]?.filter((_, i) => i !== index) ?? [];
+        return { ...state, [type]: newImages };
+      }),
+
+      reset: () => set({ ...init }),
+
+    })),
+    {
+      name: StorageKeys.BOOK_DELIVERY_FORM,
+    }
+  ),
+);
 
 export default useBookDeliveryStore;

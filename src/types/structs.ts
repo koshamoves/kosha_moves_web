@@ -1,4 +1,8 @@
 import {
+  bookDeliverySequenceStep1Schema,
+  bookDeliverySequenceStep2Schema,
+  bookDeliverySequenceStep3Schema,
+  bookDeliverySequenceStep4Schema,
   bookMoveSequenceStep1Schema,
   bookMoveSequenceStep2Schema,
   bookMoveSequenceStep3Schema,
@@ -6,10 +10,7 @@ import {
   hireLabourSequenceStep1Schema,
   hireLabourSequenceStep2Schema,
   hireLabourSequenceStep3Schema,
-  bookDeliverySequenceStep1Schema,
-  bookDeliverySequenceStep2Schema,
-  bookDeliverySequenceStep3Schema,
-  bookDeliverySequenceStep4Schema,
+  locationSchema,
 } from "@/core/validators";
 import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
@@ -26,25 +27,33 @@ export interface Services {
   label: string;
   description: string;
 }
-export type BookMove = z.infer<typeof bookMoveSequenceStep1Schema> &
-  z.infer<typeof bookMoveSequenceStep2Schema> &
-  z.infer<typeof bookMoveSequenceStep3Schema> &
-  z.infer<typeof bookMoveSequenceStep4Schema> & {
+export type BookMove =
+  & z.infer<typeof bookMoveSequenceStep1Schema>
+  & z.infer<typeof bookMoveSequenceStep2Schema>
+  & z.infer<typeof bookMoveSequenceStep3Schema>
+  & z.infer<typeof bookMoveSequenceStep4Schema>
+  & {
     requestType?: string;
     tempImages?: string[];
     bookingId?: string;
   };
-export type HireLabour = z.infer<typeof hireLabourSequenceStep1Schema> &
-  z.infer<typeof hireLabourSequenceStep2Schema> &
-  z.infer<typeof hireLabourSequenceStep3Schema> & {
+
+export type Location = z.infer<typeof locationSchema>;
+
+export type HireLabour =
+  & z.infer<typeof hireLabourSequenceStep1Schema>
+  & z.infer<typeof hireLabourSequenceStep2Schema>
+  & z.infer<typeof hireLabourSequenceStep3Schema>
+  & {
     requestType?: string;
     tempImages?: string[];
     bookingId?: string;
   };
-export type BookDelivery = z.infer<typeof bookDeliverySequenceStep1Schema> &
-  z.infer<typeof bookDeliverySequenceStep2Schema> &
-  z.infer<typeof bookDeliverySequenceStep3Schema> &
-  z.infer<typeof bookDeliverySequenceStep4Schema>;
+export type BookDelivery =
+  & z.infer<typeof bookDeliverySequenceStep1Schema>
+  & z.infer<typeof bookDeliverySequenceStep2Schema>
+  & z.infer<typeof bookDeliverySequenceStep3Schema>
+  & z.infer<typeof bookDeliverySequenceStep4Schema>;
 
 export interface Quote {
   companyName: string;
@@ -99,17 +108,17 @@ export interface Booking {
   hasAdditionalStops: boolean;
   hasAddOns: boolean;
   status:
-  | "New"
-  | "Pending"
-  | "Confirmed"
-  | "Rejected"
-  | "InProgress"
-  | "Completed"
-  | "DepositHeld"
-  | "Cancelled"
-  | "Edited"
-  | "Paused"
-  | "PendingPayment";
+    | "New"
+    | "Pending"
+    | "Confirmed"
+    | "Rejected"
+    | "InProgress"
+    | "Completed"
+    | "DepositHeld"
+    | "Cancelled"
+    | "Edited"
+    | "Paused"
+    | "PendingPayment";
   movingDate: string;
   bookingDate: string;
   modifiedDate?: Date;

@@ -9,37 +9,37 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export const useDeleteAccount = () => {
-      const { updateUser, user } = useUserStore((state) => state);
-      const router = useRouter();
-      const [loading, setLoading] = useState(false);
-      const [error, setError] = useState(null);
-    
-      const deleteAccount = () => {
-        setLoading(true);
-        setError(null);
-    
-        deleteUserAccount(user as IUser)
-          .then(() => {
-            updateUser(null);
-            localStorage.clear();
-            wait(1000).then(() => window.location.reload());
-          })
-          .catch((err) => {
-            setError(err);
-            toast({
-              title: "Oops!",
-              description: getFirebaseErrorMessage(err),
-              variant: "destructive",
-            });
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      };
-    
-      return {
-        deleteAccount,
-        loading,
-        error,
-      };
-    };
+  const [updateUser, resetUser, user] = useUserStore((state) => [state.update, state.reset, state.user]);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const deleteAccount = () => {
+    setLoading(true);
+    setError(null);
+
+    deleteUserAccount(user as IUser)
+      .then(() => {
+        resetUser();
+        localStorage.clear();
+        wait(1000).then(() => window.location.reload());
+      })
+      .catch((err) => {
+        setError(err);
+        toast({
+          title: "Oops!",
+          description: getFirebaseErrorMessage(err),
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  return {
+    deleteAccount,
+    loading,
+    error,
+  };
+};

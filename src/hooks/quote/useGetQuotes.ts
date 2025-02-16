@@ -24,18 +24,7 @@ export const useGetQuotes = (
   const _useGetQuotes = (payload: Partial<SearchRequestDto>) =>
     methods
       .mutateAsync(payload)
-      .then((res: Quote[]) => {
-        const { formData } = bookMoveStore.getState();
-        const { formData: hireLabourFormData } = hireLabourStore.getState();
-
-        if (isHireLabourRoute) {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourFormData));
-        } else {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(formData));
-        }
-
-        setQuotesResult(res);
-      })
+      .then((res: Quote[]) => setQuotesResult(res))
       .catch(() => {
         toast({
           title: "Oops!",

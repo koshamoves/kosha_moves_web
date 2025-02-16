@@ -12,7 +12,7 @@ import {
   QuotesTitle,
   QuotesVehicle,
 } from "@/components/quotations/quotes";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 import { Routes } from "@/core/routing";
 import useShowQuotes from "@/stores/show-quotes.store";
 import { Quote, RequestType } from "@/types/structs";
@@ -27,7 +27,9 @@ const Page = () => {
   const searchParams = useSearchParams();
   const selectedBooking = useBookingStore.use.selectedBooking();
   const router = useRouter();
-  const { setQuoteDetailsData } = useQuoteDetailsData();
+
+  const replaceQuoteDetails = useQuoteDetailsStore((state) => state.replace);
+
   const { quotesResult } = useShowQuotes((state) => state);
   const updating = searchParams.get("action") === "update";
 
@@ -54,7 +56,8 @@ const Page = () => {
           return (
             <Quotes
               onClick={() => {
-                setQuoteDetailsData(item);
+                replaceQuoteDetails(item);
+
                 router.push(
                   `${Routes.bookMoveQuoteDetails}${updating ? "?action=update" : ""
                   }`
