@@ -24,20 +24,7 @@ export const useGetQuotes = (
   const _useGetQuotes = (payload: Partial<SearchRequestDto>) =>
     methods
       .mutateAsync(payload)
-      .then((res: Quote[]) => {
-        const bookMoveData = bookMoveStore.getState();
-        const { formData: hireLabourData } = hireLabourStore.getState();
-
-        // FIXME: why do we want to write to storage here?
-
-        if (isHireLabourRoute) {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(hireLabourData));
-        } else {
-          localStorage.setItem(StorageKeys.FORM_DATA, JSON.stringify(bookMoveData));
-        }
-
-        setQuotesResult(res);
-      })
+      .then((res: Quote[]) => setQuotesResult(res))
       .catch(() => {
         toast({
           title: "Oops!",
