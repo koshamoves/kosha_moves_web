@@ -13,6 +13,7 @@ export enum StorageKeys {
   FORM_DATA = "form-data",
   BOOK_MOVE_FORM = "book-move-form",
   HIRE_LABOUR_FORM = "hire-labour-form",
+  BOOK_DELIVERY_FORM = "book-delivery-form",
   IMAGES = "images",
 }
 
