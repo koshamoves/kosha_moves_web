@@ -59,10 +59,10 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { storage } from "@/firebase/firestore";
-import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import TimePicker from '../../../TimePicker';
 import { CountableInput } from "@/components/input/CountableInput";
 import { HireLabour } from "@/types/structs";
+import useBookingIdStore from "@/stores/booking-id.store";
 
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
@@ -89,9 +89,8 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     name: "elevatorAccess",
   });
 
-  useEffect(() => {
-    localStorage.removeItem("bookingId");
-  }, []);
+  // TODO: this will always happen on page load, and means that Step2 will never generate its own ID
+  useBookingIdStore(state => state.reset)()
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep1Schema>) => {
     onChangeStep("itm");
@@ -279,6 +278,8 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
 const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const { update, removeImage, updateField } = useHireLabourStore(state => state);
+  const bookingId = useBookingIdStore(state => state.id)
+
   let { majorAppliances, workOutEquipment, pianos, hotTubs, poolTables, numberOfBoxes, instructions, images, tempImages } = useHireLabourStore(state => state);
 
   const form = useForm<z.infer<typeof hireLabourSequenceStep2Schema>>({
@@ -294,20 +295,6 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       images,
     },
   });
-
-  const [bookingId, setBookingId] = useState<string>("");
-
-  // Generate a new unique ID when the component mounts
-  useEffect(() => {
-    const storedBookingId = localStorage.getItem("bookingId");
-    if (storedBookingId) {
-      setBookingId(storedBookingId);
-    } else {
-      const newBookingId = generateBookingId();
-      setBookingId(newBookingId);
-      localStorage.setItem("bookingId", newBookingId);
-    }
-  }, []);
 
   const handleRemoveImage = async (index: number) => {
     try {

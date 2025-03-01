@@ -60,12 +60,12 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { storage } from "@/firebase/firestore";
-import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { ErrorMessage } from "@/constants/enums";
 import { toast } from "@/components/toast/use-toast";
 import TimePicker from '../../../TimePicker';
 import { CountableInput } from '../../../input/CountableInput';
 import { BookMove } from "@/types/structs";
+import useBookingIdStore from "@/stores/booking-id.store";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
@@ -90,10 +90,8 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     control: form.control,
   });
 
-  useEffect(() => {
-    // TODO: use zustand for this 
-    localStorage.removeItem("bookingId");
-  }, []);
+  // Reset booking ID
+  useBookingIdStore(state => state.reset)()
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep1Schema>) => {
     onChangeStep("propertyDetail");
@@ -739,21 +737,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const [bookingId, setBookingId] = useState<string>("");
-
-  // Generate a new unique ID when the component mounts
-  useEffect(() => {
-    // TODO: use zustand for this? 
-    
-    const storedBookingId = localStorage.getItem("bookingId");
-    if (storedBookingId) {
-      setBookingId(storedBookingId);
-    } else {
-      const newBookingId = generateBookingId();
-      setBookingId(newBookingId);
-      localStorage.setItem("bookingId", newBookingId);
-    }
-  }, []);
+  const bookingId = useBookingIdStore(state => state.id);
 
   const handleRemoveImage = async (index: number) => {
     try {

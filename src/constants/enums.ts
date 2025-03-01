@@ -15,6 +15,7 @@ export enum StorageKeys {
   HIRE_LABOUR_FORM = "hire-labour-form",
   BOOK_DELIVERY_FORM = "book-delivery-form",
   IMAGES = "images",
+  BOOKING_ID = "booking-id",
 }
 
 export enum FIREBASE_COLLECTIONS {
