@@ -11,7 +11,7 @@ interface TimePickerProps {
 }
 
 const TimePicker: React.FC<TimePickerProps> = ({ field }) => {
-  const [time, setTime] = useState<Date>(parse(field.value, "kk:mm:ss", new Date()));
+  const [time, setTime] = useState<Date | null>(field.value ? parse(field.value ?? "", "kk:mm:ss", new Date()) : null);
 
   const handleOnChange = (date: Date | null): void => {
     if (date == null) return;
