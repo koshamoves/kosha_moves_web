@@ -126,7 +126,7 @@ export const hireLabourSequenceStep3Schema = bookMoveSequenceStep4Schema;
 
 export const bookDeliverySequenceStep1Schema = z.object({
   deliveryDate: z.date({ message: "Move date is required" }),
-  time: z.string().min(1, { message: "Time is required" }),
+  time: z.string().time({ message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),
   deliveryLocation: locationSchema,

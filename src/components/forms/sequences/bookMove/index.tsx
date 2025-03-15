@@ -141,11 +141,13 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="time"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-grey-300">Time</FormLabel>
-                  <FormControl>
-                    <TimePicker onChange={(value) => field.onChange(value)} />
-                  </FormControl>
-                  <FormMessage className="text-destructive" />
+                  <Column className="gap-3">
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <TimePicker field={field} />
+                    </FormControl>
+                    <FormMessage className="text-destructive" />
+                  </Column>
                 </FormItem>
               )}
             />
@@ -316,8 +318,8 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const form = useForm<z.infer<typeof bookMoveSequenceStep2Schema>>({
     resolver: zodResolver(bookMoveSequenceStep2Schema),
     defaultValues: {
-      PUDPickUpLocation: { elevatorAccess: "", ...PUDPickUpLocation}, // FIXME: bool, not string please 
-      PUDFinalDestination: { elevatorAccess: "", ...PUDFinalDestination},
+      PUDPickUpLocation: { elevatorAccess: "", ...PUDPickUpLocation }, // FIXME: bool, not string please 
+      PUDFinalDestination: { elevatorAccess: "", ...PUDFinalDestination },
       PUDStops: // TODO: figure out what's going on over here 
         (PUDStops?.length || 0) > 0
           ? PUDStops
@@ -1035,7 +1037,7 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
   const [loading, setLoading] = useState(false);
-  
+
   const { update } = useBookMoveStore((state) => state);
   let { services, pickUpLocation } = useBookMoveStore(state => state);
 
@@ -1066,7 +1068,7 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     // FIXME: this is unnecesasry thanks to update()?
     // const updatedFormData = { ...formData, ...data }; 
     update(data);
-    
+
     const state = useBookMoveStore.getState() as BookMove; // FIXME: maybe don't cast here?
     if (pickUpLocation?.location) getQuotes(bookMoveFactory(state));
   };
