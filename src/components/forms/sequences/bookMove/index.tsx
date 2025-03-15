@@ -1032,26 +1032,18 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
+
   const [loading, setLoading] = useState(false);
-
-  const { update } = useBookMoveStore((state) => state);
-  let { services, pickUpLocation } = useBookMoveStore(state => state);
-
-  const { isPending, getQuotes } = useGetQuotes({
-    onSuccess: () => {
-      router.push(
-        `${Routes.bookMoveQuotes}${updating ? "?action=update" : ""}`
-      );
-    },
-    onError: () => {
-      setLoading(false);
-    },
-  });
   const [selectAll, setSelectAll] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isPending) setLoading(true);
-  }, [isPending]);
+  const [update, services, pickUpLocation] = useBookMoveStore(state => [state.update, state.services, state.pickUpLocation]);
+
+  const { isPending, getQuotes } = useGetQuotes({
+    onSuccess: () => router.push(`${Routes.bookMoveQuotes}${updating ? "?action=update" : ""}`),
+    onError: () => setLoading(false),
+  });
+
+  useEffect(() => { if (isPending) setLoading(true); }, [isPending]);
 
   const form = useForm<z.infer<typeof bookMoveSequenceStep4Schema>>({
     resolver: zodResolver(bookMoveSequenceStep4Schema),
@@ -1061,11 +1053,9 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   });
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep4Schema>) => {
-    // FIXME: this is unnecesasry thanks to update()?
-    // const updatedFormData = { ...formData, ...data }; 
     update(data);
-
     const state = useBookMoveStore.getState() as BookMove; // FIXME: maybe don't cast here?
+
     if (pickUpLocation?.location) getQuotes(bookMoveFactory(state));
   };
 
