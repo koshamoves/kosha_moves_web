@@ -17,15 +17,15 @@ export const useBookMove = (
   useMutationOptions: Omit<UseMutationOptions<any, any, Partial<MoveRequestDto>>, "mutationFn"> = {}
 ) => {
   const { isValidRoute: isHireLabourRoute } = useValidRoute(Routes.sequence.hireLabour);
-   // const [loading, setLoading] = useState(false);
-   // const [error, setError] = useState(null);
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState(null);
 
-    const { reset } = useShowQuotes.getState();
-    const { reset: resetBookMove } = useBookMoveStore.getState();
-    const { reset: resetHireLabour } = useHireLabourStore.getState();
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+  const { reset } = useShowQuotes.getState();
+  const { reset: resetBookMove } = useBookMoveStore.getState();
+  const { reset: resetHireLabour } = useHireLabourStore.getState();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const methods = useMutation<any, any, Partial<MoveRequestDto>>({
     mutationFn: (props) => bookMoveData(props),
@@ -36,16 +36,18 @@ export const useBookMove = (
     methods
       .mutateAsync(payload)
       .then((res: any) => {
-         queryClient.invalidateQueries({ queryKey: [CacheKey.BOOKINGS_STATE] });
-                localStorage.clear();
-                reset();
-                resetHireLabour();
-                resetBookMove();
-                toast({
-                  description: SUCCESS_MESSAGE.BOOKINGS_COMPLETE,
-                  variant: "success",
-                });
-                wait(0).then(() => router.push(Routes.bookings));
+        queryClient.invalidateQueries({ queryKey: [CacheKey.BOOKINGS_STATE] });
+        reset();
+        resetHireLabour();
+        resetBookMove();
+        localStorage.clear();
+
+        toast({
+          description: SUCCESS_MESSAGE.BOOKINGS_COMPLETE,
+          variant: "success",
+        });
+
+        wait(0).then(() => router.push(Routes.bookings));
       })
       .catch(() => {
         toast({
