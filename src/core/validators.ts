@@ -64,7 +64,7 @@ export const locationSchema = z.object({
 });
 
 export const bookMoveSequenceStep1Schema = z.object({
-  moveDate: z.date({ message: "Move date is required" }),
+  moveDate: z.coerce.date({ message: "Move Date is required" }),
   time: z.string().min(1, { message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),
