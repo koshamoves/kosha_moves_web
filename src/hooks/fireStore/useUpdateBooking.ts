@@ -32,7 +32,7 @@ export const useUpdateBooking = (
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: [CacheKey.BOOKINGS_STATE] });
       useMutationOptions.onSuccess?.(...args);
-      localStorage.clear();
+      localStorage.clear(); // FIXME: lol ok, what does this actually remove though?
       setSelectedBooking(null);
       reset();
       resetHireLabour();
