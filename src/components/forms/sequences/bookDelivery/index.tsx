@@ -118,11 +118,13 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="time"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-grey-300">Time</FormLabel>
-                  <FormControl>
-                    <TimePicker onChange={(value) => field.onChange(value)} />
-                  </FormControl>
-                  <FormMessage className="text-destructive" />
+                  <Column className="gap-3">
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <TimePicker field={field} />
+                    </FormControl>
+                    <FormMessage className="text-destructive" />
+                  </Column>
                 </FormItem>
               )}
             />
