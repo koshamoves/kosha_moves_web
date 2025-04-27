@@ -21,15 +21,15 @@ const Page = () => {
                                           <H level={1} className="text-primary m-0 text-4xl">Create an Account</H>
                                           <P className="text-primary-foreground m-0 text-base font-dm-sans">Input your account details to sign up</P>
                                     </Column>
-                                    <Button variant="ghost" size="lg">
+                                   {/*  <Button variant="ghost" size="lg">
                                           <Google className="mr-2 h-[20px] w-[19px]" />
                                           <p className="text-primary text-base">Sign up with Google</p>
-                                    </Button>
+                                    </Button> */}
                                     <Column className="gap-12">
-                                          <div className="relative">
+                                         {/*  <div className="relative">
                                                 <div className="border" />
                                                 <P className="font-dm-sans text-grey-100 p-2 bg-white-100 max-w-max absolute left-[50%] -bottom-4 translate-x-[-50%]">or</P>
-                                          </div>
+                                          </div> */}
                                           <SignUpForm />
                                     </Column>
                               </Column>
