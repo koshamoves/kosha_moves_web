@@ -1,5 +1,5 @@
 import { P } from "@/components/atoms"
-import { Routes } from "@/core/routing"
+import { POLICY_URL, TERMS_URL } from "@/constants/constants";
 import Link from "next/link"
 
 export const Footer = () => {
@@ -9,11 +9,11 @@ export const Footer = () => {
                   <P className="text-grey-200">© {currentYear} Kosha Moves All Rights Reserved.</P>
 
                   <div className="flex flex-wrap gap-4 sm:gap-8">
-                        <Link href={Routes.license}>
-                              <P className="text-grey-200 hover:text-black transition-colors duration-300 ease-linear">License</P>
+                        <Link href={POLICY_URL}>
+                              <P className="text-grey-200 hover:text-black transition-colors duration-300 ease-linear">Privacy Policy</P>
                         </Link>
-                        <Link href={Routes.terms}>
-                              <P className="text-grey-200 hover:text-black transition-colors duration-300 ease-linear">Terms of Use</P>
+                        <Link href={TERMS_URL}>
+                              <P className="text-grey-200 hover:text-black transition-colors duration-300 ease-linear">Terms</P>
                         </Link>
                   </div>
             </footer>

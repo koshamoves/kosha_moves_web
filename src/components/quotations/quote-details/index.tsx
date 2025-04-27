@@ -650,11 +650,11 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
         )}
         {finishing && currentUser && (
           <>
-            {user?.hasCreditCard ? (
+            {/* {user?.hasCreditCard ? (
               <Button className="bg-[#19B000]">Make Payment</Button>
             ) : (
               !!NaN && <Button className="bg-[#19B000]">Pay on site</Button>
-            )}
+            )} */}
             {selectedBooking?.status === "Pending" && (
               <Button
                 disabled={isDeletePending}

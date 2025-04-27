@@ -42,12 +42,12 @@ const SEQUENCES: (Record<"route" | "icon" | "label", string> & {
       icon: "/images/hire-labor.png",
       type: RequestType.LabourOnly,
     },
-    {
-      label: "Book a Delivery",
-      route: Routes.sequence.bookDelivery,
-      icon: "/images/book-delivery.png",
-      type: RequestType.Delivery,
-    },
+    // {
+    //   label: "Book a Delivery",
+    //   route: Routes.sequence.bookDelivery,
+    //   icon: "/images/book-delivery.png",
+    //   type: RequestType.Delivery,
+    // },
   ];
 
 export default function Home() {
@@ -133,7 +133,7 @@ export default function Home() {
             ))}
           </Row>
         </Column>
-        {user && (
+        {/* {user && (
           <Column className="gap-4">
             <H level={3} className="text-primary text-2xl">
               {isToday ? "Today" : format(date, "do MMMM, yyyy")}
@@ -229,9 +229,9 @@ export default function Home() {
                 ))}
             </Row>
           </Column>
-        )}
+        )} */}
       </Column>
-      {user && (
+      {/* {user && (
         <Column className="flex-1 sm:max-w-[500px] md:max-w-[350px] gap-8">
           <Calendar
             mode="single"
@@ -252,12 +252,12 @@ export default function Home() {
                 can print them out as .pdf or .csv file
               </P>
             </Column>
-            {/* <Column>
+            <Column>
               <MoveHistory status="Pending" type="Hire labor" />
-            </Column> */}
+            </Column>
           </Column>
         </Column>
-      )}
+      )} */}
     </Row>
   );
 }

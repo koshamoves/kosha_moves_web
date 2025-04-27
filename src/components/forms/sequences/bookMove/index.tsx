@@ -194,7 +194,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 className="group"
               >
                 <Row className="px-6 justify-between items-center">
-                  <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary" />
+                  <div className="relative h-[58px] max-w-max" />
                   <Button
                     type="button"
                     variant="ghost"
@@ -241,7 +241,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         </AnimatePresence>
         <div>
           <div className="px-6">
-            <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary">
+            <div className="relative h-[58px] max-w-max">
               <Button
                 type="button"
                 variant="ghost"
@@ -467,7 +467,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </Row>
           </Row>
           <div className="px-6">
-            <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
+            <div className="relative h-[40px] max-w-max" />
           </div>
         </div>
         {stops.map((stop, index) => (
@@ -576,7 +576,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               </Row>
             </Row>
             <div className="px-6">
-              <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
+              <div className="relative h-[40px] max-w-max" />
             </div>
           </div>
         ))}
@@ -926,7 +926,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-        <div>
+       {/*  <div>
           <Row className="items-center flex-wrap gap-4">
             {tempImages!.map((image, index) => (
               <div
@@ -1007,7 +1007,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               )}
             />
           )}
-        </div>
+        </div> */}
         <Row className="items-center justify-center my-8 flex-wrap">
           <Button
             type="button"

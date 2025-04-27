@@ -4,10 +4,10 @@ import { Routes } from "./core/routing";
 import { auth } from "./firebase/auth";
 
 export const middleware = async (request: NextRequest) => {
-  // const { root, profile, messages, bookings, license, terms, sequence } = Routes;
-  // const authRoutes = [root, profile, messages, bookings, license, terms, ...Object.values(sequence)];
-  const { profile, messages, bookings, license, terms } = Routes;
-  const authRoutes = [profile, messages, bookings, license, terms];
+  // const { root, profile, messages, bookings, policy, terms, sequence } = Routes;
+  // const authRoutes = [root, profile, messages, bookings, policy, terms, ...Object.values(sequence)];
+  const { profile, messages, bookings, policy: policy, terms } = Routes;
+  const authRoutes = [profile, messages, bookings, policy, terms];
 
   onAuthStateChanged(auth, (user) => {
     if (authRoutes.includes(request.nextUrl.pathname)) {

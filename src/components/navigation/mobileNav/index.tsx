@@ -31,7 +31,7 @@ export const MobileNav: FC<Props> = ({ trigger }) => {
 
   const SIDE_NAV_MENU_DATA = [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: (
         <Home
           {...sizes}
