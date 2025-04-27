@@ -6,7 +6,7 @@ export const Routes = {
       profile: "/profile",
       messages: "/messages",
       bookings: "/bookings",
-      license: "/license",
+      policy: "/policy",
       terms: "/terms",
       sequence: {
             hireLabour: "/hire-labour",

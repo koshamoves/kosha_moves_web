@@ -18,7 +18,7 @@ export const SideNav: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
 
   const SIDE_NAV_MENU_DATA = [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: (
         <Home
           {...sizes}

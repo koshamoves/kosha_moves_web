@@ -468,7 +468,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-        <div>
+        {/* <div>
           <Row className="items-center flex-wrap gap-4">
             {images.map((image, index) => (
               <div
@@ -571,7 +571,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               )}
             />
           )}
-        </div>
+        </div> */}
         <Row className="items-center justify-center my-8">
           <Button
             type="button"
