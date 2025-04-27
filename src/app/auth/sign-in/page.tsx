@@ -29,7 +29,7 @@ const Page = () => {
                 Enter your email and password to sign in!
               </P>
             </Column>
-            <Button
+            {/* <Button
               onClick={signInWithGoogle}
               disabled={loading}
               variant="ghost"
@@ -37,14 +37,14 @@ const Page = () => {
             >
               <Google className="mr-2 h-[20px] w-[19px]" />
               <p className="text-primary text-base">Sign in with Google</p>
-            </Button>
+            </Button> */}
             <Column className="gap-12">
-              <div className="relative">
+             {/*  <div className="relative">
                 <div className="border" />
                 <P className="font-dm-sans text-grey-100 p-2 bg-white-100 max-w-max absolute left-[50%] -bottom-4 translate-x-[-50%]">
                   or
                 </P>
-              </div>
+              </div> */}
               <SignInForm />
             </Column>
           </Column>

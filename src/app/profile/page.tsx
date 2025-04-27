@@ -41,7 +41,7 @@ const Page = () => {
                                     <UserProfileItem />
                               </Column>
                         </Column>
-                        <div className="flex-1">
+                        {/* <div className="flex-1">
                               <H className="m-0 ml-6 text-primary text-xl md:hidden">Payment Methods</H>
                               <Row className="bg-white-100 shadow-xs flex-1 p-6 rounded-lg gap-4 flex-col md:flex-row items-center w-full h-full">
                                     {
@@ -90,18 +90,18 @@ const Page = () => {
                                           }
                                     </Column>
                               </Row>
-                        </div>
+                        </div> */}
                   </Row>
-                  <Row className="gap-4 flex-wrap flex-col md:flex-row">
+                 {/*  <Row className="gap-4 flex-wrap flex-col md:flex-row">
                         <Column className="flex-1 gap-6 font-dm-sans p-4 bg-white-100 shadow-xs rounded-lg">
                               <Column>
                                     <H className="text-xl text-primary">Move History</H>
                                     <p className="text-primary-foreground text-base">Here you can find all your transactions on this account and you can print them out as a .pdf or .csv file</p>  
                               </Column>
                               <Column>
-                                    {/* <MoveHistory status="Pending" type="Hire labor" />
+                                     <MoveHistory status="Pending" type="Hire labor" />
                                     <MoveHistory status="Pending" type="Hire labor" />
-                                    <MoveHistory status="Pending" type="Hire labor" /> */}
+                                    <MoveHistory status="Pending" type="Hire labor" />
                               </Column>
                         </Column>
                         <Column className="flex-1 font-dm-sans p-4 bg-white-100 shadow-xs rounded-lg">
@@ -110,9 +110,9 @@ const Page = () => {
                                     <p className="text-primary-foreground text-base">We believe in transparency, affordability, and excellent customer service. That&apos;s why we offer competitive pricing and easy payment options. Our app also automates the invoicing and billing process, saving you time and hassle. For any legal enquiries you may have, browse through the categories below</p>  
                               </Column>
                         </Column>
-                  </Row>
+                  </Row> */}
                   <Row className="gap-4 flex-wrap">
-                        <Column className="mt-6 flex-1 gap-4">
+                        <Column className="mt-6 flex-1 gap-4 md:max-w-[400px]">
                               <Button 
                                     loading={loading} 
                                     onClick={() => signOut()} 
