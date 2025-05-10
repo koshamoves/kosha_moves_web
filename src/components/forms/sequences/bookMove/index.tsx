@@ -193,12 +193,47 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 }}
                 className="group"
               >
-                <Row className="px-6 justify-between items-center">
-                  <div className="relative h-[58px] max-w-max" />
+                <div className="relative h-[58px] max-w-max" />
+                <div className="flex bg-white-100 shadow-sm rounded-xl gap-6 p-6 sm:p-12">
+                  <Row className="flex-col sm:flex-row flex-grow gap-6">
+                    <StopsLocationInput
+                      name={`stops.${index}`}
+                      index={index}
+                      control={form.control}
+                      label={`Stop ${index + 1}`}
+                      defaultValue={stops[index]?.location}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`stops.${index}.apartmentNumber`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Apartment/Unit</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              {...InputDirectives.numbersOnly}
+                              placeholder=""
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="sm:hidden"
+                      onClick={() => {
+                        remove(index);
+                        removeStop(index);
+                      }}
+                    >Remove</Button>
+                  </Row>
                   <Button
                     type="button"
                     variant="ghost"
-                    className="bg-transparent hover:bg-transparent px-0 max-w-max hidden group-hover:inline"
+                    className="justify-end bg-transparent hover:bg-transparent px-0 max-w-max hidden sm:inline sm:invisible sm:group-hover:visible"
                     onClick={() => {
                       remove(index);
                       removeStop(index);
@@ -208,33 +243,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       <div className="border w-3" />
                     </span>
                   </Button>
-                </Row>
-                <Row className="bg-white-100 shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
-                  <StopsLocationInput
-                    name={`stops.${index}`}
-                    index={index}
-                    control={form.control}
-                    label={`Stop ${index + 1}`}
-                    defaultValue={stops[index]?.location}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`stops.${index}.apartmentNumber`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormLabel>Apartment/Unit</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            {...InputDirectives.numbersOnly}
-                            placeholder=""
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </Row>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -926,7 +935,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-       {/*  <div>
+        {/*  <div>
           <Row className="items-center flex-wrap gap-4">
             {tempImages!.map((image, index) => (
               <div
