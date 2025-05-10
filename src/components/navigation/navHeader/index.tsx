@@ -133,12 +133,12 @@ const switchHeaderContent = (route: string, isQuotesVisible: boolean) => {
     case Routes.root:
       return {
         title: "Home",
-        description: "Schedule a Move",
+        description: "Book a Move",
       };
     case Routes.sequence.bookMove:
       return {
         title: "Home",
-        description: "Schedule a Move",
+        description: "Book a Move",
       };
     case Routes.sequence.hireLabour:
       return {

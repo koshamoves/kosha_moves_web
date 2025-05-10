@@ -5,12 +5,12 @@ import { Toaster } from "@/components/toast/toaster";
 import { Layout } from "@/components/layout";
 import { cn } from "@/lib/utils";
 
-const dmSans = DM_Sans({ 
+const dmSans = DM_Sans({
   subsets: ["latin"],
   display: 'swap',
   variable: '--font-dm-sans',
 });
-const sourceSans3 = Source_Sans_3({ 
+const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
   display: 'swap',
   variable: '--font-source-sans',
@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "KoshaMoves | Schedule a move",
+  title: "KoshaMoves | Book a Move",
   description: "KoshaMoves - ",
   applicationName: 'MyMedHub',
   referrer: 'origin-when-cross-origin',
@@ -49,10 +49,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(dmSans.variable, sourceSans3.variable, poppins.variable)}>
-          <Layout>
-            {children}
-          </Layout>
-          <Toaster />
+        <Layout>
+          {children}
+        </Layout>
+        <Toaster />
       </body>
     </html>
   );
