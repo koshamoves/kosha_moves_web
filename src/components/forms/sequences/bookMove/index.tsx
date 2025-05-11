@@ -20,7 +20,7 @@ import {
 } from "@/core/validators";
 import { DateInput } from "@/components/dateInput";
 import { Button, P, Picture } from "@/components/atoms";
-import { cn } from "@/lib/utils";
+import { cn, isWorseBoolean } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Column, Row } from "@/components/layout";
@@ -1096,9 +1096,3 @@ const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
   );
 }
 
-// TODO: move to utils or something
-function isWorseBoolean(str: string): asserts str is "Yes" | "No" {
-  if (str !== "Yes" && str !== "No") {
-    throw new Error("Assertion Error: expected 'Yes' or 'No'");
-  }
-}
