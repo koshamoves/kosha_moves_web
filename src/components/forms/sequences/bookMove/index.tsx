@@ -384,9 +384,6 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
-              <div className="md:flex items-center hidden">
-                <div className="mt-8 w-[80px] border border-dotted" />
-              </div>
               <Row className="gap-4 flex-col sm:flex-row sm:items-end w-full">
                 <FormField
                   control={form.control}
@@ -490,9 +487,6 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 </P>
               </Column>
               <Row className="gap-4 flex-1 items-center">
-                <div className="hidden sm:flex items-center">
-                  <div className="mt-8 w-[80px] border border-dotted" />
-                </div>
                 <Row className="gap-4 flex-col sm:flex-row w-full">
                   <FormField
                     control={form.control}
@@ -599,9 +593,6 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
-              <div className="hidden sm:flex items-center">
-                <div className="mt-8 w-[80px] border border-dotted" />
-              </div>
               <Row className="gap-4 flex-col sm:flex-row sm:items-end w-full">
                 <FormField
                   control={form.control}
