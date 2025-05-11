@@ -448,7 +448,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             <SelectItem value="No">No</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-destructive min-h-[1.5rem]" /> {/* Reserve space */}
+                        <FormMessage className="text-destructive sm:absolute min-h-[1.5rem]" /> {/* Reserve space */}
                       </FormItem>
                     )}
                   />
