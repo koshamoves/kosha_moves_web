@@ -64,7 +64,7 @@ export const locationSchema = z.object({
 });
 
 export const bookMoveSequenceStep1Schema = z.object({
-  moveDate: z.coerce.date({ message: "Move Date is required" }),
+  moveDate: z.coerce.date({ message: "Please select a date" }),
   time: z.string().min(1, { message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),
@@ -112,7 +112,7 @@ export const bookMoveSequenceStep4Schema = z.object({
 
 export const hireLabourSequenceStep1Schema = z
   .object({
-    date: z.date({ message: "Date is required" }),
+    date: z.date({ message: "Please select a date" }),
     time: z.string().min(1, { message: "Time is required" }),
     serviceLocation: z.string().min(1, { message: "Location is required" }),
     apartmentNumber: z.string().optional(),
@@ -125,7 +125,7 @@ export const hireLabourSequenceStep2Schema = bookMoveSequenceStep3Schema;
 export const hireLabourSequenceStep3Schema = bookMoveSequenceStep4Schema;
 
 export const bookDeliverySequenceStep1Schema = z.object({
-  deliveryDate: z.date({ message: "Move date is required" }),
+  deliveryDate: z.date({ message: "Please select a date" }),
   time: z.string().time({ message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),
