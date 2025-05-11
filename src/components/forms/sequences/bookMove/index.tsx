@@ -354,18 +354,20 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     control: form.control,
     name: "PUDPickUpLocation.elevatorAccess",
   });
-  const stopsBuildingType = useWatch({
+
+  const watchedStops = useWatch({
     control: form.control,
-    name: stops.map(
-      (_, index) => `PUDStops.${index}.buildingType`
-    ) as "PUDStops"[],
+    name: "PUDStops"
+  }) ?? [];
+
+  const stopsBuildingType = watchedStops?.map(s => s.buildingType);
+  const stopsElevatorAccess = watchedStops?.map(s => {
+    isWorseBoolean(s.elevatorAccess);
+    return s.elevatorAccess
   });
-  const stopsElevatorAccess = useWatch({
-    control: form.control,
-    name: stops.map(
-      (_, index) => `PUDStops.${index}.elevatorAccess`
-    ) as "PUDStops"[],
-  });
+
+  isWorseBoolean(pickUpLocationElevatorAccess);
+  isWorseBoolean(finalDestinationElevatorAccess);
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep2Schema>) => {
     onChangeStep("generalInfo");
@@ -385,91 +387,16 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
               <Row className="gap-4 flex-col sm:flex-row sm:items-end w-full">
-                <FormField
-                  control={form.control}
-                  name="PUDPickUpLocation.buildingType"
-                  render={({ field }) => (
-                    <FormItem className="flex-1 relative">
-                      <FormLabel className="text-grey-300">
-                        Building Type
-                      </FormLabel>
-                      <Select
-                        onValueChange={(...arg) => {
-                          field.onChange(...arg);
-                          form.trigger("PUDPickUpLocation.elevatorAccess");
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Condo">Condo</SelectItem>
-                          <SelectItem value="Apartment">Apartment</SelectItem>
-                          <SelectItem value="House">House</SelectItem>
-                          <SelectItem value="Office">Office</SelectItem>
-                          <SelectItem value="TownHouse">TownHouse</SelectItem>
-                          <SelectItem value="Storage">Storage</SelectItem>
-                          <SelectItem value="Store">Store</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-destructive sm:absolute" />
-                    </FormItem>
-                  )}
+                <BuildingTypeDropdown
+                  form={form}
+                  prefix="PUDPickUpLocation"
                 />
-                {pickUpLocationBuildingType !== "House" && (
-                  <FormField
-                    control={form.control}
-                    name="PUDPickUpLocation.elevatorAccess"
-                    render={({ field, fieldState }) => (
-                      <FormItem className="flex-1 min-w-[70px]">
-                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value); // Update the field's value
-                            if (value) {
-                              form.clearErrors("PUDPickUpLocation.elevatorAccess"); // Clear the "Required" error as soon as a selection is made
-                            }
-                          }}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select an option" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-destructive sm:absolute min-h-[1.5rem]" /> {/* Reserve space */}
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {(pickUpLocationElevatorAccess === "No" ||
-                  pickUpLocationBuildingType === "House") && (
-                    <FormField
-                      control={form.control}
-                      name="PUDPickUpLocation.flightOfStairs"
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Flight of Stairs
-                          </FormLabel>
-                          <CountableInput
-                            style={{ input: "h-10 rounded-lg", button: "h-8" }}
-                            count={field.value}
-                            onChange={field.onChange}
-                          />
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                <ElevatorStairsInput
+                  form={form}
+                  prefix="PUDPickUpLocation"
+                  buildingType={pickUpLocationBuildingType}
+                  elevatorAccess={pickUpLocationElevatorAccess}
+                />
               </Row>
             </Row>
           </Row>
@@ -488,94 +415,16 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               </Column>
               <Row className="gap-4 flex-1 items-center">
                 <Row className="gap-4 flex-col sm:flex-row w-full">
-                  <FormField
-                    control={form.control}
-                    name={`PUDStops.${index}.buildingType`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Building Type
-                        </FormLabel>
-                        <Select
-                          onValueChange={(...arg) => {
-                            field.onChange(...arg);
-                            form.trigger(`PUDStops.${index}.elevatorAccess`);
-                          }}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Condo">Condo</SelectItem>
-                            <SelectItem value="Apartment">Apartment</SelectItem>
-                            <SelectItem value="House">House</SelectItem>
-                            <SelectItem value="Office">Office</SelectItem>
-                            <SelectItem value="TownHouse">TownHouse</SelectItem>
-                            <SelectItem value="Storage">Storage</SelectItem>
-                            <SelectItem value="Store">Store</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-destructive sm:absolute" />
-                      </FormItem>
-                    )}
+                  <BuildingTypeDropdown
+                    form={form}
+                    prefix={`PUDStops.${index}`}
                   />
-                  {(stopsBuildingType as unknown as string[])[index] !==
-                    "House" && (
-                      <FormField
-                        control={form.control}
-                        name={`PUDStops.${index}.elevatorAccess`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1 relative">
-                            <FormLabel className="text-grey-300">
-                              Elevator Access
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Yes">Yes</SelectItem>
-                                <SelectItem value="No">No</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage className="text-destructive sm:absolute" />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  {((stopsElevatorAccess as unknown as ("Yes" | "No")[])[
-                    index
-                  ] === "No" ||
-                    (stopsBuildingType as unknown as string[])[index] ===
-                    "House") && (
-                      <FormField
-                        control={form.control}
-                        name={`PUDStops.${index}.flightOfStairs`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1 relative">
-                            <FormLabel className="text-grey-300">
-                              Flight of Stairs
-                            </FormLabel>
-                            <FormControl>
-                              <CountableInput
-                                style={{ input: "h-10 rounded-lg", button: "h-8" }}
-                                count={field.value}
-                                onChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage className="text-destructive sm:absolute" />
-                          </FormItem>
-                        )}
-                      />
-                    )}
+                  <ElevatorStairsInput
+                    form={form}
+                    prefix={`PUDStops.${index}`}
+                    buildingType={stopsBuildingType[index]}
+                    elevatorAccess={stopsElevatorAccess[index]}
+                  />
                 </Row>
               </Row>
             </Row>
@@ -594,93 +443,16 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
               <Row className="gap-4 flex-col sm:flex-row sm:items-end w-full">
-                <FormField
-                  control={form.control}
-                  name="PUDFinalDestination.buildingType"
-                  render={({ field }) => (
-                    <FormItem className="flex-1 w-full relative">
-                      <FormLabel className="text-grey-300">
-                        Building Type
-                      </FormLabel>
-                      <Select
-                        onValueChange={(...arg) => {
-                          field.onChange(...arg);
-                          form.trigger("PUDFinalDestination.elevatorAccess");
-                        }}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Condo">Condo</SelectItem>
-                          <SelectItem value="Apartment">Apartment</SelectItem>
-                          <SelectItem value="House">House</SelectItem>
-                          <SelectItem value="Office">Office</SelectItem>
-                          <SelectItem value="TownHouse">TownHouse</SelectItem>
-                          <SelectItem value="Storage">Storage</SelectItem>
-                          <SelectItem value="Store">Store</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage className="text-destructive sm:absolute" />
-                    </FormItem>
-                  )}
+                <BuildingTypeDropdown
+                  form={form}
+                  prefix="PUDFinalDestination"
                 />
-                {finalDestinationBuildingType !== "House" && (
-                  <FormField
-                    control={form.control}
-                    name="PUDFinalDestination.elevatorAccess"
-                    render={({ field, fieldState }) => (
-                      <FormItem className="flex-1 min-w-[70px]">
-                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
-                        <div className="flex flex-col"> {/* Wrap Select and FormMessage */}
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              form.trigger("PUDFinalDestination.elevatorAccess"); // Trigger validation on selection
-                            }}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select an option" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-destructive mt-2 min-h-[1.5rem]" /> {/* Add margin and height */}
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {(finalDestinationElevatorAccess === "No" ||
-                  finalDestinationBuildingType === "House") && (
-                    <FormField
-                      control={form.control}
-                      name="PUDFinalDestination.flightOfStairs"
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Flight of Stairs
-                          </FormLabel>
-                          <FormControl>
-                            <CountableInput
-                              style={{ input: "h-10 rounded-lg", button: "h-8" }}
-                              count={field.value}
-                              onChange={field.onChange}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                <ElevatorStairsInput
+                  form={form}
+                  prefix="PUDFinalDestination"
+                  buildingType={finalDestinationBuildingType}
+                  elevatorAccess={finalDestinationElevatorAccess} // oh no 
+                />
               </Row>
             </Row>
           </Row>
@@ -1191,3 +963,142 @@ export const BookMoveSequence = {
   Step3,
   Step4,
 };
+
+interface PropertyDetailInputProps {
+  form: any,
+  prefix: string
+};
+
+interface ElevatorAccessSpecificProps {
+  elevatorAccess: "Yes" | "No",
+  buildingType: string, // FIXME: this should be an enum...
+}
+
+type ElevatorStairsProps = PropertyDetailInputProps & ElevatorAccessSpecificProps;
+
+const ElevatorStairsInput = (props: ElevatorStairsProps) => {
+  const form = props.form;
+  const prefix = props.prefix;
+
+  const isHouse = props.buildingType === "House";
+  const hasElevator = props.elevatorAccess === "Yes";
+
+  return (
+    <>
+      {!isHouse && (<ElevatorAccessInput form={form} prefix={prefix} />)}
+      {(!hasElevator || isHouse) && (<FlightOfStairsInput form={form} prefix={prefix} />)}
+    </>
+  );
+}
+
+const ElevatorAccessInput = (props: PropertyDetailInputProps) => {
+  const form = props.form;
+  const prefix = props.prefix;
+
+  return (
+    <FormField
+      control={form.control}
+      name={`${prefix}.elevatorAccess`}
+      render={({ field, fieldState }) => (
+        <FormItem className="flex-1 min-w-[70px]">
+          <FormLabel className="text-grey-300">Elevator Access</FormLabel>
+          <Select
+            onValueChange={(value) => {
+              field.onChange(value); // Update the field's value
+              if (value) {
+                form.clearErrors(`${prefix}.elevatorAccess`); // Clear the "Required" error as soon as a selection is made
+              }
+            }}
+            defaultValue={field.value}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">No</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage className="text-destructive" />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+const FlightOfStairsInput = (props: PropertyDetailInputProps) => {
+  const form = props.form;
+  const prefix = props.prefix;
+
+  return (
+    <FormField
+      control={form.control}
+      name={`${prefix}.flightOfStairs`}
+      render={({ field }) => (
+        <FormItem className="flex-1 relative">
+          <FormLabel className="text-grey-300">
+            Flight of Stairs
+          </FormLabel>
+          <CountableInput
+            style={{ input: "h-10 rounded-lg", button: "h-8" }}
+            count={field.value}
+            onChange={field.onChange}
+          />
+          <FormMessage className="text-destructive" />
+        </FormItem>
+      )}
+    />
+  );
+};
+
+const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
+  const form = props.form;
+  const prefix = props.prefix;
+
+  return (
+    <FormField
+      control={form.control}
+      name={`${prefix}.buildingType`}
+      render={({ field }) => (
+        <FormItem className="flex-1 relative">
+          <FormLabel className="text-grey-300">
+            Building Type
+          </FormLabel>
+          <Select
+            onValueChange={(...arg) => {
+              field.onChange(...arg);
+              form.trigger(`${prefix}.elevatorAccess`);
+            }}
+            defaultValue={field.value}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="Condo">Condo</SelectItem>
+              <SelectItem value="Apartment">Apartment</SelectItem>
+              <SelectItem value="House">House</SelectItem>
+              <SelectItem value="Office">Office</SelectItem>
+              <SelectItem value="TownHouse">TownHouse</SelectItem>
+              <SelectItem value="Storage">Storage</SelectItem>
+              <SelectItem value="Store">Store</SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage className="text-destructive" />
+        </FormItem>
+      )}
+      {...props}
+    />
+  );
+}
+
+// TODO: move to utils or something
+function isWorseBoolean(str: string): asserts str is "Yes" | "No" {
+  if (str !== "Yes" && str !== "No") {
+    throw new Error("Assertion Error: expected 'Yes' or 'No'");
+  }
+}
