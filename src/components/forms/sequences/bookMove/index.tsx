@@ -140,6 +140,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   <Column className="gap-3">
                     <FormLabel>Time</FormLabel>
                     <FormControl>
+                      {/* TODO: Disable Time + Style this thing */}
                       <TimePicker field={field} />
                     </FormControl>
                     <FormMessage className="text-destructive" />

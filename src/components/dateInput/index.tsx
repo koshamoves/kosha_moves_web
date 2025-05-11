@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../popover"
 import { FC, ReactNode, MouseEvent, useRef } from "react"
 import { ActiveModifiers } from "react-day-picker"
 import { Close } from "@radix-ui/react-popover";
+import { isPast, add } from "date-fns";
 
 interface Props {
       field?: any;
@@ -26,8 +27,7 @@ export const DateInput: FC<Props> = ({ field, trigger }) => {
                               mode="single"
                               selected={field.value}
                               onSelect={handleSelect}
-                              disabled={(date) => date < new Date("1900-01-01")
-                              }
+                              disabled={(date) => isPast(add(date, { days: 1 }))}
                               initialFocus
                         />
                         <Close className="hidden" ref={closeRef} />
