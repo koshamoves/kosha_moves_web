@@ -127,7 +127,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                         </FormControl>
                       }
                     />
-                    <FormMessage />
+                    <FormMessage className="text-destructive" />
                   </Column>
                 </FormItem>
               )}
@@ -168,7 +168,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       defaultValue={pickUpLocation?.apartmentNumber}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-destructive" />
                 </FormItem>
               )}
             />
