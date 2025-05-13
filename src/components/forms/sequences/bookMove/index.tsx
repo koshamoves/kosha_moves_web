@@ -997,7 +997,7 @@ const ElevatorAccessInput = (props: PropertyDetailInputProps) => {
       control={form.control}
       name={name}
       render={({ field }) => (
-        <FormItem className="flex-1 min-w-[70px]">
+        <FormItem className="flex-1 relative min-w-[70px]">
           <FormLabel className="text-grey-300">Elevator Access</FormLabel>
           <Select
             onValueChange={(value) => {
@@ -1018,7 +1018,7 @@ const ElevatorAccessInput = (props: PropertyDetailInputProps) => {
               <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>
-          <FormMessage className="text-destructive" />
+          <FormMessage className="h-5 sm:absolute text-destructive" />
         </FormItem>
       )}
     />
@@ -1043,7 +1043,7 @@ const FlightOfStairsInput = (props: PropertyDetailInputProps) => {
             count={field.value}
             onChange={field.onChange}
           />
-          <FormMessage className="text-destructive" />
+          <FormMessage className="text-destructive sm:absolute" />
         </FormItem>
       )}
     />
@@ -1085,7 +1085,7 @@ export const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
               <SelectItem value="Store">Store</SelectItem>
             </SelectContent>
           </Select>
-          <FormMessage className="text-destructive" />
+          <FormMessage className="sm:absolute text-destructive" />
         </FormItem>
       )}
       {...props}

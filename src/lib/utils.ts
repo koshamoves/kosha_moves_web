@@ -114,8 +114,6 @@ export function isWorseBoolean(str: string): asserts str is "Yes" | "No" {
 }
 
 export function isWorseOptionalBoolean(str: string): asserts str is "Yes" | "No" | "" {
-  console.debug(`asserting that '${str}' is valid`);
-
   switch (str) {
     case "Yes":
     case "No":
