@@ -20,7 +20,7 @@ import {
 } from "@/core/validators";
 import { DateInput } from "@/components/dateInput";
 import { Button, P, Picture } from "@/components/atoms";
-import { cn, isWorseBoolean } from "@/lib/utils";
+import { cn, isWorseOptionalBoolean } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Column, Row } from "@/components/layout";
@@ -360,14 +360,14 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     name: "PUDStops"
   }) ?? [];
 
-  const stopsBuildingType = watchedStops?.map(s => s.buildingType);
-  const stopsElevatorAccess = watchedStops?.map(s => {
-    isWorseBoolean(s.elevatorAccess);
+  const stopsBuildingType = watchedStops.map(s => s.buildingType);
+  const stopsElevatorAccess = watchedStops.map(s => {
+    isWorseOptionalBoolean(s.elevatorAccess);
     return s.elevatorAccess
   });
 
-  isWorseBoolean(pickUpLocationElevatorAccess);
-  isWorseBoolean(finalDestinationElevatorAccess);
+  isWorseOptionalBoolean(pickUpLocationElevatorAccess);
+  isWorseOptionalBoolean(finalDestinationElevatorAccess);
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep2Schema>) => {
     onChangeStep("generalInfo");
@@ -966,47 +966,44 @@ export const BookMoveSequence = {
 
 interface PropertyDetailInputProps {
   form: any,
-  prefix: string
+  prefix?: string
 };
 
 interface ElevatorAccessSpecificProps {
-  elevatorAccess: "Yes" | "No",
+  elevatorAccess: "Yes" | "No" | "",
   buildingType: string, // FIXME: this should be an enum...
 }
 
 type ElevatorStairsProps = PropertyDetailInputProps & ElevatorAccessSpecificProps;
 
-const ElevatorStairsInput = (props: ElevatorStairsProps) => {
-  const form = props.form;
-  const prefix = props.prefix;
-
+export const ElevatorStairsInput = (props: ElevatorStairsProps) => {
   const isHouse = props.buildingType === "House";
-  const hasElevator = props.elevatorAccess === "Yes";
+  const showStairsInput = props.elevatorAccess === "Yes";
 
   return (
     <>
-      {!isHouse && (<ElevatorAccessInput form={form} prefix={prefix} />)}
-      {(!hasElevator || isHouse) && (<FlightOfStairsInput form={form} prefix={prefix} />)}
+      {!isHouse && (<ElevatorAccessInput {...props} />)}
+      {(showStairsInput || isHouse) && (<FlightOfStairsInput {...props} />)}
     </>
   );
 }
 
 const ElevatorAccessInput = (props: PropertyDetailInputProps) => {
   const form = props.form;
-  const prefix = props.prefix;
+  const name = (props.prefix) ? `${props.prefix!}.elevatorAccess` : "elevatorAccess"
 
   return (
     <FormField
       control={form.control}
-      name={`${prefix}.elevatorAccess`}
-      render={({ field, fieldState }) => (
+      name={name}
+      render={({ field }) => (
         <FormItem className="flex-1 min-w-[70px]">
           <FormLabel className="text-grey-300">Elevator Access</FormLabel>
           <Select
             onValueChange={(value) => {
               field.onChange(value); // Update the field's value
               if (value) {
-                form.clearErrors(`${prefix}.elevatorAccess`); // Clear the "Required" error as soon as a selection is made
+                form.clearErrors(name); // Clear the "Required" error as soon as a selection is made
               }
             }}
             defaultValue={field.value}
@@ -1030,12 +1027,12 @@ const ElevatorAccessInput = (props: PropertyDetailInputProps) => {
 
 const FlightOfStairsInput = (props: PropertyDetailInputProps) => {
   const form = props.form;
-  const prefix = props.prefix;
+  const name = (props.prefix) ? `${props.prefix!}.flightOfStairs` : "flightOfStairs"
 
   return (
     <FormField
       control={form.control}
-      name={`${prefix}.flightOfStairs`}
+      name={name}
       render={({ field }) => (
         <FormItem className="flex-1 relative">
           <FormLabel className="text-grey-300">
@@ -1053,14 +1050,14 @@ const FlightOfStairsInput = (props: PropertyDetailInputProps) => {
   );
 };
 
-const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
+export const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
   const form = props.form;
-  const prefix = props.prefix;
+  const name = (props.prefix) ? `${props.prefix!}.buildingType` : "buildingType"
 
   return (
     <FormField
       control={form.control}
-      name={`${prefix}.buildingType`}
+      name={name}
       render={({ field }) => (
         <FormItem className="flex-1 relative">
           <FormLabel className="text-grey-300">
@@ -1069,7 +1066,7 @@ const BuildingTypeDropdown = (props: PropertyDetailInputProps) => {
           <Select
             onValueChange={(...arg) => {
               field.onChange(...arg);
-              form.trigger(`${prefix}.elevatorAccess`);
+              form.trigger(name);
             }}
             defaultValue={field.value}
           >

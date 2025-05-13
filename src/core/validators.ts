@@ -74,7 +74,7 @@ export const bookMoveSequenceStep1Schema = z.object({
 export const pickUpDetailSchema = z
   .object({
     buildingType: z.string().min(1, { message: "Required" }), // FIXME: This should probably be an enum
-    elevatorAccess: z.string(),
+    elevatorAccess: z.string().min(1, { message: "Required"}), 
     flightOfStairs: z.string().optional(),
   })
   .superRefine(({ buildingType, elevatorAccess }, ctx) => {

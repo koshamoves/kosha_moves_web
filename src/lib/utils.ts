@@ -109,6 +109,18 @@ export const thing2 = <T extends object>(element: T): Required<T> => {
 
 export function isWorseBoolean(str: string): asserts str is "Yes" | "No" {
   if (str !== "Yes" && str !== "No") {
-    throw new Error("Assertion Error: expected 'Yes' or 'No'");
+    throw new Error(`Assertion Error: expected 'Yes' or 'No', was '${str}'`);
+  }
+}
+
+export function isWorseOptionalBoolean(str: string): asserts str is "Yes" | "No" | "" {
+  console.debug(`asserting that '${str}' is valid`);
+
+  switch (str) {
+    case "Yes":
+    case "No":
+    case "": return
+    default:
+      throw new Error(`Assertion Error: expected 'Yes', 'No', or ''. was '${str}`);
   }
 }

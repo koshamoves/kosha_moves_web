@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { SERVICES, SequenceStepsProps } from "..";
+import { BuildingTypeDropdown, ElevatorStairsInput, SERVICES, SequenceStepsProps } from "..";
 import {
   hireLabourSequenceStep1Schema,
   hireLabourSequenceStep2Schema,
@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/input";
 import { InputDirectives } from "@/lib/helpers/inputDirectives";
 import { DateInput } from "@/components/dateInput";
-import { cn } from "@/lib/utils";
+import { cn, isWorseOptionalBoolean } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "@/components/toast/use-toast";
@@ -89,6 +89,13 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     name: "elevatorAccess",
   });
 
+  const selectedBuildingType = useWatch({
+    control: form.control,
+    name: "buildingType"
+  })
+
+  isWorseOptionalBoolean(hasElevatorAccess)
+
   // TODO: this will always happen on page load, and means that Step2 will never generate its own ID
   useBookingIdStore(state => state.reset)()
 
@@ -141,7 +148,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               control={form.control}
               name="time"
               render={({ field }) => (
-                <FormItem className="flex-1">                  
+                <FormItem className="flex-1">
                   <Column className="gap-3">
                     <FormLabel>Time</FormLabel>
                     <FormControl>
@@ -181,82 +188,12 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             />
           </Row>
           <Row className="gap-4 flex-col sm:flex-row">
-            <FormField
-              control={form.control}
-              name="buildingType"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel className="text-grey-300">Building Type</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={buildingType}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Condo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Condo">Condo</SelectItem>
-                      <SelectItem value="Apartment">Apartment</SelectItem>
-                      <SelectItem value="House">House</SelectItem>
-                      <SelectItem value="Office">Office</SelectItem>
-                      <SelectItem value="TownHouse">TownHouse</SelectItem>
-                      <SelectItem value="Storage">Storage</SelectItem>
-                      <SelectItem value="Store">Store</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-destructive" />
-                </FormItem>
-              )}
+            <BuildingTypeDropdown form={form} />
+            <ElevatorStairsInput
+              form={form}
+              buildingType={selectedBuildingType}
+              elevatorAccess={hasElevatorAccess}
             />
-            <FormField
-              control={form.control}
-              name="elevatorAccess"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel className="text-grey-300">
-                    Elevator Access
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={elevatorAccess}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Yes" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-destructive" />
-                </FormItem>
-              )}
-            />
-            {hasElevatorAccess === "No" && (
-              <FormField
-                control={form.control}
-                name="flightOfStairs"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel className="text-grey-300">
-                      Flight of Stairs
-                    </FormLabel>
-                    <FormControl>
-                      <CountableInput
-                        style={{ input: "h-10 rounded-lg", button: "h-8" }}
-                        count={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-destructive" />
-                  </FormItem>
-                )}
-              />
-            )}
           </Row>
         </Column>
         <Row className="items-center justify-center my-8">
@@ -623,7 +560,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep3Schema>) => {
     update(data);
-    
+
     const state = useHireLabourStore.getState() as HireLabour;
     if (serviceLocation) getQuotes(hireLabourFactory(state));
   };
