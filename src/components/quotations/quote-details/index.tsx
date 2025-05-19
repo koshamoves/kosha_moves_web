@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/form";
-import { DebouncedInput, Input } from "@/components/input";
+import { DiscountInput } from "@/components/input";
 import { Column, Row } from "@/components/layout";
 import { toast } from "@/components/toast/use-toast";
 import { ErrorMessage, StorageKeys } from "@/constants/enums";
@@ -535,30 +535,30 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       ? hireLabourFactory(hireData)
       : bookMoveFactory(bookData);
     const data = {
-  
+
       clientId: user?.uid ?? "",
       clientName: user?.fullName ?? "",
       searchRequest: {
-        ...formattedFormData, 
+        ...formattedFormData,
         additionalNotes: formData.instructions
       },
-     
-    bookingDate: new Date(), 
+
+      bookingDate: new Date(),
       quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
-  
+
     } as MoveRequestDto;
-   
+
     if (updating) {
       if (!selectedBooking?.bookingId) return;
-      const moveUpdateDto : MoveUpdateDto = {
+      const moveUpdateDto: MoveUpdateDto = {
         bookingId: selectedBooking.bookingId,
         moveRequest: data,
         status: BookingStatusDto.Edited,
         modifiedDate: new Date()
       };
 
-      updateMove(moveUpdateDto);   
-    } else {     
+      updateMove(moveUpdateDto);
+    } else {
       bookMove(data);
     }
   };
@@ -616,13 +616,15 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
         {!finishing && (
           <>
             <>
-              <DebouncedInput
+              <DiscountInput
                 placeholder="Input Discount Code"
                 className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
-                debounce={1500}
-                onChange={(e) => {
-                  getVoucher({ code: e.target.value });
+                timeout={1500}
+                onInputSettled={(str: string) => {
+                  console.warn("discount str: ", str);
+                  getVoucher({ code: str });
                 }}
+
               />
               {isGettingVoucher && (
                 <p className="text-sm italic">Checking voucher...</p>
