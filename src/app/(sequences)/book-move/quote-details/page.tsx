@@ -100,7 +100,6 @@ const Page = () => {
   const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
   const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
 
-
   // accounts for the sitauation where a user inputs a flightOfStairs 
   // value but later changes elevatorAccess to "Yes"
   const countStairs = (stop: z.infer<typeof pickUpDetailSchema>): number => {
@@ -116,18 +115,23 @@ const Page = () => {
     countStairs(PUDPickUpLocation!) + countStairs(PUDFinalDestination!)
   );
 
-  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
-  // TODO: use useMemo to cache the total amount
-  const totalAmount =
-    realTruckFee +
-    realHourlyRate * minimumHours +
-    +(majorAppliances ?? 0) * majorAppliancesFee +
-    totalStairs * flightOfStairsFee +
-    +(pianos ?? 0) * pianosFee +
-    +(PUDStops?.length ?? 0) * stopOverFee +
-    +(hotTubs ?? 0) * hotTubsFee +
-    +(poolTables ?? 0) * poolTablesFee +
-    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
+  // // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
+  // // TODO: use useMemo to cache the total amount
+  // const localTotal =
+  //   realTruckFee +
+  //   realHourlyRate * minimumHours +
+  //   +(majorAppliances ?? 0) * majorAppliancesFee +
+  //   totalStairs * flightOfStairsFee +
+  //   +(pianos ?? 0) * pianosFee +
+  //   +(PUDStops?.length ?? 0) * stopOverFee +
+  //   +(hotTubs ?? 0) * hotTubsFee +
+  //   +(poolTables ?? 0) * poolTablesFee +
+  //   +(workOutEquipment ?? 0) * workoutEquipmentsFee;
+  // console.debug("Local Total Amount: ", localTotal);
+
+  const totalAmount = minimumAmount +
+    additionalMoverHourlyRate * (movers - originalMoverCount) + // TruckFee is affected
+    additionalMoverHourlyRate * (movers - originalMoverCount); // HourlyRate is affected
 
   let bookingDate, bookingTime, locations;
 
