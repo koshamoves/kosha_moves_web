@@ -455,6 +455,7 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
     </Column>
   );
 };
+
 interface QuoteDetailsChargeProps extends HTMLAttributes<HTMLDivElement> {
   amount: number;
   hourlyRate: number;
@@ -473,8 +474,14 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   );
   const selectedBooking = useBookingStore.use.selectedBooking();
   const { user } = useUserStore((state) => state);
-  const { bookMove } = useBookMove();
-  const { isPending, updateMove } = useUpdateMove();
+  const { isPending: isSubmitPending, isSuccess: isSubmitSuccess, bookMove } = useBookMove();
+  const { isPending: isUpdatePending, isSuccess: isUpdateSuccess, updateMove } = useUpdateMove();
+
+  const shouldDisableSubmit = isSubmitPending ||
+    isUpdatePending ||
+    isSubmitSuccess ||
+    isUpdateSuccess;
+
   //const { isPending, mutate: updateBooking } = useUpdateBooking();
 
   const bookData = useBookMoveStore(state => state) as BookMove; // FIXME: some type safety here? 
@@ -526,30 +533,23 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   }
 
   const handleBook = () => {
-    console.log("here");
-    console.log(selectedBooking);
-    console.log(updating);
     if (!selectedBooking && updating) return;
-    console.log("here 2");
-    const formattedFormData = isHireLabourRoute
-      ? hireLabourFactory(hireData)
-      : bookMoveFactory(bookData);
-    const data = {
 
-      clientId: user?.uid ?? "",
+    const formattedFormData = isHireLabourRoute ? hireLabourFactory(hireData) : bookMoveFactory(bookData);
+    const data = {
+      clientId: user?.uid ?? "", // FIXME: some of the data here we don't want to just ignore if its not present
       clientName: user?.fullName ?? "",
       searchRequest: {
         ...formattedFormData,
         additionalNotes: formData.instructions
       },
-
       bookingDate: new Date(),
       quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
-
     } as MoveRequestDto;
 
     if (updating) {
       if (!selectedBooking?.bookingId) return;
+
       const moveUpdateDto: MoveUpdateDto = {
         bookingId: selectedBooking.bookingId,
         moveRequest: data,
@@ -632,21 +632,20 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
             </>
 
             <Button
-              disabled={isPending}
-              loading={isPending}
+              disabled={shouldDisableSubmit}
+              loading={shouldDisableSubmit}
               onClick={() => {
                 if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
                 if (!(!formData || !quoteDetails) && currentUser)
                   handleBook();
               }}
             >
-              {!currentUser
-                ? "Sign in to complete booking"
-                : updating
-                  ? isPending
-                    ? "Updating..."
-                    : "Update Booking"
-                  : "Book Now"}
+              {
+                !currentUser ? "Sign in to complete booking" :
+                  (updating ?
+                    (isUpdatePending ? "Updating..." : "Update Booking") :
+                    "Book Now")
+              }
             </Button>
           </>
         )}
