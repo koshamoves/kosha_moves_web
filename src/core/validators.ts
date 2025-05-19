@@ -21,11 +21,12 @@ export const signUpSchema = z.object({
         message: "Full name should include both first name and last name",
       },
     ),
-  phone: z.string().regex(/^(?:\+234|0)?(70|80|81|90|91)\d{8}$/, {
-    message: "Invalid Nigerian phone number format",
-  }),
+  phone: z.string().regex(/^(?:\+1\s?|1\s?|1-)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
+    {
+      message: "Invalid NA phone number",
+    }),
   email: emailSchema,
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z.string().min(1, { message: "Password must contain at least 1 character(s)" }),
   acceptTerms: z.boolean(),
 });
 
@@ -74,7 +75,7 @@ export const bookMoveSequenceStep1Schema = z.object({
 export const pickUpDetailSchema = z
   .object({
     buildingType: z.string().min(1, { message: "Required" }), // FIXME: This should probably be an enum
-    elevatorAccess: z.string().min(1, { message: "Required"}), 
+    elevatorAccess: z.string().min(1, { message: "Required" }),
     flightOfStairs: z.string().optional(),
   })
   .superRefine(({ buildingType, elevatorAccess }, ctx) => {
