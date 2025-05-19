@@ -4,7 +4,7 @@ import { Button, H, P, Picture } from "@/components/atoms";
 import { Calendar } from "@/components/calendar";
 import { Column, Row } from "@/components/layout";
 import { useGetBookingsByDate } from "@/hooks/fireStore/useGetBookings";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Quotes,
   QuotesAmount,
@@ -17,19 +17,30 @@ import {
   QuotesRatings,
 } from "@/components/quotations/quotes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { Routes } from "@/core/routing";
 import useBookingStore from "@/stores/booking.store";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RequestType } from "@/types/structs";
 
 const Page = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dateParam = searchParams.get("date");
+
   const [date, setDate] = useState<Date>(new Date());
   const { isLoading, data: bookings, error } = useGetBookingsByDate(date);
   const setSelectedBooking = useBookingStore.use.setSelectedBooking();
-  const isToday =
-    format(date, "MM-dd-yyyy") === format(new Date(), "MM-dd-yyyy");
+  const isToday = isSameDay(date, new Date());
+
+  useEffect(() => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateParam ?? "");
+    if (!match) return;
+
+    const [, year, month, day] = match.map(Number);
+    setDate(new Date(year, month - 1, day));
+  }, [dateParam])
+
   return (
     <Row className="gap-8 flex-col md:flex-row">
       <Column className="flex-1 gap-8">
@@ -166,7 +177,6 @@ const Page = () => {
           selected={date}
           onSelect={(date) => date && setDate(date)}
           disabled={(date: Date) => date < new Date("1900-01-01")}
-          initialFocus
           className="rounded-xl shadow-custom bg-white-100 w-full"
         />
       </Column>

@@ -18,13 +18,13 @@ export const useUpdateMove = (
   useMutationOptions: Omit<UseMutationOptions<any, any, Partial<MoveUpdateDto>>, "mutationFn"> = {}
 ) => {
   const { isValidRoute: isHireLabourRoute } = useValidRoute(Routes.sequence.hireLabour);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const router = useRouter();
-    const setSelectedBooking = useBookingStore.use.setSelectedBooking();
-    const { reset } = useShowQuotes.getState();
-    const { reset: resetBookMove } = useBookMoveStore.getState();
-    const { reset: resetHireLabour } = useHireLabourStore.getState();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const router = useRouter();
+  const setSelectedBooking = useBookingStore.use.setSelectedBooking();
+  const { reset } = useShowQuotes.getState();
+  const { reset: resetBookMove } = useBookMoveStore.getState();
+  const { reset: resetHireLabour } = useHireLabourStore.getState();
 
   const methods = useMutation<any, any, Partial<MoveUpdateDto>>({
     mutationFn: (props) => updateMoveData(props),
@@ -35,17 +35,19 @@ export const useUpdateMove = (
     methods
       .mutateAsync(payload)
       .then((res: any) => {
-       queryClient.invalidateQueries({ queryKey: [CacheKey.BOOKINGS_STATE] });
-             localStorage.clear();
-             setSelectedBooking(null);
-             reset();
-             resetHireLabour();
-             resetBookMove();
-             toast({
-               description: SUCCESS_MESSAGE.BOOKING_UPDATED,
-               variant: "success",
-             });
-             wait(0).then(() => router.push(Routes.bookings));
+        queryClient.invalidateQueries({ queryKey: [CacheKey.BOOKINGS_STATE] });
+        localStorage.clear();
+        setSelectedBooking(null);
+        reset();
+        resetHireLabour();
+        resetBookMove();
+        // TODO: do we also want to make use of the searchParam in /bookings here? 
+
+        toast({
+          description: SUCCESS_MESSAGE.BOOKING_UPDATED,
+          variant: "success",
+        });
+        wait(0).then(() => router.push(Routes.bookings));
       })
       .catch(() => {
         toast({
