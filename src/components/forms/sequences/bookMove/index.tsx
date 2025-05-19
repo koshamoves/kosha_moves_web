@@ -978,12 +978,12 @@ type ElevatorStairsProps = PropertyDetailInputProps & ElevatorAccessSpecificProp
 
 export const ElevatorStairsInput = (props: ElevatorStairsProps) => {
   const isHouse = props.buildingType === "House";
-  const showStairsInput = props.elevatorAccess === "Yes";
+  const hasElevator = props.elevatorAccess === "No";
 
   return (
     <>
       {!isHouse && (<ElevatorAccessInput {...props} />)}
-      {(showStairsInput || isHouse) && (<FlightOfStairsInput {...props} />)}
+      {(hasElevator || isHouse) && (<FlightOfStairsInput {...props} />)}
     </>
   );
 }
