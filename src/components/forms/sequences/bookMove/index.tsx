@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/form";
 import { AnimatePresence, motion } from "framer-motion";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -965,6 +965,7 @@ export const BookMoveSequence = {
 };
 
 interface PropertyDetailInputProps {
+  // form: UseFormReturn<z.infer<typeof bookMoveSequenceStep2Schema>>,
   form: any,
   prefix?: string
 };
@@ -979,6 +980,11 @@ type ElevatorStairsProps = PropertyDetailInputProps & ElevatorAccessSpecificProp
 export const ElevatorStairsInput = (props: ElevatorStairsProps) => {
   const isHouse = props.buildingType === "House";
   const hasElevator = props.elevatorAccess === "No";
+
+  if (isHouse) { // House BuildingType implies no elevator
+    const name = (props.prefix) ? `${props.prefix!}.elevatorAccess` : "elevatorAccess"
+    props.form.setValue(name);
+  }
 
   return (
     <>
