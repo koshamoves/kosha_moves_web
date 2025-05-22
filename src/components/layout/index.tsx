@@ -38,6 +38,9 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
     Routes.bookMoveQuoteDetails,
     Routes.hireLabourQuotes,
     Routes.hireLabourQuoteDetails,
+    Routes.giftCard,
+    Routes.success,
+    Routes.cancel,
   ]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
