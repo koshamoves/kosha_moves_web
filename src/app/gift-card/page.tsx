@@ -72,7 +72,7 @@ const Page = () => {
             eGift Card
           </h1>
           <p className="text-gray-600 mt-2 leading-relaxed">
-            You can't go wrong with a gift card. Choose an amount and write a
+            You can&apos;t go wrong with a gift card. Choose an amount and write a
             personalized message to make this gift your own.
           </p>
         </div>
