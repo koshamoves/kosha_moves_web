@@ -25,3 +25,4 @@ export { default as Trash } from "./Trash";
 export { default as TruckFront } from "./TruckFront";
 export { default as TruckFrontGrey } from "./TruckFrontGrey";
 export { default as User } from "./User";
+export { default as GiftCard } from "./GiftCard";
