@@ -2,11 +2,11 @@ import { Calendar } from "../calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "../popover"
 import { FC, ReactNode } from "react"
 
-interface Props{
+interface Props {
       field?: any;
       trigger: ReactNode;
 }
-export const DateInput: FC<Props> = ({ field, trigger}) => {
+export const DateInput: FC<Props> = ({ field, trigger }) => {
       return (
             <Popover>
                   <PopoverTrigger asChild>

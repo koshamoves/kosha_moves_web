@@ -16,24 +16,12 @@ import { Column, Row } from "@/components/layout";
 import Link from "next/link";
 import { Routes } from "@/core/routing";
 import { useSearchParams } from "next/navigation";
-import useBookMoveStore from "@/stores/book-move.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
-  const action = searchParams.get("action");
-  const isTakingAction = ["update", "finish"].includes(action ?? "");
   const updating = searchParams.get("action") === "update";
   const [activeTab, setActiveTab] = useState<string>("dateAndTime");
   const selectedBooking = useBookingStore.use.selectedBooking();
-  const [isMounted, setIsMounted] = useState(false);
-  const resetBookMoveStore = useBookMoveStore((state) => state.reset);
-
-  useEffect(() => {
-    if (!isTakingAction) {
-      resetBookMoveStore();
-    }
-    setIsMounted(true);
-  }, [isTakingAction, resetBookMoveStore]);
 
   useEffect(() => {
     document
@@ -41,7 +29,6 @@ const Page = () => {
       ?.scrollTo({ left: 0, top: 0, behavior: "smooth" });
   }, [activeTab]);
 
-  if (!isMounted) return null;
   if (!selectedBooking && updating) {
     return (
       <Row className="w-full h-full items-center justify-center">
@@ -112,21 +99,11 @@ const Page = () => {
 
 const getMobileTitle = (active: string): string => {
   switch (active) {
-    case "dateAndTime":
-      return "Schedule a Move";
-      break;
-    case "propertyDetail":
-      return "Pickup Details";
-      break;
-    case "generalInfo":
-      return "Additional Info";
-      break;
-    case "serviceRequirement":
-      return "Service Requirements";
-      break;
-    default:
-      return "";
-      break;
+    case "dateAndTime": return "Schedule a Move";
+    case "propertyDetail": return "Pickup Details";
+    case "generalInfo": return "Additional Info";
+    case "serviceRequirement": return "Service Requirements";
+    default: return "";
   }
 };
 

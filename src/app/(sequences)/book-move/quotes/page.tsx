@@ -12,10 +12,10 @@ import {
   QuotesTitle,
   QuotesVehicle,
 } from "@/components/quotations/quotes";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 import { Routes } from "@/core/routing";
 import useShowQuotes from "@/stores/show-quotes.store";
-import { Quote } from "@/types/structs";
+import { Quote, RequestType } from "@/types/structs";
 import { useRouter } from "next/navigation";
 import { CircleAlert } from "lucide-react";
 import useBookingStore from "@/stores/booking.store";
@@ -27,9 +27,12 @@ const Page = () => {
   const searchParams = useSearchParams();
   const selectedBooking = useBookingStore.use.selectedBooking();
   const router = useRouter();
-  const { setQuoteDetailsData } = useQuoteDetailsData();
+
+  const replaceQuoteDetails = useQuoteDetailsStore((state) => state.replace);
+
   const { quotesResult } = useShowQuotes((state) => state);
   const updating = searchParams.get("action") === "update";
+
   if (!selectedBooking && updating) {
     return (
       <Row className="w-full h-full items-center justify-center">
@@ -51,36 +54,37 @@ const Page = () => {
         list={quotesResult}
         renderItem={({ index, item }) => {
           return (
-          <Quotes
-            onClick={() => {
-              setQuoteDetailsData(item);
-              router.push(
-                `${Routes.bookMoveQuoteDetails}${
-                  updating ? "?action=update" : ""
-                }`
-              );
-            }}
-            key={item.companyName + index}
-          >
-            <QuotesImage src="" type="RegularMove" />
-            <QuotesContent>
-              <Row className="items-start justify-between gap-6 flex-wrap">
-                <Column>
-                  <QuotesTitle title={item.companyName} />
-                  <QuotesMovers>{item.movers} Movers</QuotesMovers>
-                </Column>
-                <QuotesMoversDoodles length={item.movers} />
-              </Row>
-              <Row className="justify-between items-center">
-                <Column className="gap-1">
-                  <QuotesVehicle>{item.movingTruck}</QuotesVehicle>
-                  <QuotesRatings rating={item.averageRating} />
-                </Column>
-                <QuotesAmount amount={item.minimumAmount} />
-              </Row>
-            </QuotesContent>
-          </Quotes>
-        )}}
+            <Quotes
+              onClick={() => {
+                replaceQuoteDetails(item);
+
+                router.push(
+                  `${Routes.bookMoveQuoteDetails}${updating ? "?action=update" : ""
+                  }`
+                );
+              }}
+              key={item.companyName + index}
+            >
+              <QuotesImage src="" type={RequestType.RegularMove} />
+              <QuotesContent>
+                <Row className="items-start justify-between gap-6 flex-wrap">
+                  <Column>
+                    <QuotesTitle title={item.companyName} />
+                    <QuotesMovers>{item.movers} Movers</QuotesMovers>
+                  </Column>
+                  <QuotesMoversDoodles length={item.movers} />
+                </Row>
+                <Row className="justify-between items-center">
+                  <Column className="gap-1">
+                    <QuotesVehicle>{item.movingTruck}</QuotesVehicle>
+                    <QuotesRatings rating={item.averageRating} />
+                  </Column>
+                  <QuotesAmount amount={item.minimumAmount} />
+                </Row>
+              </QuotesContent>
+            </Quotes>
+          )
+        }}
       />
     </>
   );

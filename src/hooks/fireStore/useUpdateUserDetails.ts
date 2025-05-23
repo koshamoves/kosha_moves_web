@@ -6,7 +6,7 @@ import useUserStore from "@/stores/user.store";
 import { useState } from "react";
 
 export const useUpdateUserDetails = () => {
-  const {updateUser} =  useUserStore((state) => state);
+  const updateUser = useUserStore((state) => state.update);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,7 +16,7 @@ export const useUpdateUserDetails = () => {
 
     updateUserDetails(name, phoneNumber)
       .then(() => {
-            updateUser({fullName: name, phoneNumber})
+        updateUser({ fullName: name, phoneNumber })
         toast({
           description: SUCCESS_MESSAGE.PROFILE_UPDATE,
           variant: "success",

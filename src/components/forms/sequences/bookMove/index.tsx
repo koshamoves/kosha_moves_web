@@ -60,16 +60,20 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { storage } from "@/firebase/firestore";
-import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { ErrorMessage } from "@/constants/enums";
 import { toast } from "@/components/toast/use-toast";
+import TimePicker from '../../../TimePicker';
+import { CountableInput } from '../../../input/CountableInput';
+import { BookMove } from "@/types/structs";
+import useBookingIdStore from "@/stores/booking-id.store";
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
-  const { update, formData, removeStop, reset } = useBookMoveStore(
-    (state) => state
-  );
-  const { moveDate, time, stops, pickUpLocation, finalDestination } = formData;
+
+  // FIXME: might be worth to fully spell out these fields for memoization
+  const { update, removeStop, reset } = useBookMoveStore(state => state);
+  let { moveDate, time, stops, pickUpLocation, finalDestination } = useBookMoveStore(state => state);
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep1Schema>>({
     resolver: zodResolver(bookMoveSequenceStep1Schema),
     defaultValues: {
@@ -80,18 +84,20 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       finalDestination,
     },
   });
+
   const { fields, append, remove } = useFieldArray({
     name: "stops",
     control: form.control,
   });
 
-  useEffect(() => {
-    localStorage.removeItem("bookingId");
-  }, []);
+  // Reset booking ID
+  useBookingIdStore(state => state.reset)()
+
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep1Schema>) => {
     onChangeStep("propertyDetail");
     update(data);
   };
+
   return (
     <Form {...form}>
       <form className="text-grey-300" onSubmit={form.handleSubmit(onSubmit)}>
@@ -115,11 +121,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                               !field.value && "text-muted-foreground"
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span></span>
-                            )}
+                            {field.value ? format(field.value, "PPP") : ""}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -135,15 +137,13 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="time"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel>Time</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      defaultValue={formData.time}
-                      type="time"
-                    />
-                  </FormControl>
-                  <FormMessage />
+                  <Column className="gap-3">
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <TimePicker field={field} />
+                    </FormControl>
+                    <FormMessage className="text-destructive" />
+                  </Column>
                 </FormItem>
               )}
             />
@@ -153,7 +153,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="pickUpLocation.location"
               control={form.control}
               label="Pickup Location"
-              defaultValue={pickUpLocation.location}
+              defaultValue={pickUpLocation?.location}
             />
             <FormField
               control={form.control}
@@ -165,8 +165,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     <Input
                       {...field}
                       {...InputDirectives.numbersOnly}
-                      defaultValue={formData.pickUpLocation.apartmentNumber}
-                      placeholder=""
+                      defaultValue={pickUpLocation?.apartmentNumber}
                     />
                   </FormControl>
                   <FormMessage />
@@ -195,7 +194,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                 className="group"
               >
                 <Row className="px-6 justify-between items-center">
-                  <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary" />
+                  <div className="relative h-[58px] max-w-max" />
                   <Button
                     type="button"
                     variant="ghost"
@@ -242,7 +241,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
         </AnimatePresence>
         <div>
           <div className="px-6">
-            <div className="relative h-[58px] max-w-max border-l-2 border-dotted border-primary">
+            <div className="relative h-[58px] max-w-max">
               <Button
                 type="button"
                 variant="ghost"
@@ -264,7 +263,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               name="finalDestination.location"
               control={form.control}
               label="Final Destination"
-              defaultValue={finalDestination.location}
+              defaultValue={finalDestination?.location}
             />
             <FormField
               control={form.control}
@@ -276,8 +275,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                     <Input
                       {...field}
                       {...InputDirectives.numbersOnly}
-                      defaultValue={formData.finalDestination.apartmentNumber}
-                      placeholder=""
+                      defaultValue={finalDestination?.apartmentNumber}
                     />
                   </FormControl>
                   <FormMessage />
@@ -310,23 +308,25 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 };
 
 const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { formData, update } = useBookMoveStore((state) => state);
-  const { PUDFinalDestination, PUDPickUpLocation, PUDStops } = formData;
+  const update = useBookMoveStore(state => state.update);
+  let { PUDFinalDestination, PUDPickUpLocation, PUDStops, stops, pickUpLocation, finalDestination } = useBookMoveStore((state) => state);
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep2Schema>>({
     resolver: zodResolver(bookMoveSequenceStep2Schema),
     defaultValues: {
-      PUDPickUpLocation,
-      PUDFinalDestination,
-      PUDStops:
+      PUDPickUpLocation: { elevatorAccess: "", ...PUDPickUpLocation }, // FIXME: bool, not string please 
+      PUDFinalDestination: { elevatorAccess: "", ...PUDFinalDestination },
+      PUDStops: // TODO: figure out what's going on over here 
         (PUDStops?.length || 0) > 0
           ? PUDStops
-          : formData.stops.map(() => ({
-              buildingType: "",
-              flightOfStairs: "0",
-              elevatorAccess: "",
-            })),
+          : stops.map(() => ({
+            buildingType: "",
+            flightOfStairs: "0",
+            elevatorAccess: "",
+          })),
     },
   });
+
 
   const finalDestinationBuildingType = useWatch({
     control: form.control,
@@ -346,13 +346,13 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   });
   const stopsBuildingType = useWatch({
     control: form.control,
-    name: formData.stops.map(
+    name: stops.map(
       (_, index) => `PUDStops.${index}.buildingType`
     ) as "PUDStops"[],
   });
   const stopsElevatorAccess = useWatch({
     control: form.control,
-    name: formData.stops.map(
+    name: stops.map(
       (_, index) => `PUDStops.${index}.elevatorAccess`
     ) as "PUDStops"[],
   });
@@ -370,7 +370,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <Column className="flex-1 max-w-[250px]">
               <P className="font-semibold text-lg">Pickup Location</P>
               <P className="font-bold text-primary text-xl">
-                {formData.pickUpLocation.location}
+                {pickUpLocation?.location}
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
@@ -416,18 +416,21 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   <FormField
                     control={form.control}
                     name="PUDPickUpLocation.elevatorAccess"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Elevator Access
-                        </FormLabel>
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex-1 min-w-[70px]">
+                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value); // Update the field's value
+                            if (value) {
+                              form.clearErrors("PUDPickUpLocation.elevatorAccess"); // Clear the "Required" error as soon as a selection is made
+                            }
+                          }}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="" />
+                              <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -435,42 +438,39 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                             <SelectItem value="No">No</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-destructive sm:absolute" />
+                        <FormMessage className="text-destructive min-h-[1.5rem]" /> {/* Reserve space */}
                       </FormItem>
                     )}
                   />
                 )}
                 {(pickUpLocationElevatorAccess === "No" ||
                   pickUpLocationBuildingType === "House") && (
-                  <FormField
-                    control={form.control}
-                    name="PUDPickUpLocation.flightOfStairs"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Flight of Stairs
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            placeholder="0"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
+                    <FormField
+                      control={form.control}
+                      name="PUDPickUpLocation.flightOfStairs"
+                      render={({ field }) => (
+                        <FormItem className="flex-1 relative">
+                          <FormLabel className="text-grey-300">
+                            Flight of Stairs
+                          </FormLabel>
+                          <CountableInput
+                            style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                            count={field.value}
+                            onChange={field.onChange}
                           />
-                        </FormControl>
-                        <FormMessage className="text-destructive sm:absolute" />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                          <FormMessage className="text-destructive sm:absolute" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
               </Row>
             </Row>
           </Row>
           <div className="px-6">
-            <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
+            <div className="relative h-[40px] max-w-max" />
           </div>
         </div>
-        {formData.stops.map((stop, index) => (
+        {stops.map((stop, index) => (
           <div key={stop.location + index}>
             <Row className="bg-white-100 justify-between shadow-sm rounded-xl gap-6 p-6 sm:p-12 flex-col sm:flex-row">
               <Column className="flex-1 max-w-[250px]">
@@ -520,64 +520,63 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   />
                   {(stopsBuildingType as unknown as string[])[index] !==
                     "House" && (
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.elevatorAccess`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Elevator Access
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Yes">Yes</SelectItem>
-                              <SelectItem value="No">No</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                      <FormField
+                        control={form.control}
+                        name={`PUDStops.${index}.elevatorAccess`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1 relative">
+                            <FormLabel className="text-grey-300">
+                              Elevator Access
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Yes">Yes</SelectItem>
+                                <SelectItem value="No">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage className="text-destructive sm:absolute" />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   {((stopsElevatorAccess as unknown as ("Yes" | "No")[])[
                     index
                   ] === "No" ||
                     (stopsBuildingType as unknown as string[])[index] ===
-                      "House") && (
-                    <FormField
-                      control={form.control}
-                      name={`PUDStops.${index}.flightOfStairs`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 relative">
-                          <FormLabel className="text-grey-300">
-                            Flight of Stairs
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              className="h-10 rounded-lg"
-                              {...field}
-                              {...InputDirectives.numbersOnly}
-                              defaultValue={0}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-destructive sm:absolute" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                    "House") && (
+                      <FormField
+                        control={form.control}
+                        name={`PUDStops.${index}.flightOfStairs`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1 relative">
+                            <FormLabel className="text-grey-300">
+                              Flight of Stairs
+                            </FormLabel>
+                            <FormControl>
+                              <CountableInput
+                                style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                                count={field.value}
+                                onChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-destructive sm:absolute" />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                 </Row>
               </Row>
             </Row>
             <div className="px-6">
-              <div className="relative h-[40px] max-w-max border-l-2 border-dotted border-primary" />
+              <div className="relative h-[40px] max-w-max" />
             </div>
           </div>
         ))}
@@ -586,7 +585,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             <Column className="flex-1 max-w-[250px]">
               <P className="font-semibold text-lg">Final Destination</P>
               <P className="font-bold text-primary text-xl">
-                {formData.finalDestination.location}
+                {finalDestination?.location}
               </P>
             </Column>
             <Row className="gap-4 flex-1 items-center sm:min-w-[300px]">
@@ -632,52 +631,55 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   <FormField
                     control={form.control}
                     name="PUDFinalDestination.elevatorAccess"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Elevator Access
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-destructive sm:absolute" />
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex-1 min-w-[70px]">
+                        <FormLabel className="text-grey-300">Elevator Access</FormLabel>
+                        <div className="flex flex-col"> {/* Wrap Select and FormMessage */}
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              form.trigger("PUDFinalDestination.elevatorAccess"); // Trigger validation on selection
+                            }}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select an option" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Yes">Yes</SelectItem>
+                              <SelectItem value="No">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-destructive mt-2 min-h-[1.5rem]" /> {/* Add margin and height */}
+                        </div>
                       </FormItem>
                     )}
                   />
                 )}
                 {(finalDestinationElevatorAccess === "No" ||
                   finalDestinationBuildingType === "House") && (
-                  <FormField
-                    control={form.control}
-                    name="PUDFinalDestination.flightOfStairs"
-                    render={({ field }) => (
-                      <FormItem className="flex-1 relative">
-                        <FormLabel className="text-grey-300">
-                          Flight of Stairs
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            className="h-10 rounded-lg"
-                            {...field}
-                            {...InputDirectives.numbersOnly}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-destructive sm:absolute" />
-                      </FormItem>
-                    )}
-                  />
-                )}
+                    <FormField
+                      control={form.control}
+                      name="PUDFinalDestination.flightOfStairs"
+                      render={({ field }) => (
+                        <FormItem className="flex-1 relative">
+                          <FormLabel className="text-grey-300">
+                            Flight of Stairs
+                          </FormLabel>
+                          <FormControl>
+                            <CountableInput
+                              style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                              count={field.value}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormMessage className="text-destructive sm:absolute" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
               </Row>
             </Row>
           </Row>
@@ -702,12 +704,13 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   );
 };
 
+/** Additional Info Step */
 const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { update, updateField, removeImage, formData } = useBookMoveStore(
+  const { update, updateField, removeImage } = useBookMoveStore(
     (state) => state
   );
-  const {
-    majorAppliances,
+
+  let { majorAppliances,
     workOutEquipment,
     pianos,
     hotTubs,
@@ -715,8 +718,9 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     numberOfBoxes,
     instructions,
     images,
-    tempImages,
-  } = formData;
+    tempImages } = useBookMoveStore(state => state);
+
+
   const form = useForm<z.infer<typeof bookMoveSequenceStep3Schema>>({
     resolver: zodResolver(bookMoveSequenceStep3Schema),
     defaultValues: {
@@ -731,23 +735,11 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const [bookingId, setBookingId] = useState<string>("");
-
-  // Generate a new unique ID when the component mounts
-  useEffect(() => {
-    const storedBookingId = localStorage.getItem("bookingId");
-    if (storedBookingId) {
-      setBookingId(storedBookingId);
-    } else {
-      const newBookingId = generateBookingId();
-      setBookingId(newBookingId);
-      localStorage.setItem("bookingId", newBookingId);
-    }
-  }, []);
+  const bookingId = useBookingIdStore(state => state.id);
 
   const handleRemoveImage = async (index: number) => {
     try {
-      const imageUrl = formData.images[index];
+      const imageUrl = images[index];
       const urlParts = imageUrl.split("%2F");
       const folder = urlParts[0].split("/").pop();
       const fileName = urlParts[1].split("?")[0];
@@ -758,7 +750,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       removeImage(index);
       form.setValue(
         "images",
-        formData.images.filter((_, i) => i !== index)
+        images.filter((_, i) => i !== index)
       );
       updateField(
         "tempImages",
@@ -815,10 +807,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Major Appliances
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
               </FormItem>
@@ -833,10 +825,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Workout Equipment
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -852,10 +844,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pianos</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -869,10 +861,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Hot Tubs</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -888,10 +880,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pool Tables</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -905,10 +897,10 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Number of Boxes</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8 " }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -934,7 +926,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-        <div>
+       {/*  <div>
           <Row className="items-center flex-wrap gap-4">
             {tempImages!.map((image, index) => (
               <div
@@ -1015,7 +1007,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               )}
             />
           )}
-        </div>
+        </div> */}
         <Row className="items-center justify-center my-8 flex-wrap">
           <Button
             type="button"
@@ -1040,36 +1032,31 @@ const Step4: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
-  const { update, formData } = useBookMoveStore((state) => state);
+
   const [loading, setLoading] = useState(false);
-  const { isPending, getQuotes } = useGetQuotes({
-    onSuccess: () => {
-      router.push(
-        `${Routes.bookMoveQuotes}${updating ? "?action=update" : ""}`
-      );
-    },
-    onError: () => {
-      setLoading(false);
-    },
-  });
   const [selectAll, setSelectAll] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isPending) setLoading(true);
-  }, [isPending]);
+  const [update, services, pickUpLocation] = useBookMoveStore(state => [state.update, state.services, state.pickUpLocation]);
+
+  const { isPending, getQuotes } = useGetQuotes({
+    onSuccess: () => router.push(`${Routes.bookMoveQuotes}${updating ? "?action=update" : ""}`),
+    onError: () => setLoading(false),
+  });
+
+  useEffect(() => { if (isPending) setLoading(true); }, [isPending]);
 
   const form = useForm<z.infer<typeof bookMoveSequenceStep4Schema>>({
     resolver: zodResolver(bookMoveSequenceStep4Schema),
     defaultValues: {
-      services: formData.services,
+      services: services,
     },
   });
 
   const onSubmit = (data: z.infer<typeof bookMoveSequenceStep4Schema>) => {
-    const updatedFormData = { ...formData, ...data };
-    update(updatedFormData);
-    if (formData.pickUpLocation.location)
-      getQuotes(bookMoveFactory(updatedFormData));
+    update(data);
+    const state = useBookMoveStore.getState() as BookMove; // FIXME: maybe don't cast here?
+
+    if (pickUpLocation?.location) getQuotes(bookMoveFactory(state));
   };
 
   const handleSelectAllChange = (checked: boolean) => {

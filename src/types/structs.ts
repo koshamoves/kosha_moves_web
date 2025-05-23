@@ -1,4 +1,8 @@
 import {
+  bookDeliverySequenceStep1Schema,
+  bookDeliverySequenceStep2Schema,
+  bookDeliverySequenceStep3Schema,
+  bookDeliverySequenceStep4Schema,
   bookMoveSequenceStep1Schema,
   bookMoveSequenceStep2Schema,
   bookMoveSequenceStep3Schema,
@@ -6,10 +10,7 @@ import {
   hireLabourSequenceStep1Schema,
   hireLabourSequenceStep2Schema,
   hireLabourSequenceStep3Schema,
-  bookDeliverySequenceStep1Schema,
-  bookDeliverySequenceStep2Schema,
-  bookDeliverySequenceStep3Schema,
-  bookDeliverySequenceStep4Schema,
+  locationSchema,
 } from "@/core/validators";
 import { User } from "firebase/auth";
 import { Timestamp } from "firebase/firestore";
@@ -26,25 +27,33 @@ export interface Services {
   label: string;
   description: string;
 }
-export type BookMove = z.infer<typeof bookMoveSequenceStep1Schema> &
-  z.infer<typeof bookMoveSequenceStep2Schema> &
-  z.infer<typeof bookMoveSequenceStep3Schema> &
-  z.infer<typeof bookMoveSequenceStep4Schema> & {
+export type BookMove =
+  & z.infer<typeof bookMoveSequenceStep1Schema>
+  & z.infer<typeof bookMoveSequenceStep2Schema>
+  & z.infer<typeof bookMoveSequenceStep3Schema>
+  & z.infer<typeof bookMoveSequenceStep4Schema>
+  & {
     requestType?: string;
     tempImages?: string[];
     bookingId?: string;
   };
-export type HireLabour = z.infer<typeof hireLabourSequenceStep1Schema> &
-  z.infer<typeof hireLabourSequenceStep2Schema> &
-  z.infer<typeof hireLabourSequenceStep3Schema> & {
+
+export type Location = z.infer<typeof locationSchema>;
+
+export type HireLabour =
+  & z.infer<typeof hireLabourSequenceStep1Schema>
+  & z.infer<typeof hireLabourSequenceStep2Schema>
+  & z.infer<typeof hireLabourSequenceStep3Schema>
+  & {
     requestType?: string;
     tempImages?: string[];
     bookingId?: string;
   };
-export type BookDelivery = z.infer<typeof bookDeliverySequenceStep1Schema> &
-  z.infer<typeof bookDeliverySequenceStep2Schema> &
-  z.infer<typeof bookDeliverySequenceStep3Schema> &
-  z.infer<typeof bookDeliverySequenceStep4Schema>;
+export type BookDelivery =
+  & z.infer<typeof bookDeliverySequenceStep1Schema>
+  & z.infer<typeof bookDeliverySequenceStep2Schema>
+  & z.infer<typeof bookDeliverySequenceStep3Schema>
+  & z.infer<typeof bookDeliverySequenceStep4Schema>;
 
 export interface Quote {
   companyName: string;
@@ -130,7 +139,7 @@ export interface Booking {
   moveTimestamps?: MoveTimestamp[];
   oldMinimumAmount?: number;
   additionalNotes?: string;
-  requestType: "RegularMove" | "LabourOnly" | "Delivery";
+  requestType: RequestType;
   serviceAddOns?: string[];
   estimatedNumberOfBoxes?: number;
   feeAdjustments?: FeeAdjustment[];
@@ -152,7 +161,7 @@ export interface QuoteDetailsRate {
   icon: ReactNode;
   label: string;
   rate: number;
-  count?: number;
+  count: number;
 }
 
 export interface IUser extends User {
@@ -199,4 +208,11 @@ export interface Review {
 export interface Company {
   id: string;
   operatingName: string;
+}
+
+// https://github.com/koshamoves/kosha_moves_functions/blob/ba2ee1f5c3279843e9361be89ae20e55c622f1c3/functions/src/models/search-request.ts#L27C1-L31C2
+export enum RequestType {
+  RegularMove = "RegularMove",
+  LabourOnly = "LabourOnly",
+  Delivery = "Delivery",
 }

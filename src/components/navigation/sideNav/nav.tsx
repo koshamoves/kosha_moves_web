@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Picture } from "@/components/atoms";
 import { NavItem } from ".";
 import { useActiveRoute } from "@/hooks/useActiveRoute";
-import { Calendar, Chat, Home, User } from "@/components/Icons";
+import { Calendar, Chat, GiftCard, Home, User } from "@/components/Icons";
 import { Routes } from "@/core/routing";
 import { usePathname } from "next/navigation";
 
@@ -18,7 +18,7 @@ export const SideNav: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
 
   const SIDE_NAV_MENU_DATA = [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: (
         <Home
           {...sizes}
@@ -45,6 +45,13 @@ export const SideNav: FC<{ nonAuth?: boolean }> = ({ nonAuth }) => {
         />
       ),
       route: Routes.messages,
+    },
+          {
+      title: "Buy Gift Card",
+      icon: (
+        <GiftCard {...sizes} invertcolor={isActiveRoute(Routes.giftCard)} />
+      ),
+      route: Routes.giftCard,
     },
     {
       title: "Profile",

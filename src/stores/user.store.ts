@@ -1,28 +1,18 @@
 import { IUser } from "@/types/structs";
 import { create } from "zustand";
 
-interface Store {
-      user: IUser | null;
-      updateUser: (newData: Partial<IUser> | null) => void;
-    }
+interface Actions {
+  update: (newData: Partial<IUser>) => void;
+  reset: () => void;
+}
 
+type State = { user: IUser }
+
+type Store = Partial<State> & Actions;
 
 const useUserStore = create<Store>((set) => ({
-      user: null,
-      updateUser: (newData) => set((state) => {
-            if (state.user) {
-              return {
-                user: {
-                  ...state.user,
-                  ...newData,
-                }
-              };
-            } else {
-              return {
-                user: newData as IUser
-              };
-            }
-          }),
-    }));
-    
-    export default useUserStore;
+  update: (newData: Partial<IUser>) => set((state) => ({ user: state.user ? { ...state.user, ...newData } : (newData as IUser) })),
+  reset: () => set({}),
+}));
+
+export default useUserStore;

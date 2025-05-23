@@ -17,7 +17,6 @@ import { DebouncedInput, Input } from "@/components/input";
 import { Column, Row } from "@/components/layout";
 import { toast } from "@/components/toast/use-toast";
 import { ErrorMessage, StorageKeys } from "@/constants/enums";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import {
   bookMoveFactory,
   bookMoveReverseFactory,
@@ -31,14 +30,16 @@ import { useAddToBookings } from "@/hooks/fireStore/useAddToBookings";
 import { useValidRoute } from "@/hooks/useValidRoute";
 import { generateBookingId } from "@/lib/helpers/generateBookingId";
 import { generateDoodles } from "@/lib/helpers/generateDoodle";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, thing2 } from "@/lib/utils";
 import useBookingStore from "@/stores/booking.store";
 import useUserStore from "@/stores/user.store";
 import {
   BookMove,
   Booking,
   HireLabour,
+  Quote,
   QuoteDetailsRate,
+  RequestType,
   Voucher,
 } from "@/types/structs";
 import { format } from "date-fns";
@@ -55,6 +56,10 @@ import { useGetVoucher } from "@/hooks/misc/useGetVoucher";
 import useHireLabourStore from "@/stores/hire-labour.store";
 import { useGetQuotes } from "@/hooks/quote/useGetQuotes";
 import Link from "next/link";
+import { useBookMove } from "@/hooks/booking/useBookMove";
+import { useUpdateMove } from "@/hooks/booking/useUpdateMove";
+import { BookingStatusDto, MoveRequestDto, MoveUpdateDto } from "@/types/dtos";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const QuoteDetails: FC<HTMLAttributes<HTMLDivElement>> = ({ ...props }) => (
   <Row {...props} className={cn("flex gap-4", props.className)} />
@@ -177,18 +182,21 @@ const QuoteDetailsMap: FC<QuoteDetailsMapProps> = ({ data, ...props }) => {
 
 interface QuotesDetailsWorkersProps extends HTMLAttributes<HTMLDivElement> {
   movers: number;
+  minMovers: number;
   finishing: boolean;
   disabled?: boolean;
   workerTag?: string;
 }
+
 const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
   movers,
+  minMovers = 1,
   disabled,
   workerTag = "Movers",
   finishing,
   ...props
 }) => {
-  const { updateQuoteField } = useQuoteDetailsData();
+  const updateQuoteField = useQuoteDetailsStore(state => state.updateField);
   const [count, setCount] = useState<number>(movers);
   const doodles = useMemo(() => generateDoodles({ length: 3 }), []);
 
@@ -214,7 +222,7 @@ const QuoteDetailsWorkers: FC<QuotesDetailsWorkersProps> = ({
             disabled={disabled}
             onClick={() =>
               !disabled &&
-              setCount((prevCount) => (prevCount > 1 ? prevCount - 1 : 1))
+              setCount((prev) => (prev > minMovers ? prev - 1 : minMovers))
             }
             className="flex-1 rounded-full shadow-custom max-w-[30px] max-h-[30px] p-0 text-xl font-medium bg-grey-800 text-grey-600 hover:bg-primary hover:text-white-100"
           >
@@ -271,7 +279,6 @@ interface QuoteDetailsRatesProps extends HTMLAttributes<HTMLDivElement> {
   rates: Array<QuoteDetailsRate>;
 }
 const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
-  const { quoteDetailsData } = useQuoteDetailsData();
   return (
     <Column className="p-4 bg-white-100 shadow-custom rounded-lg">
       <H level={2} className="text-primary font-dm-sans text-lg">
@@ -279,16 +286,10 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
       </H>
       <Column>
         {rates
-          // .filter((item) => {
-          //   return (
-          //     ["Truck Fee", "Flight of Stairs"].includes(item.label) ||
-          //     (item.count || 0) > 0
-          //   );
-          // })
+          .filter((item) => item.count > 0)
           .map((item, index) => {
-            if (!item.rate) return null;
-            const newCount = +(item.count || 0) || 0;
-            const newRate = (newCount > 0 ? newCount : 1) * item.rate;
+            const price = item.rate * item.count; // due to filter, item.count is at least 1 
+
             return (
               <Row
                 key={item.label + index}
@@ -303,11 +304,7 @@ const QuoteDetailsRates: FC<QuoteDetailsRatesProps> = ({ rates }) => {
                   </P>
                 </Row>
                 <P className="text-primary font-bold">
-                  {formatCurrency(
-                    item.label === "Minimum Hours"
-                      ? newRate * quoteDetailsData.movers
-                      : newRate
-                  )}
+                  {formatCurrency(price) /* FIXME: some behaviour changed here. Is it still correct? */}
                 </P>
               </Row>
             );
@@ -327,7 +324,8 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
   disabled,
   finishing,
 }) => {
-  const { updateQuoteField } = useQuoteDetailsData();
+  const updateQuoteField = useQuoteDetailsStore(store => store.updateField);
+
   //TODO: confirm the types of vehicles available
   const truckList = [
     { type: "pickup truck", image: "/images/truckPickUp.png", quantity: 0 },
@@ -459,7 +457,7 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
 };
 interface QuoteDetailsChargeProps extends HTMLAttributes<HTMLDivElement> {
   amount: number;
-  hourlyRate: string;
+  hourlyRate: number;
   finishing?: boolean;
   updating?: boolean;
 }
@@ -475,14 +473,19 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   );
   const selectedBooking = useBookingStore.use.selectedBooking();
   const { user } = useUserStore((state) => state);
-  const { loading, addToBookings } = useAddToBookings();
-  const { isPending, mutate: updateBooking } = useUpdateBooking();
-  const formData = JSON.parse(
-    localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
-  );
-  const quoteDetailsData = JSON.parse(
-    localStorage.getItem(StorageKeys.QUOTE_DETAIL) || "{}"
-  );
+  const { bookMove } = useBookMove();
+  const { isPending, updateMove } = useUpdateMove();
+  //const { isPending, mutate: updateBooking } = useUpdateBooking();
+
+  const bookData = useBookMoveStore(state => state) as BookMove; // FIXME: some type safety here? 
+  const hireData = useHireLabourStore(state => state) as HireLabour;
+
+  // FIXME: merging the two types like this isn't the best imo. (temp fix so things aren't too broken)
+  const formData: BookMove | HireLabour = isHireLabourRoute ? hireData : bookData;
+
+  const quoteDetails = useQuoteDetailsStore(state => state) as Quote;
+
+
   const router = useRouter();
   const pathname = usePathname();
   const [gottenVoucher, setGottenVoucher] = useState<Voucher | null>(null);
@@ -500,21 +503,20 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
     onSuccess: () => {
       if (
         selectedBooking &&
-        (selectedBooking.requestType === "RegularMove" ||
-          selectedBooking.requestType === "LabourOnly")
+        (selectedBooking.requestType === RequestType.RegularMove ||
+          selectedBooking.requestType === RequestType.LabourOnly)
       ) {
         router.push(
-          `${
-            selectedBooking.requestType === "RegularMove"
-              ? Routes.bookMoveQuotes
-              : Routes.hireLabourQuotes
+          `${selectedBooking.requestType === RequestType.RegularMove
+            ? Routes.bookMoveQuotes
+            : Routes.hireLabourQuotes
           }?action=update`
         );
       }
     },
   });
 
-  if (!formData || !quoteDetailsData) {
+  if (!formData || !quoteDetails) {
     toast({
       title: "Oops!",
       description: ErrorMessage.SERVICE_REQUEST_MADE,
@@ -524,62 +526,47 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   }
 
   const handleBook = () => {
+    console.log("here");
+    console.log(selectedBooking);
+    console.log(updating);
     if (!selectedBooking && updating) return;
+    console.log("here 2");
     const formattedFormData = isHireLabourRoute
-      ? hireLabourFactory(formData)
-      : bookMoveFactory(formData);
+      ? hireLabourFactory(hireData)
+      : bookMoveFactory(bookData);
     const data = {
-      bookingId: formattedFormData.bookingId
-        ? formattedFormData.bookingId
-        : generateBookingId(),
+  
       clientId: user?.uid ?? "",
-      driverId: "", //TODO: where is driverId from?
-      ...formattedFormData,
-      hasAdditionalStops: formattedFormData.additionalStops
-        ? formattedFormData.additionalStops.length > 0
-          ? true
-          : false
-        : false,
-      hasAddOns: formData.services.length > 0 ? true : false,
-      status: "Pending" as "Pending",
-      movingDate: formattedFormData.date,
-      bookingDate: format(new Date(), "M/dd/yyyy h:mm a"),
-      workoutEquipmentsQuantity: formData.workOutEquipment
-        ? parseInt(formData.workOutEquipment)
-        : 0,
-      majorAppliancesQuantity: formData.majorAppliances
-        ? parseInt(formData.majorAppliances)
-        : 0,
-      pianosQuantity: formData.pianos ? parseInt(formData.pianos ?? "0") : 0,
-      hotTubsQuantity: formData.hotTubs ? parseInt(formData.hotTubs ?? "0") : 0,
-      poolTablesQuantity: formData.poolTables
-        ? parseInt(formData.poolTables)
-        : 0,
-      quote: { ...quoteDetailsData, voucherCode: gottenVoucher?.code ?? "" },
-      additionalNotes: formData.instructions,
-      serviceAddOns: formData.services,
-      estimatedNumberOfBoxes: formData.numberOfBoxes
-        ? parseInt(formData.numberOfBoxes)
-        : 0,
-      images: formData?.images ?? [],
-    };
-    const { date, addOns, ...dataWithoutDate } = data;
+      clientName: user?.fullName ?? "",
+      searchRequest: {
+        ...formattedFormData, 
+        additionalNotes: formData.instructions
+      },
+     
+    bookingDate: new Date(), 
+      quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
+  
+    } as MoveRequestDto;
+   
     if (updating) {
       if (!selectedBooking?.bookingId) return;
-      updateBooking({
+      const moveUpdateDto : MoveUpdateDto = {
         bookingId: selectedBooking.bookingId,
-        booking: {
-          ...dataWithoutDate,
-          bookingDate: selectedBooking.bookingDate,
-        } as Booking,
-      });
-    } else {
-      addToBookings(dataWithoutDate as Booking);
+        moveRequest: data,
+        status: BookingStatusDto.Edited,
+        modifiedDate: new Date()
+      };
+
+      updateMove(moveUpdateDto);   
+    } else {     
+      bookMove(data);
     }
   };
+
   //TODO: how the voucher code works
   if (!selectedBooking && updating) return null;
   const currentUser = getAuth().currentUser;
+
   return (
     <Column
       {...props}
@@ -591,7 +578,7 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       {gottenVoucher ? (
         <div className="flex flex-wrap gap-2 items-end leading-[100%]">
           <H level={3} className="text-xl font-bold line-through">
-            {amount}
+            {"$" + amount}
           </H>
           <H className="text-3xl font-bold">
             {formatCurrency(
@@ -602,7 +589,6 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
                 } else {
                   return amt - (clientDiscount / 100) * amt;
                 }
-                // })(Number(amount.replace(/[^\d.-]+/g, "")))}
               })(amount)
             )}
           </H>
@@ -622,54 +608,53 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
       )}
       <Column className="gap-6">
         <P className="text-grey-600 text-sm">
-          Note: After Minimum Charge Billing Cost {hourlyRate} After Every
-          Additional Hour
+          Note: After the minimum charge, you would be charged
+          {` ${formatCurrency(hourlyRate / 4)} `}
+          for every additional 15 minutes
         </P>
 
         {!finishing && (
           <>
-            {currentUser && (
-              <>
-                <DebouncedInput
-                  placeholder="Input Discount Code"
-                  className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
-                  debounce={1500}
-                  onChange={(e) => {
-                    getVoucher({ code: e.target.value });
-                  }}
-                />
-                {isGettingVoucher && (
-                  <p className="text-sm italic">Checking voucher...</p>
-                )}
-              </>
-            )}
+            <>
+              <DebouncedInput
+                placeholder="Input Discount Code"
+                className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
+                debounce={1500}
+                onChange={(e) => {
+                  getVoucher({ code: e.target.value });
+                }}
+              />
+              {isGettingVoucher && (
+                <p className="text-sm italic">Checking voucher...</p>
+              )}
+            </>
+
             <Button
-              disabled={loading || isPending}
-              loading={loading || isPending}
+              disabled={isPending}
+              loading={isPending}
               onClick={() => {
-                if (!currentUser)
-                  router.push(`${Routes.signIn}?returnUrl=${pathname}`);
-                if (!(!formData || !quoteDetailsData) && currentUser)
+                if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
+                if (!(!formData || !quoteDetails) && currentUser)
                   handleBook();
               }}
             >
               {!currentUser
                 ? "Sign in to complete booking"
                 : updating
-                ? isPending
-                  ? "Updating..."
-                  : "Update Booking"
-                : "Book Now"}
+                  ? isPending
+                    ? "Updating..."
+                    : "Update Booking"
+                  : "Book Now"}
             </Button>
           </>
         )}
         {finishing && currentUser && (
           <>
-            {user?.hasCreditCard ? (
+            {/* {user?.hasCreditCard ? (
               <Button className="bg-[#19B000]">Make Payment</Button>
             ) : (
               !!NaN && <Button className="bg-[#19B000]">Pay on site</Button>
-            )}
+            )} */}
             {selectedBooking?.status === "Pending" && (
               <Button
                 disabled={isDeletePending}
@@ -691,11 +676,11 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
                 loading={isGettingQuotes}
                 onClick={() => {
                   if (!selectedBooking?.bookingId) return;
-                  if (selectedBooking.requestType === "RegularMove") {
+                  if (selectedBooking.requestType === RequestType.RegularMove) {
                     getQuotes(
                       bookMoveFactory(bookMoveReverseFactory(selectedBooking))
                     );
-                  } else if (selectedBooking.requestType === "LabourOnly") {
+                  } else if (selectedBooking.requestType === RequestType.LabourOnly) {
                     getQuotes(
                       hireLabourFactory(
                         hireLabourReverseFactory(selectedBooking)
@@ -733,16 +718,15 @@ const QuoteDetailsEditRequest: FC<{ type: Booking["requestType"] }> = ({
       <Button
         className="bg-white-500 text-black-500"
         onClick={() => {
-          if (type === "RegularMove") {
+          if (type === RequestType.RegularMove) {
             updateBookMove(bookMoveReverseFactory(selectedBooking));
-          } else if (type === "LabourOnly") {
+          } else if (type === RequestType.LabourOnly) {
             updateHireLabour(hireLabourReverseFactory(selectedBooking));
           }
           router.push(
-            `${
-              selectedBooking.requestType === "RegularMove"
-                ? Routes.sequence.bookMove
-                : Routes.sequence.hireLabour
+            `${selectedBooking.requestType === RequestType.RegularMove
+              ? Routes.sequence.bookMove
+              : Routes.sequence.hireLabour
             }?action=update`
           );
         }}
@@ -758,9 +742,14 @@ interface QuoteDetailsServiceRequirementProps
   services: Array<String>;
   disabled?: boolean;
 }
+
 const QuoteDetailsServiceRequirement: FC<
   QuoteDetailsServiceRequirementProps
 > = ({ disabled, ...props }) => {
+
+  const updateMove = useBookMoveStore(state => state.update);
+
+
   const services = [
     "reassembly",
     "disassembly",
@@ -774,10 +763,10 @@ const QuoteDetailsServiceRequirement: FC<
     "move garage items",
     "move patio items",
   ];
+
   const form = useForm({
     defaultValues: {
-      services: (JSON.parse(localStorage.getItem(StorageKeys.FORM_DATA) || "{}")
-        ?.services ?? []) as typeof services,
+      services: useBookMoveStore(state => state.services),
     },
   });
 
@@ -786,14 +775,8 @@ const QuoteDetailsServiceRequirement: FC<
   const watchedServices = watch("services");
 
   useEffect(() => {
-    localStorage.setItem(
-      StorageKeys.FORM_DATA,
-      JSON.stringify({
-        ...JSON.parse(localStorage.getItem(StorageKeys.FORM_DATA) || "{}"),
-        services: watchedServices,
-      })
-    );
-  }, [watchedServices]);
+    updateMove({ services: watchedServices });
+  }, [updateMove, watchedServices]);
 
   return (
     <Column
@@ -913,17 +896,17 @@ const QuoteDetailsEDT = () => {
 };
 interface QuoteDetailsStatusProps extends HTMLAttributes<HTMLDivElement> {
   status:
-    | "New"
-    | "Pending"
-    | "Confirmed"
-    | "Rejected"
-    | "InProgress"
-    | "Completed"
-    | "DepositHeld"
-    | "Cancelled"
-    | "Edited"
-    | "Paused"
-    | "PendingPayment";
+  | "New"
+  | "Pending"
+  | "Confirmed"
+  | "Rejected"
+  | "InProgress"
+  | "Completed"
+  | "DepositHeld"
+  | "Cancelled"
+  | "Edited"
+  | "Paused"
+  | "PendingPayment";
 }
 const QuoteDetailsStatus: FC<QuoteDetailsStatusProps> = ({ status }) => {
   return (

@@ -2,7 +2,7 @@
 import { Routes } from "@/core/routing";
 import { useActiveRoute } from "@/hooks/useActiveRoute";
 import { usePathname } from "next/navigation";
-import { Calendar, Chat, Home, User } from "@/components/Icons";
+import { Calendar, Chat, GiftCard, Home, User } from "@/components/Icons";
 import { FC, ReactNode, useState } from "react";
 import {
   Dialog,
@@ -31,7 +31,7 @@ export const MobileNav: FC<Props> = ({ trigger }) => {
 
   const SIDE_NAV_MENU_DATA = [
     {
-      title: "Dashboard",
+      title: "Home",
       icon: (
         <Home
           {...sizes}
@@ -58,6 +58,13 @@ export const MobileNav: FC<Props> = ({ trigger }) => {
         />
       ),
       route: Routes.messages,
+    },
+          {
+      title: "Buy Gift Card",
+      icon: (
+        <GiftCard {...sizes} invertcolor={isActiveRoute(Routes.giftCard)} />
+      ),
+      route: Routes.giftCard,
     },
     {
       title: "Profile",

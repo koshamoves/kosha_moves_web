@@ -7,12 +7,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const truncateWithEllipsis = (text: string, maxLength: number) => {
-  if (typeof text !== "string")
+  if (typeof text !== "string") {
     throw new TypeError("Expected a string as the first argument");
-  if (typeof maxLength !== "number" || maxLength < 0)
+  }
+  if (typeof maxLength !== "number" || maxLength < 0) {
     throw new TypeError(
-      "Expected a non-negative number as the second argument"
+      "Expected a non-negative number as the second argument",
     );
+  }
 
   if (text.length > maxLength) return text.slice(0, maxLength - 3) + "...";
   return text;
@@ -25,7 +27,7 @@ export const wait = (ms: number) => {
 export function mergeArrays(...arrays: any[]) {
   const length = arrays.reduce(
     (minLength, arr) => Math.min(minLength, arr.length),
-    Infinity
+    Infinity,
   );
 
   return Array.from({ length }, (_, index) =>
@@ -34,9 +36,8 @@ export function mergeArrays(...arrays: any[]) {
         ...mergedObj,
         ...arr[index],
       }),
-      {}
-    )
-  );
+      {},
+    ));
 }
 
 function abbreviateNumber(value: number): string {
@@ -55,7 +56,7 @@ function abbreviateNumber(value: number): string {
 export function formatCurrency(
   value: number,
   locale: string = "en-US",
-  currency: string = "USD"
+  currency: string = "USD",
 ): string {
   const formattedValue = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -88,4 +89,21 @@ export const safeParseDate = (value: unknown): Date | null => {
   if (isValidDate(value)) return new Date(value as string);
   return null;
 };
+
+export type WithOptional<T, K extends keyof T> =
+  & Omit<T, K>
+  & Partial<Pick<T, K>>;
+export type OptionalExcept<T, K extends keyof T> =
+  & Partial<Omit<T, K>>
+  & Pick<T, K>;
+
+
+// TODO: rename
+export const thing2 = <T extends object>(element: T): Required<T> => {
+  for (const [key, value] of Object.entries(element)) {
+    if (value == null) throw new Error(`Missing required field: ${key}`);
+  }
+
+  return element as Required<T>;
+}
 

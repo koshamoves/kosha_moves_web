@@ -23,7 +23,7 @@ import { queryClient } from "@/lib/query";
 
 export const Layout: FC<PropsWithChildren> = ({ children }) => {
   const layoutMainWrapperRef = useRef<HTMLDivElement | null>(null);
-  const { updateUser } = useUserStore((state) => state);
+  const updateUser = useUserStore((state) => state.update);
   const { isValidRoute } = useValidRoute([
     Routes.signIn,
     Routes.signUp,
@@ -38,6 +38,9 @@ export const Layout: FC<PropsWithChildren> = ({ children }) => {
     Routes.bookMoveQuoteDetails,
     Routes.hireLabourQuotes,
     Routes.hireLabourQuoteDetails,
+    Routes.giftCard,
+    Routes.success,
+    Routes.cancel,
   ]);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);

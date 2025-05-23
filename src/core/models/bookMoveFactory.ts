@@ -1,6 +1,6 @@
 import { mergeArrays } from "@/lib/utils";
-import { BookMoveDto } from "@/types/dtos";
-import { BookMove, Booking } from "@/types/structs";
+import { photoDto, SearchRequestDto } from "@/types/dtos";
+import { BookMove, Booking, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
 const parseFlightOfStairs = (stop: any) => ({
@@ -9,25 +9,25 @@ const parseFlightOfStairs = (stop: any) => ({
     typeof stop.flightOfStairs === "string"
       ? parseInt(stop.flightOfStairs) || 0
       : typeof stop.flightOfStairs === "number"
-      ? stop.flightOfStairs
-      : 0,
+        ? stop.flightOfStairs
+        : 0,
 });
 
 /**
- * Creates a BookMoveDto from a given BookMove.
+ * Creates a SearchRequestDto from a given BookMove.
  *
  * @param a - The BookMove object to convert.
- * @returns The corresponding BookMoveDto.
+ * @returns The corresponding SearchRequestDto.
  *
  * requestType is defaulted
  */
-export const bookMoveFactory = (a: BookMove): BookMoveDto => {
+export const bookMoveFactory = (a: BookMove): SearchRequestDto => {
   //TODO: Handle driverId
 
   const addOns = [
     { name: "Major Appliances", quantity: parseInt(a.majorAppliances ?? "0") },
     {
-      name: "Workout Equipment",
+      name: "Workout Equipments",
       quantity: parseInt(a.workOutEquipment ?? "0"),
     },
     { name: "Pianos", quantity: parseInt(a.pianos ?? "0") },
@@ -40,8 +40,21 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
     (item) => !isNaN(item.quantity) && item.quantity > 0
   );
 
+  const photos : photoDto [] = [
+    {
+      name: "",
+      savedInStorage: false,
+      bytes: undefined
+    }
+  ]
+
   const formattedDate = format(new Date(a.moveDate), "M/d/yyyy");
-  const formattedTime = format(new Date(`1970-01-01T${a.time}:00`), "h:mm a");
+  const formattedTime = (() => {
+    const [time, period] = a.time.split(' '); // e.g., "12:30 PM"
+    const [hours, minutes] = time.split(':').map(Number);
+    const adjustedHours = period === 'PM' && hours !== 12 ? hours + 12 : hours === 12 && period === 'AM' ? 0 : hours;
+    return format(new Date(1970, 0, 1, adjustedHours, minutes), "h:mm a");
+  })();
 
   return {
     fromAddress: {
@@ -66,11 +79,13 @@ export const bookMoveFactory = (a: BookMove): BookMoveDto => {
       hasElevator: a.PUDFinalDestination.elevatorAccess,
       id: "",
     },
-    date: `${formattedDate} ${formattedTime}`,
+    date: a.moveDate,
     additionalStops: mergeArrays(a.stops, a.PUDStops).map(parseFlightOfStairs),
     addOns: filteredAddOns,
-    requestType: "RegularMove",
+    requestType: RequestType.RegularMove,
     bookingId: a.bookingId ?? "",
+    numberOfBoxes: parseInt(a.numberOfBoxes ?? "0"),
+    photos: photos
   };
 };
 

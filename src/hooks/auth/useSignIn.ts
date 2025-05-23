@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export const useSignIn = () => {
-  const { updateUser } = useUserStore((state) => state);
+  const updateUser = useUserStore((state) => state.update);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,7 +45,7 @@ export const useSignIn = () => {
 };
 
 export const useSignInWithGoogle = () => {
-  const { updateUser } = useUserStore((state) => state);
+  const updateUser = useUserStore((state) => state.update);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

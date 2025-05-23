@@ -1,12 +1,12 @@
-import { BookMoveDto } from "@/types/dtos";
-import { Booking, HireLabour } from "@/types/structs";
+import { SearchRequestDto } from "@/types/dtos";
+import { Booking, HireLabour, RequestType } from "@/types/structs";
 import { format } from "date-fns";
 
-export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
+export const hireLabourFactory = (a: HireLabour): Partial<SearchRequestDto> => {
   const addOns = [
     { name: "Major Appliances", quantity: parseInt(a.majorAppliances ?? "0") },
     {
-      name: "Workout Equipment",
+      name: "Workout Equipments",
       quantity: parseInt(a.workOutEquipment ?? "0"),
     },
     { name: "Pianos", quantity: parseInt(a.pianos ?? "0") },
@@ -19,7 +19,12 @@ export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
     (item) => !isNaN(item.quantity) && item.quantity > 0
   );
   const formattedDate = format(new Date(a.date), "M/d/yyyy");
-  const formattedTime = format(new Date(`1970-01-01T${a.time}:00`), "h:mm a");
+  const formattedTime = (() => {
+    const [time, period] = a.time.split(' '); // e.g., "12:30 PM"
+    const [hours, minutes] = time.split(':').map(Number);
+    const adjustedHours = period === 'PM' && hours !== 12 ? hours + 12 : hours === 12 && period === 'AM' ? 0 : hours;
+    return format(new Date(1970, 0, 1, adjustedHours, minutes), "h:mm a");
+  })();
 
   return {
     fromAddress: {
@@ -40,10 +45,9 @@ export const hireLabourFactory = (a: HireLabour): Partial<BookMoveDto> => {
       hasElevator: "",
       id: "",
     },
-    date: `${formattedDate} ${formattedTime}`,
-    additionalStops: [],
+    date: a.date,
     addOns: filteredAddOns,
-    requestType: "LabourOnly",
+    requestType: RequestType.LabourOnly,
   };
 };
 

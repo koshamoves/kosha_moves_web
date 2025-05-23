@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { Routes } from "@/core/routing";
 import useBookingStore from "@/stores/booking.store";
 import { useRouter } from "next/navigation";
+import { RequestType } from "@/types/structs";
 
 const Page = () => {
   const router = useRouter();
@@ -97,10 +98,9 @@ const Page = () => {
                     ) {
                       setSelectedBooking(booking);
                       router.push(
-                        `${
-                          booking.requestType === "RegularMove"
-                            ? Routes.bookMoveQuoteDetails
-                            : Routes.hireLabourQuoteDetails
+                        `${booking.requestType === RequestType.RegularMove
+                          ? Routes.bookMoveQuoteDetails
+                          : Routes.hireLabourQuoteDetails
                         }?action=finish`
                       );
                     }
@@ -116,7 +116,7 @@ const Page = () => {
                         {typeof booking.quote?.movers === "number" && (
                           <QuotesMovers>
                             {booking.quote?.movers}{" "}
-                            {booking.requestType === "RegularMove"
+                            {booking.requestType === RequestType.RegularMove
                               ? "movers"
                               : "laborers"}
                           </QuotesMovers>

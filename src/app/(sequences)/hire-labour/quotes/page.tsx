@@ -12,22 +12,22 @@ import {
   QuotesTitle,
   QuotesVehicle,
 } from "@/components/quotations/quotes";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
 import useShowQuotes from "@/stores/show-quotes.store";
-import { Quote } from "@/types/structs";
+import { Quote, RequestType } from "@/types/structs";
 import { useRouter } from "next/navigation";
 import useBookingStore from "@/stores/booking.store";
 import { P } from "@/components/atoms";
 import { CircleAlert } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
   const selectedBooking = useBookingStore.use.selectedBooking();
   const router = useRouter();
-  const { setQuoteDetailsData } = useQuoteDetailsData();
+  const replaceQuoteData = useQuoteDetailsStore((state) => state.replace);
   const { quotesResult } = useShowQuotes((state) => state);
   const updating = searchParams.get("action") === "update";
   if (!selectedBooking && updating) {
@@ -51,16 +51,15 @@ const Page = () => {
       renderItem={({ index, item }) => (
         <Quotes
           onClick={() => {
-            setQuoteDetailsData(item);
+            replaceQuoteData(item);
             router.push(
-              `${Routes.hireLabourQuoteDetails}${
-                updating ? "?action=update" : ""
+              `${Routes.hireLabourQuoteDetails}${updating ? "?action=update" : ""
               }`
             );
           }}
           key={item.companyName + index}
         >
-          <QuotesImage src="" type="LabourOnly" />
+          <QuotesImage src="" type={RequestType.LabourOnly} />
           <QuotesContent>
             <Row className="items-start justify-between gap-6 flex-wrap">
               <Column>

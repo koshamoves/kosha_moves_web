@@ -59,20 +59,18 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { storage } from "@/firebase/firestore";
-import { generateBookingId } from "@/lib/helpers/generateBookingId";
+import TimePicker from '../../../TimePicker';
+import { CountableInput } from "@/components/input/CountableInput";
+import { HireLabour } from "@/types/structs";
+import useBookingIdStore from "@/stores/booking-id.store";
+
 
 const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
-  const { update, formData, reset } = useHireLabourStore((state) => state);
-  const {
-    date,
-    time,
-    serviceLocation,
-    apartmentNumber,
-    buildingType,
-    elevatorAccess,
-    flightOfStairs,
-  } = formData;
+
+  const { update, reset } = useHireLabourStore(state => state);
+  let { date, time, serviceLocation, apartmentNumber, buildingType, elevatorAccess, flightOfStairs } = useHireLabourStore(state => state);
+
   const form = useForm<z.infer<typeof hireLabourSequenceStep1Schema>>({
     resolver: zodResolver(hireLabourSequenceStep1Schema),
     defaultValues: {
@@ -91,9 +89,8 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     name: "elevatorAccess",
   });
 
-  useEffect(() => {
-    localStorage.removeItem("bookingId");
-  }, []);
+  // TODO: this will always happen on page load, and means that Step2 will never generate its own ID
+  useBookingIdStore(state => state.reset)()
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep1Schema>) => {
     onChangeStep("itm");
@@ -144,12 +141,14 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               control={form.control}
               name="time"
               render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel className="text-grey-300">Time</FormLabel>
-                  <FormControl>
-                    <Input type="time" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-destructive" />
+                <FormItem className="flex-1">                  
+                  <Column className="gap-3">
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <TimePicker field={field} />
+                    </FormControl>
+                    <FormMessage className="text-destructive" />
+                  </Column>
                 </FormItem>
               )}
             />
@@ -247,10 +246,10 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                       Flight of Stairs
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        className="h-10 rounded-lg"
-                        {...field}
-                        {...InputDirectives.numbersOnly}
+                      <CountableInput
+                        style={{ input: "h-10 rounded-lg", button: "h-8" }}
+                        count={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage className="text-destructive" />
@@ -261,7 +260,7 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
           </Row>
         </Column>
         <Row className="items-center justify-center my-8">
-          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl" onClick={()=>{
+          <Button type="button" className="flex-1 max-w-[180px] rounded-3xl" onClick={() => {
             reset()
             router.push(Routes.root)
           }}>
@@ -280,20 +279,11 @@ const Step1: FC<SequenceStepsProps> = ({ onChangeStep }) => {
 };
 
 const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
-  const { formData, update, removeImage, updateField } = useHireLabourStore(
-    (state) => state
-  );
-  const {
-    majorAppliances,
-    workOutEquipment,
-    pianos,
-    hotTubs,
-    poolTables,
-    numberOfBoxes,
-    instructions,
-    images,
-    tempImages
-  } = formData;
+  const { update, removeImage, updateField } = useHireLabourStore(state => state);
+  const bookingId = useBookingIdStore(state => state.id)
+
+  let { majorAppliances, workOutEquipment, pianos, hotTubs, poolTables, numberOfBoxes, instructions, images, tempImages } = useHireLabourStore(state => state);
+
   const form = useForm<z.infer<typeof hireLabourSequenceStep2Schema>>({
     resolver: zodResolver(hireLabourSequenceStep2Schema),
     defaultValues: {
@@ -308,23 +298,9 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
     },
   });
 
-  const [bookingId, setBookingId] = useState<string>("");
-
-  // Generate a new unique ID when the component mounts
-  useEffect(() => {
-    const storedBookingId = localStorage.getItem("bookingId");
-    if (storedBookingId) {
-      setBookingId(storedBookingId);
-    } else {
-      const newBookingId = generateBookingId();
-      setBookingId(newBookingId);
-      localStorage.setItem("bookingId", newBookingId);
-    }
-  }, []);
-
   const handleRemoveImage = async (index: number) => {
     try {
-      const imageUrl = formData.images[index];
+      const imageUrl = images[index];
       const urlParts = imageUrl.split("%2F");
       const folder = urlParts[0].split("/").pop();
       const fileName = urlParts[1].split("?")[0];
@@ -335,7 +311,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
       removeImage(index);
       form.setValue(
         "images",
-        formData.images.filter((_, i) => i !== index)
+        images.filter((_, i) => i !== index)
       );
       updateField(
         "tempImages",
@@ -372,10 +348,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Major Appliances
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -391,10 +367,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                   Workout Equipment
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -410,10 +386,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pianos</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -427,10 +403,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Hot Tubs</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -446,10 +422,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Pool Tables</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -463,10 +439,10 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               <FormItem className="flex-1">
                 <FormLabel className="text-grey-300">Number of Boxes</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    {...InputDirectives.numbersOnly}
-                    placeholder="0"
+                  <CountableInput
+                    style={{ button: "h-8" }}
+                    count={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage className="text-destructive" />
@@ -492,7 +468,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
             </FormItem>
           )}
         />
-        <div>
+        {/* <div>
           <Row className="items-center flex-wrap gap-4">
             {images.map((image, index) => (
               <div
@@ -595,7 +571,7 @@ const Step2: FC<SequenceStepsProps> = ({ onChangeStep }) => {
               )}
             />
           )}
-        </div>
+        </div> */}
         <Row className="items-center justify-center my-8">
           <Button
             type="button"
@@ -620,7 +596,7 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updating = searchParams.get("action") === "update";
-  const { update, formData } = useHireLabourStore((state) => state);
+  const { update, services, serviceLocation } = useHireLabourStore((state) => state);
   const [loading, setLoading] = useState(false);
   const { isPending, getQuotes } = useGetQuotes({
     onSuccess: () => {
@@ -641,14 +617,15 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
   const form = useForm<z.infer<typeof hireLabourSequenceStep3Schema>>({
     resolver: zodResolver(hireLabourSequenceStep3Schema),
     defaultValues: {
-      services: formData.services,
+      services: services,
     },
   });
 
   const onSubmit = (data: z.infer<typeof hireLabourSequenceStep3Schema>) => {
-    const updatedFormData = { ...formData, ...data };
-    update(updatedFormData);
-    if (formData.serviceLocation) getQuotes(hireLabourFactory(updatedFormData));
+    update(data);
+    
+    const state = useHireLabourStore.getState() as HireLabour;
+    if (serviceLocation) getQuotes(hireLabourFactory(state));
   };
 
   const handleSelectAllChange = (checked: boolean) => {
@@ -717,14 +694,14 @@ const Step3: FC<SequenceStepsProps> = ({ onChangeStep }) => {
                               onCheckedChange={(checked) => {
                                 return checked
                                   ? field.onChange([
-                                      ...(field.value || []),
-                                      service.id,
-                                    ])
+                                    ...(field.value || []),
+                                    service.id,
+                                  ])
                                   : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== service.id
-                                      )
-                                    );
+                                    field.value?.filter(
+                                      (value) => value !== service.id
+                                    )
+                                  );
                               }}
                             />
                           </FormControl>

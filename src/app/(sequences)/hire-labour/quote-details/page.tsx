@@ -23,16 +23,17 @@ import {
   QuoteDetailsNotesImages,
 } from "@/components/quotations/quote-details";
 import { StorageKeys } from "@/constants/enums";
-import { useQuoteDetailsData } from "@/contexts/QuoteDetails.context";
 import { Routes } from "@/core/routing";
-import { formatCurrency, safeParseDate } from "@/lib/utils";
+import { formatCurrency, safeParseDate, thing2 } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
-import type { Quote } from "@/types/structs";
+import { RequestType, type Quote } from "@/types/structs";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import useQuoteDetailsStore from "@/stores/quote-details.store";
+import useHireLabourStore from "@/stores/hire-labour.store";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -43,7 +44,9 @@ const Page = () => {
     width: 21,
     height: 21,
   };
-  const { quoteDetailsData } = useQuoteDetailsData();
+
+  const quoteDetails = thing2(useQuoteDetailsStore());
+
   const {
     companyName,
     numberOfReviews,
@@ -58,13 +61,24 @@ const Page = () => {
     hotTubsFee,
     poolTablesFee,
     workoutEquipmentsFee,
-    minimumAmount,
+    additionalMoverHourlyRate
   } = finishing
-    ? (selectedBooking?.quote as Quote) ?? {}
-    : quoteDetailsData || {};
-  const formData = JSON.parse(
-    localStorage.getItem(StorageKeys.FORM_DATA) || "{}"
-  );
+      ? (selectedBooking?.quote as Quote) ?? {}
+      : quoteDetails || {};
+
+  let {
+    majorAppliances,
+    pianos,
+    flightOfStairs,
+    hotTubs,
+    poolTables,
+    workOutEquipment,
+    images,
+    instructions,
+    services,
+  } = useHireLabourStore(state => state);
+
+
   let bookingDate, bookingTime, locations;
   if (finishing) {
     bookingDate = format(
@@ -77,63 +91,22 @@ const Page = () => {
     );
     locations = [selectedBooking?.fromAddress];
   }
-  // const amount = useMemo(() => {
-  //   const majorAppliancesAmount =
-  //     (+formData.majorAppliances! || 0) * majorAppliancesFee;
-  //   const workoutEquipmentsAmount =
-  //     (+formData.workOutEquipment! || 0) * workoutEquipmentsFee;
-  //   const pianosAmount = (+formData.pianos! || 0) * pianosFee;
-  //   const hotTubsAmount = (+formData.hotTubs! || 0) * hotTubsFee;
-  //   const poolTablesAmount = (+formData.poolTables! || 0) * poolTablesFee;
-  //   const stopsAmount = (formData.stops?.length || 0) * stopOverFee;
-  //   const flightOfStairsAmount =
-  //     ((+formData.PUDPickUpLocation?.flightOfStairs! || 0) +
-  //       (+formData.PUDFinalDestination?.flightOfStairs! || 0) +
-  //       (formData.PUDStops?.reduce(
-  //         (acc: number, curr: { flightOfStairs: number }) =>
-  //           acc + (+curr?.flightOfStairs! || 0),
-  //         0
-  //       ) ?? 0) ?? 0) * flightOfStairsFee;
-  //   return (
-  //     minimumAmount +
-  //     majorAppliancesAmount +
-  //     workoutEquipmentsAmount +
-  //     pianosAmount +
-  //     hotTubsAmount +
-  //     poolTablesAmount +
-  //     stopsAmount +
-  //     flightOfStairsAmount
-  //   );
-  // }, [
-  //   minimumAmount,
-  //   formData.majorAppliances,
-  //   majorAppliancesFee,
-  //   formData.workOutEquipment,
-  //   workoutEquipmentsFee,
-  //   formData.pianos,
-  //   pianosFee,
-  //   formData.hotTubs,
-  //   hotTubsFee,
-  //   formData.poolTables,
-  //   poolTablesFee,
-  //   formData.stops?.length,
-  //   stopOverFee,
-  //   formData.PUDPickUpLocation?.flightOfStairs,
-  //   formData.PUDFinalDestination?.flightOfStairs,
-  //   formData.PUDStops,
-  //   flightOfStairsFee,
-  // ]);
+
+
+  /// FIXME: see app/(sequences)/hire-labour/quote-details/page.tsx
+  const [originalMoverCount, _] = useState(movers);
+  const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
+  const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
 
   const totalAmount =
-    +(formData.majorAppliances ?? 0) * majorAppliancesFee +
-    +(formData.pianos ?? 0) * pianosFee +
-    +(formData.PUDStops?.length ?? 0) * stopOverFee +
-    +(formData.hotTubs ?? 0) * hotTubsFee +
-    +(formData.poolTables ?? 0) * poolTablesFee +
-    +(formData.workOutEquipment ?? 0) * workoutEquipmentsFee +
-    hourlyRate * minimumHours * minimumHours * movers +
-    truckFee * movers +
-    minimumAmount;
+    realTruckFee +
+    realHourlyRate * minimumHours +
+    +(majorAppliances ?? 0) * majorAppliancesFee +
+    +(pianos ?? 0) * pianosFee +
+    +(flightOfStairs ?? 0) * flightOfStairsFee +
+    +(hotTubs ?? 0) * hotTubsFee +
+    +(poolTables ?? 0) * poolTablesFee +
+    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
 
   if (companyName === "") {
     return (
@@ -159,8 +132,8 @@ const Page = () => {
       </Row>
     );
   }
-  const companyId =
-    selectedBooking?.quote?.companyId ?? quoteDetailsData.companyId;
+
+  const companyId = selectedBooking?.quote?.companyId ?? quoteDetails.companyId;
   return (
     <Column className="w-full">
       {finishing && (
@@ -195,6 +168,7 @@ const Page = () => {
             />
             <QuoteDetailsWorkers
               movers={movers}
+              minMovers={originalMoverCount}
               disabled={finishing}
               workerTag="Laborers"
               finishing={finishing}
@@ -207,95 +181,89 @@ const Page = () => {
                 icon: <TruckFrontGrey {...iconSizes} />,
                 label: "Truck Fee",
                 rate: truckFee,
+                count: 1, // FIXME: hardcoded value
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Appliances",
                 rate: majorAppliancesFee,
-                ...(+(formData.majorAppliances ?? 0)
-                  ? { count: +(formData.majorAppliances ?? 0) }
-                  : {}),
+                count: +(majorAppliances ?? 0),
               },
               {
                 icon: <FlightOfStairs {...iconSizes} />,
                 label: "Flight of Stairs",
                 rate: flightOfStairsFee,
+                count: +(flightOfStairs ?? 0),
               },
               {
                 icon: <Piano {...iconSizes} />,
                 label: "Piano",
                 rate: pianosFee,
-                ...(+(formData.pianos ?? 0)
-                  ? { count: +(formData.pianos ?? 0) }
-                  : {}),
+                count: +(pianos ?? 0),
               },
-              {
-                icon: <AdditionalStops {...iconSizes} />,
-                label: "Additional Stops",
-                rate: stopOverFee,
-              },
+              // FIXME: can HireLabour have additional stops? 
+              // {
+              //   icon: <AdditionalStops {...iconSizes} />,
+              //   label: "Additional Stops",
+              //   rate: stopOverFee,
+              //   count: +(PUDStops?.length ?? 0),
+              // },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Hot Tub",
                 rate: hotTubsFee,
-                ...(+(formData.hotTubs ?? 0)
-                  ? { count: +(formData.hotTubs ?? 0) }
-                  : {}),
+                count: +(hotTubs ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Pool Table",
                 rate: poolTablesFee,
-                ...(+(formData.poolTables ?? 0)
-                  ? { count: +(formData.poolTables ?? 0) }
-                  : {}),
+                count: +(poolTables ?? 0),
               },
               {
                 icon: <Appliances {...iconSizes} />,
                 label: "Workout Equipments",
                 rate: workoutEquipmentsFee,
-                ...(+(formData.workOutEquipment ?? 0)
-                  ? { count: +(formData.workOutEquipment ?? 0) }
-                  : {}),
+                count: +(workOutEquipment ?? 0),
               },
               {
                 icon: <Alarm {...iconSizes} />,
                 label: "Minimum Hours",
                 count: minimumHours,
-                rate: hourlyRate * minimumHours,
+                rate: realHourlyRate,
               },
             ]}
           />
           <QuoteDetailsNotesImages
             images={
               !finishing
-                ? formData?.images ?? []
+                ? images ?? []
                 : selectedBooking?.images ?? []
             }
             notes={
               !finishing
-                ? formData.instructions ?? ""
+                ? instructions ?? ""
                 : selectedBooking?.additionalNotes ?? ""
             }
           />
         </Column>
         <Column className="gap-4 max-w-[400px] flex-1">
           <QuoteDetailsServiceRequirement
-            services={formData.services}
+            services={services}
             disabled={finishing || selectedBooking?.status === "Cancelled"}
           />
           {((!updating && !finishing) ||
             selectedBooking?.status !== "Cancelled") && (
-            <>
-              <QuoteDetailsCharge
-                amount={totalAmount}
-                hourlyRate={formatCurrency(hourlyRate)}
-                finishing={finishing}
-                updating={updating}
-              />
-              {finishing && <QuoteDetailsEditRequest type="LabourOnly" />}
-            </>
-          )}
+              <>
+                <QuoteDetailsCharge
+                  amount={totalAmount}
+                  hourlyRate={hourlyRate}
+                  finishing={finishing}
+                  updating={updating}
+                />
+                {finishing && <QuoteDetailsEditRequest type={RequestType.LabourOnly} />}
+              </>
+            )}
         </Column>
         {companyId && (
           <Button className=" text-white-100" asChild>

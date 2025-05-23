@@ -1,36 +1,18 @@
-import { BookMoveDto } from "@/types/dtos";
-import axiosInstance from "../axios";
+import { SearchRequestDto } from "@/types/dtos";
 import { Endpoints } from "../endpoints";
-import { ApiResponse, Quote } from "@/types/structs";
+import { Quote } from "@/types/structs";
+import firebaseApp from "@/firebase/config";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
-export const getQuote = async (payload: Partial<BookMoveDto>): Promise<any> => {
-  try {
-    const res = await axiosInstance.post(Endpoints.GET_QUOTE, {
-      data: {
-        searchRequest: JSON.stringify(payload),
-      },
-    });
-    return res;
-  } catch (err) {
-    throw err;
-  }
+const functions = getFunctions(firebaseApp);
+
+const _getQuote = httpsCallable(functions, Endpoints.GET_QUOTE);
+const _getQuotes = httpsCallable(functions, Endpoints.GET_QUOTES);
+
+export const getQuote = async (payload: Partial<SearchRequestDto>): Promise<Quote> => {
+  return (await _getQuote({ searchRequest: JSON.stringify(payload) })).data as Quote;
 };
 
-export const getQuotes = async (
-  payload: Partial<BookMoveDto>
-): Promise<ApiResponse<Array<Quote>>> => {
-  try {
-    const res = await axiosInstance.post<ApiResponse<Array<Quote>>>(
-      Endpoints.GET_QUOTES,
-      {
-        data: {
-          searchRequest: JSON.stringify(payload),
-        },
-      }
-    );
-    return res.data;
-  } catch (err) {
-    throw err;
-  }
+export const getQuotes = async (payload: Partial<SearchRequestDto>): Promise<Quote[]> => {
+  return (await _getQuotes({ searchRequest: JSON.stringify(payload) })).data as Quote[];
 };
-

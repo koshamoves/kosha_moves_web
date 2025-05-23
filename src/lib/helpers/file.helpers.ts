@@ -6,7 +6,7 @@ export function fileToString(file: File): string {
         lastModified: file.lastModified
       });
     }
-    
+
 export function stringToFile(str: string): File {
       const obj = JSON.parse(str);
       // Note: We can't recreate the actual file content, so this is just a placeholder

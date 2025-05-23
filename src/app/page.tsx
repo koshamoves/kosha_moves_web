@@ -19,7 +19,7 @@ import { Routes } from "@/core/routing";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
-import { Booking } from "@/types/structs";
+import { Booking, RequestType } from "@/types/structs";
 import { useGetBookingsByDate } from "@/hooks/fireStore/useGetBookings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
@@ -30,25 +30,25 @@ import { useRouter } from "next/navigation";
 const SEQUENCES: (Record<"route" | "icon" | "label", string> & {
   type: Booking["requestType"];
 })[] = [
-  {
-    label: "Book a Move",
-    route: Routes.sequence.bookMove,
-    icon: "/images/book-move.png",
-    type: "RegularMove",
-  },
-  {
-    label: "Hire Labor",
-    route: Routes.sequence.hireLabour,
-    icon: "/images/hire-labor.png",
-    type: "LabourOnly",
-  },
-  {
-    label: "Book a Delivery",
-    route: Routes.sequence.bookDelivery,
-    icon: "/images/book-delivery.png",
-    type: "Delivery",
-  },
-];
+    {
+      label: "Book a Move",
+      route: Routes.sequence.bookMove,
+      icon: "/images/book-move.png",
+      type: RequestType.RegularMove,
+    },
+    {
+      label: "Hire Labor",
+      route: Routes.sequence.hireLabour,
+      icon: "/images/hire-labor.png",
+      type: RequestType.LabourOnly,
+    },
+    // {
+    //   label: "Book a Delivery",
+    //   route: Routes.sequence.bookDelivery,
+    //   icon: "/images/book-delivery.png",
+    //   type: RequestType.Delivery,
+    // },
+  ];
 
 export default function Home() {
   const user = getAuth().currentUser;
@@ -133,7 +133,7 @@ export default function Home() {
             ))}
           </Row>
         </Column>
-        {user && (
+        {/* {user && (
           <Column className="gap-4">
             <H level={3} className="text-primary text-2xl">
               {isToday ? "Today" : format(date, "do MMMM, yyyy")}
@@ -169,10 +169,9 @@ export default function Home() {
                       ) {
                         setSelectedBooking(booking);
                         router.push(
-                          `${
-                            booking.requestType === "RegularMove"
-                              ? Routes.bookMoveQuoteDetails
-                              : Routes.hireLabourQuoteDetails
+                          `${booking.requestType === RequestType.RegularMove
+                            ? Routes.bookMoveQuoteDetails
+                            : Routes.hireLabourQuoteDetails
                           }?action=finish`
                         );
                       }
@@ -188,7 +187,7 @@ export default function Home() {
                           {typeof booking.quote?.movers === "number" && (
                             <QuotesMovers>
                               {booking.quote?.movers}{" "}
-                              {booking.requestType === "RegularMove"
+                              {booking.requestType === RequestType.RegularMove
                                 ? "movers"
                                 : "laborers"}
                             </QuotesMovers>
@@ -230,9 +229,9 @@ export default function Home() {
                 ))}
             </Row>
           </Column>
-        )}
+        )} */}
       </Column>
-      {user && (
+      {/* {user && (
         <Column className="flex-1 sm:max-w-[500px] md:max-w-[350px] gap-8">
           <Calendar
             mode="single"
@@ -253,12 +252,12 @@ export default function Home() {
                 can print them out as .pdf or .csv file
               </P>
             </Column>
-            {/* <Column>
+            <Column>
               <MoveHistory status="Pending" type="Hire labor" />
-            </Column> */}
+            </Column>
           </Column>
         </Column>
-      )}
+      )} */}
     </Row>
   );
 }

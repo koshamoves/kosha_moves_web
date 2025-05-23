@@ -19,5 +19,7 @@ export enum Endpoints {
       SEND_EDITED_BOOKING_NOTIFICATION = "sendEditedBookingNotification",
       SEND_EMAIL = "sendEmail",
       SEND_EMAIL_WITH_TEMPLATE = "sendEmailWithTemplate",
-      SEND_SIGN_UP_EMAIL = "sendSignUpEmail"
+      SEND_SIGN_UP_EMAIL = "sendSignUpEmail",
+      BOOK_MOVE = "bookMove",
+      UPDATE_MOVE = "updateMove"
 }
