@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -32,12 +31,14 @@ export async function POST(req: NextRequest) {
         forSelf: String(body.forSelf),
         recipientEmail: body.email || "n/a",
         recipientName: body.name || "n/a",
+        selfEmail: body.selfEmail || "n/a",
+        selfName: body.selfName || "n/a",
         deliveryDate: body.date || "n/a",
         message: body.message || "",
       },
     });
 
-    // console.log("Checkout Created Stripe session:", session);
+    console.log("Checkout Created Stripe session:", session);
 
     // Return the full session URL for client redirect
     return NextResponse.json({ url: session.url });
