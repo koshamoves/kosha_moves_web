@@ -18,14 +18,16 @@ const Page = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); 
+    setLoading(true);
 
     const payload = {
       amount,
       quantity,
       forSelf,
-      email: forSelf ? null : email,
-      name: forSelf ? null : name,
+      email: !forSelf ? email : null, // Recipient email
+      name: !forSelf ? name : null, // Recipient name
+      selfEmail: forSelf ? email : null, // Your email
+      selfName: forSelf ? name : null, // Your name
       date,
       message,
     };
@@ -42,11 +44,11 @@ const Page = () => {
         window.location.href = data.url;
       } else {
         console.error("Checkout failed:", data);
-        setLoading(false); 
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error creating checkout session", error);
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -72,8 +74,8 @@ const Page = () => {
             eGift Card
           </h1>
           <p className="text-gray-600 mt-2 leading-relaxed">
-            You can&apos;t go wrong with a gift card. Choose an amount and write a
-            personalized message to make this gift your own.
+            You can&apos;t go wrong with a gift card. Choose an amount and write
+            a personalized message to make this gift your own.
           </p>
         </div>
 
@@ -172,6 +174,26 @@ const Page = () => {
           </div>
         )}
 
+        {forSelf && (
+          <div className="flex flex-col gap-4 my-6">
+            <input
+              type="email"
+              placeholder="Your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+            <input
+              type="text"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </div>
+        )}
+
         {/* Date */}
         <div className="space-y-1 my-6">
           <label className="font-medium text-gray-700">Delivery date</label>
@@ -179,6 +201,7 @@ const Page = () => {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]} // Only allow today or future
             className="w-full rounded-md border border-gray-300 px-3 py-2"
           />
         </div>

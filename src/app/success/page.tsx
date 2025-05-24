@@ -36,9 +36,19 @@ export default function SuccessPage() {
   if (error) return <div className="text-red-500 p-4">Error: {error}</div>;
   if (!session) return <div className="p-4">Loading session...</div>;
 
-  const recipientName = session.metadata?.recipientName || "Friend";
+  const recipientName =
+    session.metadata?.recipientName && session.metadata.recipientName !== "n/a"
+      ? session.metadata.recipientName
+      : session.metadata?.selfName && session.metadata.selfName !== "n/a"
+      ? session.metadata.selfName
+      : "there";
+
   const senderName =
-    session.metadata?.forSelf === "true" ? recipientName : "Gift Sender";
+    session.metadata?.forSelf === "true"
+      ? session.metadata?.selfName && session.metadata.selfName !== "n/a"
+        ? session.metadata.selfName
+        : "Self"
+      : "Gift Sender";
   const messageMeta = session?.metadata?.message || "";
   const amount = (session.amount_total / 100).toFixed(2);
 
@@ -53,8 +63,7 @@ export default function SuccessPage() {
       </p>
 
       <p className="mb-4 text-gray-800">
-        You just got a gift card from{" "}
-        <span className="font-semibold">{senderName}</span>!
+        You just successfully purchased a gift card!{" "}
       </p>
 
       <div className="bg-gray-100 p-4 rounded-md mb-4">

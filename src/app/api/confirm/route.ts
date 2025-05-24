@@ -20,19 +20,19 @@ export async function GET(req: NextRequest) {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     
-    const payload = {
-      data: {
-        buyGiftCardRequest: {
-          receipientEmail: session.metadata?.recipientEmail || "",
-          amount: session.amount_total ? session.amount_total / 100 : 0,
-          receipientName: session.metadata?.recipientName || "",
-          clientName:
-            session.metadata?.forSelf === "true"
-              ? session.metadata?.recipientName || "Self"
-              : "Gift Sender",
-        },
-      },
-    };
+   const payload = {
+  data: {
+    buyGiftCardRequest: {
+      receipientEmail: session.metadata?.recipientEmail || session.metadata?.selfEmail || "",
+      receipientName: session.metadata?.recipientName || session.metadata?.selfName || "",
+      amount: session.amount_total ? session.amount_total / 100 : 0,
+      clientName:
+        session.metadata?.forSelf === "true"
+          ? session.metadata?.selfName || "Self"
+          : "Gift Sender",
+    },
+  },
+};
 
     // console.log("Sending payload to callback:", payload);
 
