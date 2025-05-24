@@ -55,7 +55,7 @@ export const SignUpForm = () => {
               <FormControl>
                 <Input placeholder="William Chisimba" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-destructive" />
             </FormItem>
           )}
         />
@@ -67,12 +67,12 @@ export const SignUpForm = () => {
               <FormLabel>Phone Number*</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="080 289 0123 456"
+                  placeholder="(204) XXX-XXXX"
                   {...field}
-                  {...InputDirectives.numbersOnly}
+                  {...InputDirectives.mobile}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-destructive" />
             </FormItem>
           )}
         />
@@ -89,7 +89,7 @@ export const SignUpForm = () => {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-destructive" />
             </FormItem>
           )}
         />
@@ -102,7 +102,7 @@ export const SignUpForm = () => {
               <FormControl>
                 <PasswordInput placeholder="Min. 8 characters" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-destructive" />
             </FormItem>
           )}
         />
@@ -128,7 +128,7 @@ export const SignUpForm = () => {
                   </Row>
                 </Row>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-destructive" />
             </FormItem>
           )}
         />

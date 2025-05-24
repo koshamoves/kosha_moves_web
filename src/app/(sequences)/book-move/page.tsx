@@ -99,7 +99,7 @@ const Page = () => {
 
 const getMobileTitle = (active: string): string => {
   switch (active) {
-    case "dateAndTime": return "Schedule a Move";
+    case "dateAndTime": return "Book a Move";
     case "propertyDetail": return "Pickup Details";
     case "generalInfo": return "Additional Info";
     case "serviceRequirement": return "Service Requirements";

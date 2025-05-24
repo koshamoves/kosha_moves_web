@@ -24,7 +24,7 @@ import {
   QuoteDetailsServiceRequirement,
 } from "@/components/quotations/quote-details";
 import { Routes } from "@/core/routing";
-import { formatCurrency, safeParseDate, thing2 } from "@/lib/utils";
+import { formatCurrency, isWorseBoolean, safeParseDate, thing2 } from "@/lib/utils";
 import { CircleAlert, StarIcon } from "lucide-react";
 import Link from "next/link";
 import useBookingStore from "@/stores/booking.store";
@@ -34,6 +34,8 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import useQuoteDetailsStore from "@/stores/quote-details.store";
+import { z } from "zod";
+import { pickUpDetailSchema } from "@/core/validators";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -98,25 +100,38 @@ const Page = () => {
   const realTruckFee = truckFee + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
   const realHourlyRate = hourlyRate + additionalMoverHourlyRate * Math.max(0, movers - originalMoverCount);
 
+  // accounts for the sitauation where a user inputs a flightOfStairs 
+  // value but later changes elevatorAccess to "Yes"
+  const countStairs = (stop: z.infer<typeof pickUpDetailSchema>): number => {
+    isWorseBoolean(stop.elevatorAccess);
 
-  // FIXME: Assuming happy path, PUDPickUpLocation and PUDFinalDestination are defined, gracefully error otherwise?
+    if (stop.elevatorAccess === "Yes") return 0;
+    return +(stop.flightOfStairs ?? 0);
+  }
+
+  // FIXME: we assume PUDPickUpLocation and PUDFinalDestination are defined here
   const totalStairs = (PUDStops ?? []).reduce(
-    (t, s) => t + +(s.flightOfStairs ?? 0),
-    +(PUDPickUpLocation!.flightOfStairs ?? 0) + +(PUDFinalDestination!.flightOfStairs ?? 0)
+    (t, s) => t + countStairs(s),
+    countStairs(PUDPickUpLocation!) + countStairs(PUDFinalDestination!)
   );
 
-  // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
-  // TODO: use useMemo to cache the total amount
-  const totalAmount =
-    realTruckFee +
-    realHourlyRate * minimumHours +
-    +(majorAppliances ?? 0) * majorAppliancesFee +
-    totalStairs * flightOfStairsFee +
-    +(pianos ?? 0) * pianosFee +
-    +(PUDStops?.length ?? 0) * stopOverFee +
-    +(hotTubs ?? 0) * hotTubsFee +
-    +(poolTables ?? 0) * poolTablesFee +
-    +(workOutEquipment ?? 0) * workoutEquipmentsFee;
+  // // see lib/screens/quote_detail.dart in koshamoves/kosha_moves_mobile
+  // // TODO: use useMemo to cache the total amount
+  // const localTotal =
+  //   realTruckFee +
+  //   realHourlyRate * minimumHours +
+  //   +(majorAppliances ?? 0) * majorAppliancesFee +
+  //   totalStairs * flightOfStairsFee +
+  //   +(pianos ?? 0) * pianosFee +
+  //   +(PUDStops?.length ?? 0) * stopOverFee +
+  //   +(hotTubs ?? 0) * hotTubsFee +
+  //   +(poolTables ?? 0) * poolTablesFee +
+  //   +(workOutEquipment ?? 0) * workoutEquipmentsFee;
+  // console.debug("Local Total Amount: ", localTotal);
+
+  const totalAmount = minimumAmount +
+    additionalMoverHourlyRate * (movers - originalMoverCount) + // TruckFee is affected
+    additionalMoverHourlyRate * (movers - originalMoverCount); // HourlyRate is affected
 
   let bookingDate, bookingTime, locations;
 

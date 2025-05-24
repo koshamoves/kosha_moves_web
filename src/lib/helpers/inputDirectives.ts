@@ -1,7 +1,10 @@
 import { HTMLAttributes } from "react";
 
+type Fields = "numbersOnly" | "mobile";
+
+
 export const InputDirectives: Record<
-	"numbersOnly",
+	Fields,
 	HTMLAttributes<HTMLElement>
 > = {
 	numbersOnly: {
@@ -26,5 +29,8 @@ export const InputDirectives: Record<
 				e.preventDefault();
 			}
 		}
+	},
+	mobile: {
+		inputMode: "tel",
 	}
 };

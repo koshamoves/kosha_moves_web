@@ -21,11 +21,12 @@ export const signUpSchema = z.object({
         message: "Full name should include both first name and last name",
       },
     ),
-  phone: z.string().regex(/^(?:\+234|0)?(70|80|81|90|91)\d{8}$/, {
-    message: "Invalid Nigerian phone number format",
-  }),
+  phone: z.string().regex(/^(?:\+1\s?|1\s?|1-)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}$/,
+    {
+      message: "Invalid NA phone number",
+    }),
   email: emailSchema,
-  password: z.string().min(1, { message: "Password is required" }),
+  password: z.string().min(1, { message: "Password must contain at least 1 character(s)" }),
   acceptTerms: z.boolean(),
 });
 
@@ -64,17 +65,17 @@ export const locationSchema = z.object({
 });
 
 export const bookMoveSequenceStep1Schema = z.object({
-  moveDate: z.coerce.date({ message: "Move Date is required" }),
+  moveDate: z.coerce.date({ message: "Please select a date" }),
   time: z.string().min(1, { message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),
   finalDestination: locationSchema,
 });
 
-const pickUpDetailSchema = z
+export const pickUpDetailSchema = z
   .object({
     buildingType: z.string().min(1, { message: "Required" }), // FIXME: This should probably be an enum
-    elevatorAccess: z.string(),
+    elevatorAccess: z.string().min(1, { message: "Required" }),
     flightOfStairs: z.string().optional(),
   })
   .superRefine(({ buildingType, elevatorAccess }, ctx) => {
@@ -112,7 +113,7 @@ export const bookMoveSequenceStep4Schema = z.object({
 
 export const hireLabourSequenceStep1Schema = z
   .object({
-    date: z.date({ message: "Date is required" }),
+    date: z.date({ message: "Please select a date" }),
     time: z.string().min(1, { message: "Time is required" }),
     serviceLocation: z.string().min(1, { message: "Location is required" }),
     apartmentNumber: z.string().optional(),
@@ -125,7 +126,7 @@ export const hireLabourSequenceStep2Schema = bookMoveSequenceStep3Schema;
 export const hireLabourSequenceStep3Schema = bookMoveSequenceStep4Schema;
 
 export const bookDeliverySequenceStep1Schema = z.object({
-  deliveryDate: z.date({ message: "Move date is required" }),
+  deliveryDate: z.date({ message: "Please select a date" }),
   time: z.string().time({ message: "Time is required" }),
   pickUpLocation: locationSchema,
   stops: z.array(locationSchema),

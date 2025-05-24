@@ -114,7 +114,7 @@ const LocationInput: FC<LocationInputProps> = ({ name, control, label, defaultVa
               )}
             </div>
           </FormControl>
-          <FormMessage />
+          <FormMessage className="text-destructive" />
         </FormItem>
       )}
     />

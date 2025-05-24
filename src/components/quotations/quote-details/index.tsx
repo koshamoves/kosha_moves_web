@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/form";
-import { DebouncedInput, Input } from "@/components/input";
+import { DiscountInput } from "@/components/input";
 import { Column, Row } from "@/components/layout";
 import { toast } from "@/components/toast/use-toast";
 import { ErrorMessage, StorageKeys } from "@/constants/enums";
@@ -455,6 +455,7 @@ const QuoteDetailsVehicle: FC<QuoteDetailsVehicleProps> = ({
     </Column>
   );
 };
+
 interface QuoteDetailsChargeProps extends HTMLAttributes<HTMLDivElement> {
   amount: number;
   hourlyRate: number;
@@ -473,8 +474,14 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   );
   const selectedBooking = useBookingStore.use.selectedBooking();
   const { user } = useUserStore((state) => state);
-  const { bookMove } = useBookMove();
-  const { isPending, updateMove } = useUpdateMove();
+  const { isPending: isSubmitPending, isSuccess: isSubmitSuccess, bookMove } = useBookMove();
+  const { isPending: isUpdatePending, isSuccess: isUpdateSuccess, updateMove } = useUpdateMove();
+
+  const shouldDisableSubmit = isSubmitPending ||
+    isUpdatePending ||
+    isSubmitSuccess ||
+    isUpdateSuccess;
+
   //const { isPending, mutate: updateBooking } = useUpdateBooking();
 
   const bookData = useBookMoveStore(state => state) as BookMove; // FIXME: some type safety here? 
@@ -526,39 +533,32 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
   }
 
   const handleBook = () => {
-    console.log("here");
-    console.log(selectedBooking);
-    console.log(updating);
     if (!selectedBooking && updating) return;
-    console.log("here 2");
-    const formattedFormData = isHireLabourRoute
-      ? hireLabourFactory(hireData)
-      : bookMoveFactory(bookData);
+
+    const formattedFormData = isHireLabourRoute ? hireLabourFactory(hireData) : bookMoveFactory(bookData);
     const data = {
-  
-      clientId: user?.uid ?? "",
+      clientId: user?.uid ?? "", // FIXME: some of the data here we don't want to just ignore if its not present
       clientName: user?.fullName ?? "",
       searchRequest: {
-        ...formattedFormData, 
+        ...formattedFormData,
         additionalNotes: formData.instructions
       },
-     
-    bookingDate: new Date(), 
+      bookingDate: new Date(),
       quote: { ...quoteDetails, voucherCode: gottenVoucher?.code ?? "" },
-  
     } as MoveRequestDto;
-   
+
     if (updating) {
       if (!selectedBooking?.bookingId) return;
-      const moveUpdateDto : MoveUpdateDto = {
+
+      const moveUpdateDto: MoveUpdateDto = {
         bookingId: selectedBooking.bookingId,
         moveRequest: data,
         status: BookingStatusDto.Edited,
         modifiedDate: new Date()
       };
 
-      updateMove(moveUpdateDto);   
-    } else {     
+      updateMove(moveUpdateDto);
+    } else {
       bookMove(data);
     }
   };
@@ -616,13 +616,15 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
         {!finishing && (
           <>
             <>
-              <DebouncedInput
+              <DiscountInput
                 placeholder="Input Discount Code"
                 className="bg-white-400 border-dashed border-2 border-white-500 placeholder:text-grey-400"
-                debounce={1500}
-                onChange={(e) => {
-                  getVoucher({ code: e.target.value });
+                timeout={1500}
+                onInputSettled={(str: string) => {
+                  console.warn("discount str: ", str);
+                  getVoucher({ code: str });
                 }}
+
               />
               {isGettingVoucher && (
                 <p className="text-sm italic">Checking voucher...</p>
@@ -630,21 +632,20 @@ const QuoteDetailsCharge: FC<QuoteDetailsChargeProps> = ({
             </>
 
             <Button
-              disabled={isPending}
-              loading={isPending}
+              disabled={shouldDisableSubmit}
+              loading={shouldDisableSubmit}
               onClick={() => {
                 if (!currentUser) router.push(`${Routes.signIn}?returnUrl=${pathname}`);
                 if (!(!formData || !quoteDetails) && currentUser)
                   handleBook();
               }}
             >
-              {!currentUser
-                ? "Sign in to complete booking"
-                : updating
-                  ? isPending
-                    ? "Updating..."
-                    : "Update Booking"
-                  : "Book Now"}
+              {
+                !currentUser ? "Sign in to complete booking" :
+                  (updating ?
+                    (isUpdatePending ? "Updating..." : "Update Booking") :
+                    "Book Now")
+              }
             </Button>
           </>
         )}

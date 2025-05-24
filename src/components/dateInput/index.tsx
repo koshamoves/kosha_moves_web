@@ -1,12 +1,22 @@
 import { Calendar } from "../calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "../popover"
-import { FC, ReactNode } from "react"
+import { FC, ReactNode, MouseEvent, useRef } from "react"
+import { ActiveModifiers } from "react-day-picker"
+import { Close } from "@radix-ui/react-popover";
+import { isPast, add } from "date-fns";
 
 interface Props {
       field?: any;
       trigger: ReactNode;
 }
 export const DateInput: FC<Props> = ({ field, trigger }) => {
+      const closeRef = useRef<HTMLButtonElement | null>(null);
+
+      const handleSelect = (day: Date | undefined, selectedDay: Date, modifiers: ActiveModifiers, e: MouseEvent) => {
+            field.onChange(day, selectedDay, modifiers, e);
+            closeRef.current?.click();
+      };
+
       return (
             <Popover>
                   <PopoverTrigger asChild>
@@ -16,11 +26,11 @@ export const DateInput: FC<Props> = ({ field, trigger }) => {
                         <Calendar
                               mode="single"
                               selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date("1900-01-01")
-                              }
+                              onSelect={handleSelect}
+                              disabled={(date) => isPast(add(date, { days: 1 }))}
                               initialFocus
                         />
+                        <Close className="hidden" ref={closeRef} />
                   </PopoverContent>
             </Popover>
       )

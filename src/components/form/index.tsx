@@ -34,7 +34,7 @@ const labelVariants = cva(
 export const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
-    VariantProps<typeof labelVariants>
+  VariantProps<typeof labelVariants>
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
@@ -106,12 +106,12 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField()
+  const { formItemId } = useFormField()
 
   return (
     <Label
       ref={ref}
-      className={cn("text-primary font-medium text-sm",error && "text-destructive", className)}
+      className={cn("text-primary font-medium text-sm", className)}
       htmlFor={formItemId}
       {...props}
     />

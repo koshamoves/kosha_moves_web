@@ -12,6 +12,7 @@ import { wait } from "@/lib/utils";
 import useBookMoveStore from "@/stores/book-move.store";
 import useHireLabourStore from "@/stores/hire-labour.store";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 export const useBookMove = (
   useMutationOptions: Omit<UseMutationOptions<any, any, Partial<MoveRequestDto>>, "mutationFn"> = {}
@@ -40,14 +41,21 @@ export const useBookMove = (
         reset();
         resetHireLabour();
         resetBookMove();
-        localStorage.clear();
+        localStorage.clear(); // FIXME: hmmmmmmm
+
+        let next: string;
+        if (payload.searchRequest) {
+          next = `${Routes.bookings}?date=${format(payload.searchRequest.date, "yyyy-MM-dd")}`;
+        } else {
+          next = Routes.bookings
+        }
 
         toast({
           description: SUCCESS_MESSAGE.BOOKINGS_COMPLETE,
           variant: "success",
         });
 
-        wait(0).then(() => router.push(Routes.bookings));
+        wait(0).then(() => router.push(next));
       })
       .catch(() => {
         toast({
